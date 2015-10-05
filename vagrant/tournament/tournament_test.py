@@ -85,7 +85,7 @@ def testReportMatches():
     registerPlayer("Bruno Walton")
     registerPlayer("Boots O'Neal")
     registerPlayer("Cathy Burton")
-    registerPlayer("Diane Grant")
+    registerPlayer("'); delete from players; --")
     standings = playerStandings()
     [id1, id2, id3, id4] = [row[0] for row in standings]
     reportMatch(id1, id2)
@@ -107,7 +107,7 @@ def testPairings():
     registerPlayer("Twilight Sparkle")
     registerPlayer("Fluttershy")
     registerPlayer("Applejack")
-    registerPlayer("Pinkie Pie")
+    registerPlayer("'); delete from players; --")
     standings = playerStandings()
     [id1, id2, id3, id4] = [row[0] for row in standings]
     reportMatch(id1, id2)
@@ -127,13 +127,13 @@ def testPairings():
 
 if __name__ == '__main__':
     testDeleteMatches()
-#    testDelete()
-#    testCount()
-#    testRegister()
-#    testRegisterCountDelete()
-#    testStandingsBeforeMatches()
-#    testReportMatches()
-#    testPairings()
+    testDelete()
+    testCount()
+    testRegister()
+    testRegisterCountDelete()
+    testStandingsBeforeMatches()
+    testReportMatches()
+    testPairings()
     print "Success!  All tests pass!"
 
 
