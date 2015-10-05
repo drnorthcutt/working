@@ -45,12 +45,13 @@ def countPlayers():
     c = DB.cursor()
     c.execute('''
 
-                DELETE
+                SELECT COUNT(id) AS num
                     FROM players;
 
               ''')
-    DB.commit()
+    players = c.fetchone()[0]
     DB.close()
+    return players
 
 
 def registerPlayer(name):
@@ -112,17 +113,33 @@ def reportMatch(winner, loser):
     """
     DB = connect()
     c = DB.cursor()
-    c.execute('''
+    result = '''
 
-                SELECT id, name, wins, matches
-                    FROM players
-                    ORDER BY wins,
-                             matches;
+                INSERT INTO matches
+                           (winner, loser)
+                    VALUES (%s, %s);
 
-              ''')
-    standing = c.fetchall()
+             '''
+    won = '''
+
+                UPDATE players
+                    SET wins = wins+1,
+                        matches = matches+1
+                    WHERE id = %s;
+
+          '''
+    lost = '''
+
+                UPDATE players
+                    SET matches = matches+1
+                    WHERE id = %s;
+
+           '''
+    c.execute(result, (winner, loser))
+    c.execute(won, (winner,))
+    c.execute(lost, (loser,))
+    DB.commit()
     DB.close()
-    return standing
 
 
 def swissPairings():
