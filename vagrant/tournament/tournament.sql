@@ -1,18 +1,24 @@
 -- Table definitions for the tournament project.
 --
--- Put your SQL 'create table' statements in this file; also 'create view'
--- statements if you choose to use it.
---
--- You can write comments in this file by starting them with two dashes, like
--- these lines here.
+/*
+Drop the database if it exists.
+Create the database and establish the schema.
+*/
 
-create table players (id serial primary key,
-                      name text,
-                      wins int,
-                      matches int);
+DROP DATABASE tournament;
+CREATE DATABASE tournament;
+\c tournament;
 
+CREATE TABLE players (
+        id serial PRIMARY KEY,
+        name text,
+        wins int,
+        matches int
+);
 
-create table matches (id serial primary key,
-                      winner int references players(id),
-                      loser int references players(id));
+CREATE TABLE matches (
+        id serial PRIMARY KEY,
+        winner int REFERENCES players(id),
+        loser int REFERENCES players(id)
+);
 
