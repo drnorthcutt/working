@@ -110,6 +110,19 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
+    DB = connect()
+    c = DB.cursor()
+    c.execute('''
+
+                SELECT id, name, wins, matches
+                    FROM players
+                    ORDER BY wins,
+                             matches;
+
+              ''')
+    standing = c.fetchall()
+    DB.close()
+    return standing
 
 
 def swissPairings():
