@@ -22,3 +22,10 @@ CREATE TABLE matches (
         loser int REFERENCES players(id)
 );
 
+CREATE VIEW results as
+        select players.id, players.name, count(matches.winner)
+            from players left join matches
+                on players.id = matches.winner
+        group by players.id,name,winner
+        order by winner;
+

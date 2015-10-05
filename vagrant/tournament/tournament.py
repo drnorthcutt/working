@@ -166,9 +166,7 @@ def swissPairings():
     c.execute('''
 
                 SELECT id, name
-                    FROM players
-                    ORDER BY wins,
-                             matches;
+                    FROM results;
 
               ''')
     each_pair = c.fetchmany(2)
