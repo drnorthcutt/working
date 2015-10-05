@@ -62,6 +62,17 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
+    DB = connect()
+    c = DB.cursor()
+    c.execute('''
+
+                INSERT INTO players
+                           (name, wins, matches)
+                    VALUES (%s, %s, %s);
+
+              ''', (name, 0, 0))
+    DB.commit()
+    DB.close()
 
 
 def playerStandings():
