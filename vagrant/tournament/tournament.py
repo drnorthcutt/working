@@ -72,7 +72,7 @@ def registerPlayer(name):
                            (name, wins, matches)
                     VALUES (%s, %s, %s);
 
-              ''', (sparkling, 0, 0))
+              ''', (sparkling, 0, 0,))
     DB.commit()
     DB.close()
 
