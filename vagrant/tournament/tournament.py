@@ -4,7 +4,6 @@
 #
 
 import psycopg2
-import bleach
 
 
 def connect():
@@ -56,14 +55,13 @@ def countPlayers():
 
 
 def registerPlayer(name):
-    """Adds a sanitized player to the tournament database.
+    """Adds a player to the tournament database.
 
     The database assigns a unique serial id number for the player.
 
     Args:
       name: the player's full name (need not be unique).
     """
-    sparkling = bleach.clean(name)
     DB = connect()
     c = DB.cursor()
     c.execute('''
@@ -72,7 +70,7 @@ def registerPlayer(name):
                            (name, wins, matches)
                     VALUES (%s, %s, %s);
 
-              ''', (sparkling, 0, 0,))
+              ''', (name, 0, 0,))
     DB.commit()
     DB.close()
 
@@ -92,14 +90,26 @@ def playerStandings():
     """
     DB = connect()
     c = DB.cursor()
-    c.execute('''
+    test = "select exists (select true from results where num_matches >= 1);"
+    c.execute(test)
+    rows = c.fetchall()
+    [s] = [row[0] for row in rows]
+    if [s] == [True]:
+        c.execute('''
 
-                SELECT id, name, wins, matches
+                SELECT *
+                    FROM results;
+
+                  ''')
+    else:
+        c.execute('''
+
+                SELECT *
                     FROM players
                     ORDER BY wins,
                              matches;
 
-              ''')
+                 ''')
     standing = c.fetchall()
     DB.close()
     return standing
@@ -112,8 +122,6 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-    c_winner = bleach.clean(winner)
-    c_loser = bleach.clean(loser)
     DB = connect()
     c = DB.cursor()
     result = '''
@@ -138,9 +146,9 @@ def reportMatch(winner, loser):
                     WHERE id = %s;
 
            '''
-    c.execute(result, (c_winner, c_loser))
-    c.execute(won, (c_winner,))
-    c.execute(lost, (c_loser,))
+    c.execute(result, (winner, loser,))
+#    c.execute(won, (winner,))
+#    c.execute(lost, (loser,))
     DB.commit()
     DB.close()
 
@@ -166,7 +174,7 @@ def swissPairings():
     c.execute('''
 
                 SELECT id, name
-                    FROM results;
+                    FROM v_wins;
 
               ''')
     each_pair = c.fetchmany(2)
