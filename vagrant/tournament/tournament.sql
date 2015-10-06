@@ -12,8 +12,8 @@ CREATE DATABASE tournament;
 CREATE TABLE players (
         id serial PRIMARY KEY,
         name text,
-        wins int,
-        matches int
+        initial_wins int,
+        initial_matches int
 );
 
 CREATE TABLE matches (
@@ -25,27 +25,23 @@ CREATE TABLE matches (
 CREATE VIEW v_wins AS
         SELECT players.id, players.name,
             COUNT(matches.winner) AS wins
-            from players LEFT JOIN matches
-                ON players.id = matches.winner
-            GROUP BY players.id, name, winner
-            ORDER BY winner;
+                FROM players LEFT JOIN matches
+                    ON players.id = matches.winner
+                GROUP BY players.id, name, winner
+                ORDER BY winner;
 
 
 CREATE VIEW v_matches AS
         SELECT players.id, name,
             COUNT(*) AS num_matches
-            FROM players, matches
-                WHERE players.id = matches.winner
-                OR players.id = matches.loser
-            GROUP BY players.id
-            ORDER BY wins desc;
+                FROM players, matches
+                    WHERE players.id = matches.winner
+                    OR players.id = matches.loser
+                GROUP BY players.id
+                ORDER BY wins desc;
 
-CREATE VIEW results AS
-        select v_wins.id, v_wins.name, wins, num_matches
-            from v_wins, v_matches
-            where v_wins.id=v_matches.id
-            order by wins desc;
-
-
-
-
+CREATE VIEW v_results AS
+        SELECT v_wins.id, v_wins.name, wins, num_matches
+                FROM v_wins, v_matches
+                    WHERE v_wins.id=v_matches.id
+                ORDER BY wins desc;

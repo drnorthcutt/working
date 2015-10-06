@@ -67,7 +67,7 @@ def registerPlayer(name):
     c.execute('''
 
                 INSERT INTO players
-                           (name, wins, matches)
+                           (name, initial_wins, initial_matches)
                     VALUES (%s, %s, %s);
 
               ''', (name, 0, 0,))
@@ -90,6 +90,7 @@ def playerStandings():
     """
     DB = connect()
     c = DB.cursor()
+    # Determine whether rows yet exist in view.  Select from players if not.
     test = "select exists (select true from results where num_matches >= 1);"
     c.execute(test)
     rows = c.fetchall()
@@ -98,7 +99,7 @@ def playerStandings():
         c.execute('''
 
                 SELECT *
-                    FROM results;
+                    FROM v_results;
 
                   ''')
     else:
@@ -131,21 +132,21 @@ def reportMatch(winner, loser):
                     VALUES (%s, %s);
 
              '''
-    won = '''
-
-                UPDATE players
-                    SET wins = wins+1,
-                        matches = matches+1
-                    WHERE id = %s;
-
-          '''
-    lost = '''
-
-                UPDATE players
-                    SET matches = matches+1
-                    WHERE id = %s;
-
-           '''
+#    won = '''
+#
+#                UPDATE players
+#                    SET wins = wins+1,
+#                        matches = matches+1
+#                    WHERE id = %s;
+#
+#          '''
+#    lost = '''
+#
+#                UPDATE players
+#                    SET matches = matches+1
+#                    WHERE id = %s;
+#
+#           '''
     c.execute(result, (winner, loser,))
 #    c.execute(won, (winner,))
 #    c.execute(lost, (loser,))
@@ -177,6 +178,7 @@ def swissPairings():
                     FROM v_wins;
 
               ''')
+    # Pull rows and append two at a time from aggregating view.
     each_pair = c.fetchmany(2)
     while each_pair:
         pairing = []
