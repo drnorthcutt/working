@@ -38,7 +38,7 @@ CREATE VIEW v_matches AS
                     WHERE players.id = matches.winner
                     OR players.id = matches.loser
                 GROUP BY players.id
-                ORDER BY wins desc;
+                ORDER BY initial_wins desc;
 
 CREATE VIEW v_results AS
         SELECT v_wins.id, v_wins.name, wins, num_matches

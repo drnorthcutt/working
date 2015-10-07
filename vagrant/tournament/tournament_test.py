@@ -125,6 +125,29 @@ def testPairings():
     print "8. After one match, players with one win are paired."
 
 
+def testMultiPairings():
+    deleteMatches()
+    deletePlayers()
+    registerPlayer("D Vader")
+    registerPlayer("L Skywalker")
+    registerPlayer("P Leia")
+    registerPlayer("R2D2")
+    registerPlayer("J Hutt")
+    registerPlayer("Yoda")
+    registerPlayer("H Solo")
+    registerPlayer("P Amadala")
+    standings = playerStandings()
+    [id1, id2, id3, id4, id5, id6, id7, id8] = [row[0] for row in standings]
+    reportMatch(id1, id2)
+    reportMatch(id3, id4)
+    reportMatch(id5, id6)
+    reportMatch(id7, id8)
+    pairings = swissPairings()
+    print "Test pairings 8 players"
+    print "Orig order: DVader,LSkywalker,PLeia,R2D2,JHutt,Yoda,HSolo,PAmadala"
+    print pairings
+
+
 if __name__ == '__main__':
     testDeleteMatches()
     testDelete()
@@ -134,6 +157,7 @@ if __name__ == '__main__':
     testStandingsBeforeMatches()
     testReportMatches()
     testPairings()
+    testMultiPairings()
     print "Success!  All tests pass!"
 
 

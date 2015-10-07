@@ -91,7 +91,7 @@ def playerStandings():
     DB = connect()
     c = DB.cursor()
     # Determine whether rows yet exist in view.  Select from players if not.
-    test = "select exists (select true from results where num_matches >= 1);"
+    test = "select exists (select true from v_results where num_matches >= 1);"
     c.execute(test)
     rows = c.fetchall()
     [s] = [row[0] for row in rows]
@@ -107,8 +107,8 @@ def playerStandings():
 
                 SELECT *
                     FROM players
-                    ORDER BY wins,
-                             matches;
+                    ORDER BY initial_wins,
+                             initial_matches;
 
                  ''')
     standing = c.fetchall()
