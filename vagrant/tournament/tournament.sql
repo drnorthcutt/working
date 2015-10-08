@@ -3,6 +3,7 @@
 /*
 Drop the database if it exists.
 Create the database and establish the schema.
+Create views.
 */
 
 DROP DATABASE tournament;
@@ -21,32 +22,35 @@ CREATE TABLE matches (
 );
 
 
+-- Display number of wins
 CREATE VIEW v_wins AS
         SELECT players.id,
             COUNT(matches.winner) AS wins
-                FROM players LEFT JOIN matches
-                    ON players.id = matches.winner
+                FROM players
+                    LEFT JOIN matches
+                        ON players.id = matches.winner
                 GROUP BY players.id
                 ORDER BY wins;
 
+-- Display number of matches per each player
 CREATE VIEW v_match_counts AS
         SELECT players.id,
             COUNT (matches.winner) AS num_matches
-                FROM players LEFT JOIN matches
-                    ON players.id = matches.winner
-                    OR players.id = matches.loser
+                FROM players
+                    LEFT JOIN matches
+                        ON players.id = matches.winner
+                        OR players.id = matches.loser
                 GROUP BY players.id
                 ORDER BY num_matches desc;
-/*
-CREATE VIEW v_results AS
-        SELECT v_wins.id, wins, num_matches
-                FROM v_wins, v_match_counts
-                    WHERE v_wins.id=v_match_counts.id
-                ORDER BY wins desc;
-*/
--- Try view a different way
+
+-- Display standings
 CREATE VIEW v_standings AS
-        SELECT players.id, players.name, SUM(v_wins.wins) AS wins, SUM(v_match_counts.num_matches) AS matches
-                FROM players JOIN v_wins ON players.id = v_wins.id
-                             JOIN v_match_counts ON players.id = v_match_counts.id
+        SELECT players.id, players.name,
+            SUM(v_wins.wins) AS wins,
+            SUM(v_match_counts.num_matches) AS matches
+                FROM players
+                    JOIN v_wins
+                        ON players.id = v_wins.id
+                    JOIN v_match_counts
+                        ON players.id = v_match_counts.id
                 GROUP BY players.id;
