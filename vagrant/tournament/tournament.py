@@ -39,6 +39,31 @@ def deletePlayers():
     DB.close()
 
 
+def deleteByes():
+    """Remove byes when unnecessary."""
+    DB = connect()
+    c = DB.cursor()
+    num = countPlayers()
+    deleteMatches()
+    print num
+    byeID = c.execute("Select * FROM players WHERE id IN (SELECT id FROM players WHERE name = 'BYE');")
+    print byeID
+    c.execute('''
+
+                DELETE
+                    FROM players
+                        WHERE id IN
+                            (SELECT id
+                                FROM players
+                                    WHERE name = 'BYE');
+
+              ''')
+    print "bye deleted?"
+    DB.commit()
+    num2 = countPlayers()
+    print num2
+    DB.close()
+
 def countPlayers():
     """Returns the number of players currently registered."""
     DB = connect()
@@ -75,6 +100,52 @@ def registerPlayer(name):
     DB.close()
 
 
+def evenCheck():
+    """Insert a BYE if number of players is not even."""
+    DB = connect()
+    c = DB.cursor()
+    s = countPlayers()
+    print ""
+    print "s%2 equals"
+    print (+s % 2)
+    if (+s % 2) == 0:
+        print "here even"
+        DB.close()
+    else:
+        print "here odd"
+        c.execute('''
+
+                SELECT exists
+                    (
+
+                    SELECT true
+                        FROM players
+                            WHERE name = 'BYE'
+
+                    );
+                  ''')
+        rows = c.fetchall()
+        tf = [row[0] for row in rows]
+        print ""
+        print "rows equals"
+        print rows
+        print "tf equals"
+        print tf
+        # Delete BYE if exists to even up match pairs.
+        if tf == [True]:
+            print "here delbye true"
+            deleteByes()
+            DB.close()
+        #Add BYE if not existing to even up match pairs.
+        elif tf == [False]:
+            print "here delbye false"
+            registerPlayer("BYE")
+            DB.close()
+        else:
+            print "ERROR"
+            DB.close()
+
+
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
 
@@ -88,14 +159,24 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+    evenCheck()
     DB = connect()
     c = DB.cursor()
     # Determine whether rows yet exist in view.  Select from players if not.
-    test = "select exists (select true from v_results where num_matches >= 1);"
-    c.execute(test)
+    c.execute('''
+
+                SELECT exists
+                    (
+
+                    SELECT true
+                        FROM v_results
+                            WHERE num_matches >= 1
+
+                    );
+              ''')
     rows = c.fetchall()
-    [s] = [row[0] for row in rows]
-    if [s] == [True]:
+    s = [row[0] for row in rows]
+    if s == [True]:
         c.execute('''
 
                 SELECT *
@@ -169,15 +250,16 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+    evenCheck()
     DB = connect()
     c = DB.cursor()
-    pairings = []
-    c.execute('''
+    match = ('''
 
                 SELECT id, name
                     FROM v_wins;
 
               ''')
+    pairings = []
     # Pull rows and append two at a time from aggregating view.
     each_pair = c.fetchmany(2)
     while each_pair:
