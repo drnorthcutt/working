@@ -11,9 +11,7 @@ CREATE DATABASE tournament;
 
 CREATE TABLE players (
         id serial PRIMARY KEY,
-        name text,
-        initial_wins int,
-        initial_matches int
+        name text
 );
 
 CREATE TABLE matches (
@@ -22,26 +20,33 @@ CREATE TABLE matches (
         loser int REFERENCES players(id)
 );
 
+
 CREATE VIEW v_wins AS
-        SELECT players.id, players.name,
+        SELECT players.id,
             COUNT(matches.winner) AS wins
                 FROM players LEFT JOIN matches
                     ON players.id = matches.winner
-                GROUP BY players.id, name, winner
-                ORDER BY winner;
+                GROUP BY players.id
+                ORDER BY wins;
 
-
-CREATE VIEW v_matches AS
-        SELECT players.id, name,
-            COUNT(*) AS num_matches
-                FROM players, matches
-                    WHERE players.id = matches.winner
+CREATE VIEW v_match_counts AS
+        SELECT players.id,
+            COUNT (matches.winner) AS num_matches
+                FROM players LEFT JOIN matches
+                    ON players.id = matches.winner
                     OR players.id = matches.loser
                 GROUP BY players.id
-                ORDER BY initial_wins desc;
-
+                ORDER BY num_matches desc;
+/*
 CREATE VIEW v_results AS
-        SELECT v_wins.id, v_wins.name, wins, num_matches
-                FROM v_wins, v_matches
-                    WHERE v_wins.id=v_matches.id
+        SELECT v_wins.id, wins, num_matches
+                FROM v_wins, v_match_counts
+                    WHERE v_wins.id=v_match_counts.id
                 ORDER BY wins desc;
+*/
+-- Try view a different way
+CREATE VIEW v_standings AS
+        SELECT players.id, players.name, SUM(v_wins.wins) AS wins, SUM(v_match_counts.num_matches) AS matches
+                FROM players JOIN v_wins ON players.id = v_wins.id
+                             JOIN v_match_counts ON players.id = v_match_counts.id
+                GROUP BY players.id;

@@ -40,14 +40,14 @@ def deletePlayers():
 
 
 def deleteByes():
-    """Remove byes when unnecessary."""
+    """Remove a BYE when unnecessary."""
     DB = connect()
     c = DB.cursor()
-    num = countPlayers()
-    deleteMatches()
-    print num
-    byeID = c.execute("Select * FROM players WHERE id IN (SELECT id FROM players WHERE name = 'BYE');")
-    print byeID
+#    num = countPlayers()
+#    deleteMatches()
+#    print num
+#    byeID = c.execute("Select * FROM players WHERE id IN (SELECT id FROM players WHERE name = 'BYE');")
+#    print byeID
     c.execute('''
 
                 DELETE
@@ -58,10 +58,10 @@ def deleteByes():
                                     WHERE name = 'BYE');
 
               ''')
-    print "bye deleted?"
+#    print "bye deleted?"
     DB.commit()
-    num2 = countPlayers()
-    print num2
+#    num2 = countPlayers()
+#    print num2
     DB.close()
 
 def countPlayers():
@@ -89,13 +89,20 @@ def registerPlayer(name):
     """
     DB = connect()
     c = DB.cursor()
+#    c.execute('''
+#
+#                INSERT INTO players
+#                           (name, initial_wins, initial_matches)
+#                    VALUES (%s, %s, %s);
+#
+#              ''', (name, 0, 0,))
     c.execute('''
 
                 INSERT INTO players
-                           (name, initial_wins, initial_matches)
-                    VALUES (%s, %s, %s);
+                           (name)
+                    VALUES (%s);
 
-              ''', (name, 0, 0,))
+              ''', (name,))
     DB.commit()
     DB.close()
 
@@ -105,14 +112,14 @@ def evenCheck():
     DB = connect()
     c = DB.cursor()
     s = countPlayers()
-    print ""
-    print "s%2 equals"
-    print (+s % 2)
+#    print ""
+#    print "s%2 equals"
+#    print (+s % 2)
     if (+s % 2) == 0:
-        print "here even"
+#        print "here even"
         DB.close()
     else:
-        print "here odd"
+#        print "here odd"
         c.execute('''
 
                 SELECT exists
@@ -126,23 +133,23 @@ def evenCheck():
                   ''')
         rows = c.fetchall()
         tf = [row[0] for row in rows]
-        print ""
-        print "rows equals"
-        print rows
-        print "tf equals"
-        print tf
+#        print ""
+#        print "rows equals"
+#        print rows
+#        print "tf equals"
+#        print tf
         # Delete BYE if exists to even up match pairs.
         if tf == [True]:
-            print "here delbye true"
+#            print "here delbye true"
             deleteByes()
             DB.close()
         #Add BYE if not existing to even up match pairs.
         elif tf == [False]:
-            print "here delbye false"
+#            print "here delbye false"
             registerPlayer("BYE")
             DB.close()
         else:
-            print "ERROR"
+#            print "ERROR: Check Failed"
             DB.close()
 
 
@@ -163,33 +170,39 @@ def playerStandings():
     DB = connect()
     c = DB.cursor()
     # Determine whether rows yet exist in view.  Select from players if not.
+#    c.execute('''
+#
+#                SELECT exists
+#                    (
+#
+#                    SELECT true
+#                        FROM v_results
+#                            WHERE num_matches >= 1
+#
+#                    );
+#              ''')
+#    rows = c.fetchall()
+#    s = [row[0] for row in rows]
+#    if s == [True]:
+#        c.execute('''
+#
+#                SELECT *
+#                    FROM v_results;
+#
+#                  ''')
+#    else:
+#        c.execute('''
+#
+#                SELECT *
+#                    FROM players
+#                    ORDER BY initial_wins,
+#                             initial_matches;
+#
+#                 ''')
     c.execute('''
 
-                SELECT exists
-                    (
-
-                    SELECT true
-                        FROM v_results
-                            WHERE num_matches >= 1
-
-                    );
-              ''')
-    rows = c.fetchall()
-    s = [row[0] for row in rows]
-    if s == [True]:
-        c.execute('''
-
                 SELECT *
-                    FROM v_results;
-
-                  ''')
-    else:
-        c.execute('''
-
-                SELECT *
-                    FROM players
-                    ORDER BY initial_wins,
-                             initial_matches;
+                    FROM v_standings;
 
                  ''')
     standing = c.fetchall()
@@ -212,7 +225,7 @@ def reportMatch(winner, loser):
                            (winner, loser)
                     VALUES (%s, %s);
 
-             '''
+              '''
 #    won = '''
 #
 #                UPDATE players
@@ -253,10 +266,11 @@ def swissPairings():
     evenCheck()
     DB = connect()
     c = DB.cursor()
-    match = ('''
+    c.execute('''
 
                 SELECT id, name
-                    FROM v_wins;
+                    FROM v_standings
+                    Order by wins desc;
 
               ''')
     pairings = []
