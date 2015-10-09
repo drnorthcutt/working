@@ -4,7 +4,6 @@
 #
 
 import psycopg2
-import bleach
 
 
 def connect():
@@ -40,6 +39,26 @@ def deletePlayers():
     DB.close()
 
 
+def deleteByes():
+    """Remove a BYE when unnecessary."""
+    DB = connect()
+    c = DB.cursor()
+    c.execute('''
+
+                DELETE
+                    FROM players
+                        WHERE id IN
+                            (
+                                SELECT id
+                                    FROM players
+                                        WHERE name = 'BYE'
+                            );
+
+              ''')
+    DB.commit()
+    DB.close()
+
+
 def countPlayers():
     """Returns the number of players currently registered."""
     DB = connect()
@@ -56,25 +75,59 @@ def countPlayers():
 
 
 def registerPlayer(name):
-    """Adds a sanitized player to the tournament database.
+    """Adds a player to the tournament database.
 
     The database assigns a unique serial id number for the player.
 
     Args:
       name: the player's full name (need not be unique).
     """
-    sparkling = bleach.clean(name)
     DB = connect()
     c = DB.cursor()
     c.execute('''
 
                 INSERT INTO players
-                           (name, wins, matches)
-                    VALUES (%s, %s, %s);
+                           (name)
+                    VALUES (%s);
 
-              ''', (sparkling, 0, 0,))
+              ''', (name,))
     DB.commit()
     DB.close()
+
+
+def evenCheck():
+    """Insert a BYE if number of players is not even."""
+    DB = connect()
+    c = DB.cursor()
+    s = countPlayers()
+    # Check for even players.
+    if (+s % 2) == 0:
+        DB.close()
+    # Check whether BYE already exists.
+    else:
+        c.execute('''
+
+                SELECT exists
+                    (
+
+                        SELECT true
+                            FROM players
+                                WHERE name = 'BYE'
+
+                    );
+
+                  ''')
+        rows = c.fetchall()
+        tf = [row[0] for row in rows]
+        if tf == [True]:
+            deleteByes()
+            DB.close()
+        # Add BYE if needed.
+        elif tf == [False]:
+            registerPlayer("BYE")
+            DB.close()
+        else:
+            DB.close()
 
 
 def playerStandings():
@@ -90,16 +143,15 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+    evenCheck()
     DB = connect()
     c = DB.cursor()
     c.execute('''
 
-                SELECT id, name, wins, matches
-                    FROM players
-                    ORDER BY wins,
-                             matches;
+                SELECT *
+                    FROM v_standings;
 
-              ''')
+                 ''')
     standing = c.fetchall()
     DB.close()
     return standing
@@ -112,8 +164,6 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-    c_winner = bleach.clean(winner)
-    c_loser = bleach.clean(loser)
     DB = connect()
     c = DB.cursor()
     result = '''
@@ -122,25 +172,25 @@ def reportMatch(winner, loser):
                            (winner, loser)
                     VALUES (%s, %s);
 
-             '''
-    won = '''
-
-                UPDATE players
-                    SET wins = wins+1,
-                        matches = matches+1
-                    WHERE id = %s;
-
-          '''
-    lost = '''
-
-                UPDATE players
-                    SET matches = matches+1
-                    WHERE id = %s;
-
-           '''
-    c.execute(result, (c_winner, c_loser))
-    c.execute(won, (c_winner,))
-    c.execute(lost, (c_loser,))
+              '''
+#    won = '''
+#
+#                UPDATE players
+#                    SET wins = wins+1,
+#                        matches = matches+1
+#                    WHERE id = %s;
+#
+#          '''
+#    lost = '''
+#
+#                UPDATE players
+#                    SET matches = matches+1
+#                    WHERE id = %s;
+#
+#           '''
+    c.execute(result, (winner, loser,))
+#    c.execute(won, (winner,))
+#    c.execute(lost, (loser,))
     DB.commit()
     DB.close()
 
@@ -160,17 +210,18 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+    evenCheck()
     DB = connect()
     c = DB.cursor()
-    pairings = []
     c.execute('''
 
                 SELECT id, name
-                    FROM players
-                    ORDER BY wins,
-                             matches;
+                    FROM v_standings
+                    Order by wins desc;
 
               ''')
+    pairings = []
+    # Pull rows and append two at a time from aggregating view.
     each_pair = c.fetchmany(2)
     while each_pair:
         pairing = []
