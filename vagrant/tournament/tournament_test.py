@@ -190,7 +190,7 @@ def test_omw():
                "James T. Kirk", "Jean-Luc Picard", "Christopher Pike",
                "William T. Riker"]
     [registerPlayer(x) for x in players]
-    standings = finalResults()
+    standings = playerStandings()
     [id1, id2, id3, id4, id5, id6, id7, id8, id9, id10] = [row[0] for row in standings]
     # Create matches:
     reportMatch(id10, id9)
@@ -233,7 +233,7 @@ if __name__ == '__main__':
     print ""
     print "Test Extra Credit"
     print ""
-    testMultiPairings()
+    testExtras()
     test_omw()
     print ""
     print "Success!  All tests pass!"
