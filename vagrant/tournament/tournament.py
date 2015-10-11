@@ -151,7 +151,46 @@ def playerStandings():
                 SELECT *
                     FROM v_standings;
 
-                 ''')
+              ''')
+    standing = c.fetchall()
+    DB.close()
+    return standing
+
+
+def finalResults():
+    """Return the player's full standings with tie breakers.
+
+    Shows full standings with calculated scoring, match wins, and opponent
+    match wins.  Used at the end of a tournament to completely rank players
+    when scores may be tied.
+
+    Returns:
+      A list of tuples, each of which contains (id, name, wins, matches, score,
+      match wins, opponent match wins):
+        id: the player's unique id (assigned by the database)
+        name: the player's full name (as registered)
+        wins: the number of matches the player has won
+        matches: the number of matches the player has played
+        score: the points the player has won, calculated as 3 points for a win,
+            0 points for a loss, 3 points for a BYE
+        match wins: the number of matches the player has won divided by the
+            number of matches the player has played (Used to rank players that
+            have a tied score)
+        omw: opponent match wins, the average match wins of a player's
+            opponents, calculated by the sum of the match wins of each opponent
+            of the player (or 0.33 if an opponent has a match wins score of
+            less) divided by the number of rounds played by the player (Used to
+            rank players that have both a tied score and match wins)
+    """
+    evenCheck()
+    DB = connect()
+    c = DB.cursor()
+    c.execute('''
+
+                SELECT *
+                    FROM v_results;
+
+              ''')
     standing = c.fetchall()
     DB.close()
     return standing
@@ -172,25 +211,8 @@ def reportMatch(winner, loser):
                            (winner, loser)
                     VALUES (%s, %s);
 
-              '''
-#    won = '''
-#
-#                UPDATE players
-#                    SET wins = wins+1,
-#                        matches = matches+1
-#                    WHERE id = %s;
-#
-#          '''
-#    lost = '''
-#
-#                UPDATE players
-#                    SET matches = matches+1
-#                    WHERE id = %s;
-#
-#           '''
+             '''
     c.execute(result, (winner, loser,))
-#    c.execute(won, (winner,))
-#    c.execute(lost, (loser,))
     DB.commit()
     DB.close()
 
