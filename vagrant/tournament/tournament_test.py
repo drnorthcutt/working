@@ -144,7 +144,7 @@ def testExtras():
     print "Original players:"
     print prior
     print ""
-    print "Current plays:"
+    print "Current players:"
     after = countPlayers()
     print after
     if (after) != 8:
@@ -152,7 +152,7 @@ def testExtras():
             "BYE not created!")
     if (after) == 8:
         print ""
-    print "BYE created succcessfully."
+        print "BYE created succcessfully."
     print ""
     # Test pairings
     standings = playerStandings()
@@ -210,6 +210,7 @@ def test_omw():
     # Check results
     standings = finalResults()
     print ""
+    print "Results: (playerId, name, wins, matches, score, match wins, omw)"
     print standings
     print ""
     correct_results = frozenset([id10, id4, id1, id6, id2, id5, id3, id8, id9, id7])
@@ -218,7 +219,7 @@ def test_omw():
         print "Expected:", correct_results
         print "Received:", user_results
         raise ValueError("Incorrect player rank!")
-    print "OMW is implemented correctly"
+    print "OMW is reporting correctly"
 
 
 if __name__ == '__main__':
@@ -231,7 +232,7 @@ if __name__ == '__main__':
     testReportMatches()
     testPairings()
     print ""
-    print "Test Extra Credit"
+    print "Test Extra Credit:"
     print ""
     testExtras()
     test_omw()
