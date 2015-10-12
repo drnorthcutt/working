@@ -124,7 +124,13 @@ def evenCheck():
             DB.close()
         # Add BYE if needed.
         elif tf == [False]:
-            registerPlayer("BYE")
+            c.execute('''
+
+                INSERT INTO players
+                           (id, name)
+                    VALUES (%s, %s);
+
+              ''', (9999, 'BYE',))
             DB.close()
         else:
             DB.close()
@@ -167,15 +173,17 @@ def finalResults():
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches, score,
       match wins, opponent match wins):
+
         id: the player's unique id (assigned by the database)
         name: the player's full name (as registered)
         wins: the number of matches the player has won
         matches: the number of matches the player has played
         score: the points the player has won, calculated as 3 points for a win,
-            0 points for a loss, 3 points for a BYE
-        match wins: the number of matches the player has won divided by the
-            number of matches the player has played (Used to rank players that
-            have a tied score)
+            0 points for a loss, 3 points for a BYE, 1 point for a tie
+        match wins: the player's score divided by three times the number of
+            matches the player has played, discounting both score and match for
+            a round when a player recieved a BYE. If less than 0.33, then 0.33
+            is displayed.  (Used to rank players that have a tied score)
         omw: opponent match wins, the average match wins of a player's
             opponents, calculated by the sum of the match wins of each opponent
             of the player (or 0.33 if an opponent has a match wins score of
@@ -217,6 +225,27 @@ def reportMatch(winner, loser):
     DB.close()
 
 
+def reportMatchTie(player1, player2):
+    """Records the tied outcome of a single match between two players.
+
+    Args:
+      player1:  the id number of either player in a tied match
+      player2:  the id number of the other player in a tied match
+    """
+    DB = connect()
+    c = DB.cursor()
+    result = '''
+
+                INSERT INTO matches
+                           (winner, loser, draw)
+                    VALUES (%s, %s, %s);
+
+             '''
+    c.execute(result, (player1, player2, 'True',))
+    DB.commit()
+    DB.close()
+
+
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
 
@@ -227,6 +256,7 @@ def swissPairings():
 
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
+
         id1: the first player's unique id
         name1: the first player's name
         id2: the second player's unique id
