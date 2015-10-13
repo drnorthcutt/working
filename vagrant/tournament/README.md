@@ -22,7 +22,20 @@ wins in the quarterfinals, they advance to the semi-finals, and so on.
 In straight Swiss tournaments, once the Swiss rounds are over the tournament is
 complete and prizes are awarded based on the final standings. There is no top
 cut or playoff.
+#Contents:
+[Objectives](#objectives)
+[Requirements](#required libraries and dependencies)
+[How to](#how to run this project)
+[Extra Credit](#extra credit description)
+  * [Functionality](#functionality)
+  * [Table Design](#table design)
+  * [Column Design](#column design)
+  * [Code Quality](#code quality)
 
+[Miscellaneous](#miscellaneous)
+* [Image](#miscellaneous)
+* [Functions added](#functions added)
+* [Views utilized](#views utilized)
 #Objectives
 
 Write server-side code to function as a database driven Swiss style tournament
