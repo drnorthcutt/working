@@ -23,22 +23,19 @@ In straight Swiss tournaments, once the Swiss rounds are over the tournament is
 complete and prizes are awarded based on the final standings. There is no top
 cut or playoff.
 
-[TOC]
-
 #Objectives
-
 
 Write server-side code to function as a database driven Swiss style tournament
 coordinator.  Must pass a series of tests, including:
 
-1.  ==Match Deletion==
-2.  ==Player Records Deletion==
-3.  ==Player Count==
-4.  ==Player Registration==
-5.  ==Player Standings Tracking==
-6.  ==Player Match Tracking==
-7.  ==Player Wins Tracking==
-8.  ==Player Pairing==
+1.  Match Deletion
+2.  Player Records Deletion
+3.  Player Count
+4.  Player Registration
+5.  Player Standings Tracking
+6.  Player Match Tracking
+7.  Player Wins Tracking
+8.  Player Pairing
 
 Other:
    1.  Meaningful and useful table structure
@@ -47,7 +44,7 @@ Other:
    4.  Appropriate commenting and README
 
 May also have (for exceeds):
-1.  One or more of the following.
+1.  One or more of the following:
 	* Prevent rematches between players
     * [x] Allowance for "bye" rounds if players odd.  No more than one per
       tournament for a player.
@@ -70,7 +67,8 @@ PostgreSQL
 #How to Run this Project
 
 
-Clone this repository and ensure the files are all in the same directory.
+Clone this full repository and ensure the files are all in the same directory.
+(if already cloned from the original repository, only this directory is required.)
 
 From the command line, or terminal, navigate to the vagrant from this repository directory, type:
 
@@ -96,8 +94,14 @@ psql -f tournament.sql
 ```
 
 To run the basic project test files:
+(Some additional tests added, commented out.)
 ```
-python tournament.py
+python tournament_test.py
+```
+
+To run the added input based mini-tester:
+```
+python tester.py
 ```
 
 
@@ -112,14 +116,17 @@ Support Draws with function reportMatchTie, inserting a boolean into the match
 table.
 
 Rank according to OMW.  Using the suggested methodology of [Wizards of the Coast](https://www.wizards.com/dci/downloads/tiebreakers.pdf),
-players are show ranking in the final round with full tie breaking in place, with:
+players are shown ranking in the final round with full tie breaking in place as:
 
 * score: 3 points for a win, 1 point for a tie, 0 points for a loss, and 3 points for a BYE
 * match-wins:  the player's score, discounting BYE points, divided by the number
-of matches the player played multiplied by 3 (or the maximum points possible),
+of matches the player played multiplied by 3 (or the maximum points possible per round),
 discounting BYE matches.
 * omw:  opponent match wins, the average of the match-wins of a player's opponents,
-discounting an opponent's BYE rounds, divided by the number of matches played by the player.
+discounting an opponent's BYE rounds, divided by the number of matches played by the player,
+discounting any BYE matches.
+
+Additional input-based mini-tester added as tester.py
 
 ###Table Design
 Two tables:
@@ -132,7 +139,8 @@ Two tables:
     * loser
     * draw
 
-Multiple views utilized to handle all stats.
+Multiple views utilized to handle all stats. (Specifically listed below, in Miscellaneous)
+
 
 ###Column Design
 
@@ -153,13 +161,25 @@ was painful.
 
 #Miscellaneous
 
-[TOC]
+Shows finalResults, with one Draw, a BYE, matchwins, and OMW.
+<img src="https://github.com/drnorthcutt/working/blob/extras/vagrant/tournament/img/omw.png" alt="OMW" style="width:800;height:243">
+In this example, Riker shows 3 wins and 1 draw over 4 matches, so:
+
+    (3 x 3 points) + (1 x 1 point) for a total score of 10.
+    4 matches x 3 possible points per match for a total possible match points of 12.
+    10 divided by 12 = 0.8333 repeating, for a matchwins of 83 <sup>1</sup>/<sub>3</sub>%.
+    His omw is then calculated by the average of his opponent's matchwins.
+    In this case, Pike, April, and Archer twice, or (approximately):
+        0.33 + 0.6666 + 0.4666 + 0.4666 = 1.9298
+    divided by his total matches played.
+    Therefore:
+        1.9298 divided by 4 for an omw of 0.4825 or 48.25%.
+
+In this example output, Chester Tester had 1 BYE.
 
 
-![alt tag](/img/omw.png?raw=true "OMW")
-<img src="/img/omw.png" alt="OMW" style="width:800;height:243">
 
-#Functions added
+###Functions added
 In addition to the standard functions, the below were added:
 
 
@@ -199,7 +219,7 @@ finalResults():
       A list of tuples, each of which contains (id, name, wins, matches, score,
       match wins, opponent match wins):
 
-        <strong>id:</strong>
+        id:
           the player's unique id (assigned by the database)
 
         name:
@@ -218,11 +238,11 @@ finalResults():
           the points the player has won, calculated as 3 points for a win, 0
           points for a loss, 3 points for a BYE, 1 point for a tie
 
-        match wins:
+	   match wins:
           the player's score divided by three times the number of matches the
-        player has played, discounting both score and match for a round when
-        a player recieved a BYE. If less than 0.33, then 0.33 is displayed.
-        (Used to rank players that have a tied score)
+          player has played, discounting both score and match for a round when
+          a player recieved a BYE. If less than 0.33, then 0.33 is displayed.
+          (Used to rank players that have a tied score)
 
         omw:
           opponent match wins, the average match wins of the opponents of a
@@ -231,3 +251,40 @@ finalResults():
           divided by the number of rounds played by the player (Used to rank
           players that have both a tied score and match wins)
 
+###Views utilized
+
+    v_wins
+        Calculate number of wins
+
+    v_ties
+        Calculate number of draws
+
+    v_match_counts
+        Calculate number of matches per each player
+
+    v_standings
+        Display standings
+
+    v_score
+        Calculate score (wins = 3, losses =0, draws = 1)
+
+    v_byeScore
+        Calculate scores from BYES as a negative number, to remove from match points
+
+    byeGone
+        Calculate scores without BYE wins. (Used only for matchwins and omw.)
+
+    v_matchBye
+        Calculate BYE match total
+
+    matchByeGone
+        Calculate player match totals without BYE matches. (Used only for match wins and omw.)
+
+    v_matchwins
+        Display Match-wins Corrected for BYES
+
+    v_omw
+        Calculate Opponent match wins
+
+    v_results
+        Aggregate Final player results with tie breakers.
