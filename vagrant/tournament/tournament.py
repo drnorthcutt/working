@@ -80,7 +80,7 @@ def registerPlayer(name):
     The database assigns a unique serial id number for the player.
 
     Args:
-      name: the player's full name (need not be unique).
+      name: the full name of a player (need not be unique).
     """
     DB = connect()
     c = DB.cursor()
@@ -131,6 +131,7 @@ def evenCheck():
                     VALUES (%s, %s);
 
               ''', (9999, 'BYE',))
+            DB.commit()
             DB.close()
         else:
             DB.close()
@@ -144,8 +145,8 @@ def playerStandings():
 
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
-        id: the player's unique id (assigned by the database)
-        name: the player's full name (as registered)
+        id: the unique id of a player (assigned by the database)
+        name: the full name of a player (as registered)
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
@@ -164,7 +165,7 @@ def playerStandings():
 
 
 def finalResults():
-    """Return the player's full standings with tie breakers.
+    """Return the full standings with tie breakers.
 
     Shows full standings with calculated scoring, match wins, and opponent
     match wins.  Used at the end of a tournament to completely rank players
