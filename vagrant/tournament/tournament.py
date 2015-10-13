@@ -40,19 +40,19 @@ def deletePlayers():
 
 
 def deleteByes():
-    """Remove a BYE when unnecessary."""
+    """Remove a BYE when unnecessary.
+
+    This assumes that playerStandings was checked before rounds were played.
+    Once a round has been played and a BYE win has been issued, it cannot be
+    deleted due to Foreign Key constraints.
+    """
     DB = connect()
     c = DB.cursor()
     c.execute('''
 
                 DELETE
                     FROM players
-                        WHERE id IN
-                            (
-                                SELECT id
-                                    FROM players
-                                        WHERE name = 'BYE'
-                            );
+                        WHERE id = 9999;
 
               ''')
     DB.commit()
@@ -60,7 +60,7 @@ def deleteByes():
 
 
 def countPlayers():
-    """Returns the number of players currently registered."""
+    """Return the number of players currently registered."""
     DB = connect()
     c = DB.cursor()
     c.execute('''
@@ -75,7 +75,7 @@ def countPlayers():
 
 
 def registerPlayer(name):
-    """Adds a player to the tournament database.
+    """Add a player to the tournament database.
 
     The database assigns a unique serial id number for the player.
 
@@ -96,7 +96,11 @@ def registerPlayer(name):
 
 
 def evenCheck():
-    """Insert a BYE if number of players is not even."""
+    """Insert a BYE if number of players is not even.
+
+    BYE id is set to 9999 to drastically lower the likelihood that any player
+    will already have this id number.
+    """
     DB = connect()
     c = DB.cursor()
     s = countPlayers()
@@ -112,7 +116,7 @@ def evenCheck():
 
                         SELECT true
                             FROM players
-                                WHERE name = 'BYE'
+                                WHERE id = 9999
 
                     );
 
@@ -157,47 +161,6 @@ def playerStandings():
 
                 SELECT *
                     FROM v_standings;
-
-              ''')
-    standing = c.fetchall()
-    DB.close()
-    return standing
-
-
-def finalResults():
-    """Return the full standings with tie breakers.
-
-    Shows full standings with calculated scoring, match wins, and opponent
-    match wins.  Used at the end of a tournament to completely rank players
-    when scores may be tied.
-
-    Returns:
-      A list of tuples, each of which contains (id, name, wins, matches, score,
-      match wins, opponent match wins):
-
-        id: the player's unique id (assigned by the database)
-        name: the player's full name (as registered)
-        wins: the number of matches the player has won
-        matches: the number of matches the player has played
-        score: the points the player has won, calculated as 3 points for a win,
-            0 points for a loss, 3 points for a BYE, 1 point for a tie
-        match wins: the player's score divided by three times the number of
-            matches the player has played, discounting both score and match for
-            a round when a player recieved a BYE. If less than 0.33, then 0.33
-            is displayed.  (Used to rank players that have a tied score)
-        omw: opponent match wins, the average match wins of a player's
-            opponents, calculated by the sum of the match wins of each opponent
-            of the player (or 0.33 if an opponent has a match wins score of
-            less) divided by the number of rounds played by the player (Used to
-            rank players that have both a tied score and match wins)
-    """
-    evenCheck()
-    DB = connect()
-    c = DB.cursor()
-    c.execute('''
-
-                SELECT *
-                    FROM v_results;
 
               ''')
     standing = c.fetchall()
@@ -253,7 +216,8 @@ def swissPairings():
     Assuming that there are an even number of players registered, each player
     appears exactly once in the pairings.  Each player is paired with another
     player with an equal or nearly-equal win record, that is, a player adjacent
-    to him or her in the standings.
+    to him or her in the standings.  For uneven players, evenCheck adds a BYE
+    player.
 
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
@@ -284,3 +248,45 @@ def swissPairings():
         each_pair = c.fetchmany(2)
     DB.close()
     return pairings
+
+
+def finalResults():
+    """Return the full standings with tie breakers.
+
+    Shows full standings with calculated scoring, match wins, and opponent
+    match wins.  Used at the end of a tournament to completely rank players
+    when scores may be tied.  At least one round should be played and reported
+    (two rounds if a BYE has been used) before calling this function.
+
+    Returns:
+      A list of tuples, each of which contains (id, name, wins, matches, score,
+      match wins, opponent match wins):
+
+        id: the player's unique id (assigned by the database)
+        name: the player's full name (as registered)
+        wins: the number of matches the player has won
+        draws: the number of draws for each player
+        matches: the number of matches the player has played
+        score: the points the player has won, calculated as 3 points for a win,
+            0 points for a loss, 3 points for a BYE, 1 point for a tie
+        match wins: the player's score divided by three times the number of
+            matches the player has played, discounting both score and match for
+            a round when a player recieved a BYE. If less than 0.33, then 0.33
+            is displayed.  (Used to rank players that have a tied score)
+        omw: opponent match wins, the average match wins of the opponents of a
+            player. Calculated by the sum of the match wins of each opponent
+            of the player (or 0.33 if an opponent has a match wins score of
+            less) divided by the number of rounds played by the player (Used to
+            rank players that have both a tied score and match wins)
+    """
+    DB = connect()
+    c = DB.cursor()
+    c.execute('''
+
+                SELECT *
+                    FROM v_results;
+
+              ''')
+    standing = c.fetchall()
+    DB.close()
+    return standing
