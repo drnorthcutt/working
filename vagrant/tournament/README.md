@@ -62,6 +62,7 @@ Other:
    4.  Appropriate commenting and README
 
 May also have (for exceeds):
+
 1.  One or more of the following:
 	* Prevent rematches between players
     * [x] Allowance for "bye" rounds if players odd.  No more than one per
