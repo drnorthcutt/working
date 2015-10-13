@@ -23,19 +23,24 @@ In straight Swiss tournaments, once the Swiss rounds are over the tournament is
 complete and prizes are awarded based on the final standings. There is no top
 cut or playoff.
 #Contents:
+
 [Objectives](#objectives)
-[Requirements](#required libraries and dependencies)
-[How to](#how to run this project)
-[Extra Credit](#extra credit description)
+
+[Requirements](#required-libraries-and-dependencies)
+
+[How to](#how-to-run-this-project)
+
+[Extra Credit](#extra-credit-description)
   * [Functionality](#functionality)
-  * [Table Design](#table design)
-  * [Column Design](#column design)
-  * [Code Quality](#code quality)
+  * [Table Design](#table-design)
+  * [Column Design](#column-design)
+  * [Code Quality](#code-quality)
 
 [Miscellaneous](#miscellaneous)
 * [Image](#miscellaneous)
-* [Functions added](#functions added)
-* [Views utilized](#views utilized)
+* [Functions added](#functions-added)
+* [Views utilized](#views-utilized)
+
 #Objectives
 
 Write server-side code to function as a database driven Swiss style tournament
@@ -71,11 +76,14 @@ May also have (for exceeds):
 
 
 #Required Libraries and Dependencies
-[VirtualBox](https://www.virtualbox.org) (5.0.5 was used)
-[Vagrant](https://www.vagrantup.com) (1.7.4 was used)
-Python v2.*
-PostgreSQL
 
+[VirtualBox](https://www.virtualbox.org) (5.0.5 was used)
+
+[Vagrant](https://www.vagrantup.com) (1.7.4 was used)
+
+Python v2.*
+
+PostgreSQL
 
 #How to Run this Project
 
@@ -84,7 +92,6 @@ Clone this full repository and ensure the files are all in the same directory.
 (if already cloned from the original repository, only this directory is required.)
 
 From the command line, or terminal, navigate to the vagrant from this repository directory, type:
-
 
 ```
 vagrant up
@@ -116,7 +123,6 @@ To run the added input based mini-tester:
 ```
 python tester.py
 ```
-
 
 #Extra Credit Description
 ####(Image below in Miscellaneous)
