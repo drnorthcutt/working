@@ -162,12 +162,14 @@ was painful.
 #Miscellaneous
 
 Shows finalResults, with one Draw, a BYE, matchwins, and OMW.
+
 <img src="https://github.com/drnorthcutt/working/blob/extras/vagrant/tournament/img/omw.png" alt="OMW" style="width:800;height:243">
+
 In this example, Riker shows 3 wins and 1 draw over 4 matches, so:
 
     (3 x 3 points) + (1 x 1 point) for a total score of 10.
     4 matches x 3 possible points per match for a total possible match points of 12.
-    10 divided by 12 = 0.8333 repeating, for a matchwins of 83 <sup>1</sup>/<sub>3</sub>%.
+    10 divided by 12 = 0.8333 repeating, for a matchwins of 83 1/3%.
     His omw is then calculated by the average of his opponent's matchwins.
     In this case, Pike, April, and Archer twice, or (approximately):
         0.33 + 0.6666 + 0.4666 + 0.4666 = 1.9298
@@ -176,6 +178,10 @@ In this example, Riker shows 3 wins and 1 draw over 4 matches, so:
         1.9298 divided by 4 for an omw of 0.4825 or 48.25%.
 
 In this example output, Chester Tester had 1 BYE.
+
+    His matchwins, instead of 6 points divided by 3 matches (3 x 3),
+    (or 6 / 9 = 0.66 repeating) show properly, disregarding the BYE as:
+        3 points divided by 2 matches (2 x 3) = 3 / 6 = 0.5
 
 
 
