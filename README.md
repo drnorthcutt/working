@@ -1,19 +1,25 @@
 fullstack
 =============
 
-Common code for the Relational Databases and Full Stack Fundamentals courses
+Relational Databases and Full Stack Fundamentals courses
 
 Contains:
 
     vagrant directory
-        Vagrant file
-        Configuration file
-        catalog directory
-        forum directory
-            forum.py
-            forum.sql
+        Vagrant file (Common code)
+        Configuration file (Common code)
+
+
+        catalog directory -- Work in progress
+
+
+        forum directory -- Terrible server, bit of a commenting system
+            forum.py (Common code)
+            forum.sql (Common code)
             forumdb.py
-        tournament directory --Swiss Style Tournament Ranking System
+
+
+        tournament directory -- Swiss Style Tournament Ranking System
             img directory
                 image file
             README

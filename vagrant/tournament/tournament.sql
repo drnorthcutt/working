@@ -3,7 +3,8 @@
 /*
 Drop the database if it exists.
 Create the database and establish the schema.
-Create views.
+Create views for accrual and calculation of wins, losses, draws, score,
+    matchwins and omw.
 */
 
 DROP DATABASE tournament;
@@ -22,7 +23,7 @@ CREATE TABLE matches (
         draw bool DEFAULT False
 );
 
--- Display number of wins
+-- Count number of wins
 CREATE VIEW v_wins AS
         SELECT players.id,
             COUNT(matches.winner) AS wins
@@ -33,7 +34,7 @@ CREATE VIEW v_wins AS
                 GROUP BY players.id
                 ORDER BY wins DESC;
 
--- Display number of draws
+-- Count number of draws
 CREATE VIEW v_ties AS
         SELECT ties.id,
             SUM (ties.num) as draws
@@ -56,7 +57,7 @@ CREATE VIEW v_ties AS
                      ) AS ties
                 GROUP BY id;
 
--- Display number of matches per each player
+-- Count number of matches per each player
 CREATE VIEW v_match_counts AS
         SELECT players.id,
             COUNT (matches.winner) AS num_matches
@@ -83,7 +84,7 @@ CREATE VIEW v_standings AS
                 GROUP BY players.id
                 ORDER BY wins DESC;
 
--- Display score (wins = 3, losses =0, draws = 1)
+-- Calculate score (wins = 3, losses =0, draws = 1)
 CREATE VIEW v_score AS
         SELECT scores.id,
             SUM (scores.points) AS score
@@ -115,7 +116,7 @@ CREATE VIEW v_score AS
             GROUP BY id
             Order by score;
 
--- Display scores from BYES as a negative number, to remove from match points
+-- Calculate scores from BYES as a negative number, to remove from match points
 CREATE VIEW v_byeScore AS
         SELECT scores.id,
                 SUM(-scores.points) AS score
@@ -145,7 +146,7 @@ CREATE VIEW byeGone AS
                      ) AS byebye
                 GROUP BY byebye.id;
 
--- BYE match total
+-- Count BYE match total
 CREATE VIEW v_matchBye AS
         SELECT players.id,
             COUNT (matches.winner) AS num_matches
@@ -171,7 +172,7 @@ CREATE VIEW matchByeGone AS
                      ) AS matchbye
                 GROUP BY matchbye.id;
 
--- Match-wins Corrected for BYES
+-- Calculate Match-wins Corrected for BYES
 CREATE VIEW v_matchwins AS
         SELECT byeGone.id,
                players.name,
@@ -185,7 +186,7 @@ CREATE VIEW v_matchwins AS
                     JOIN players
                         ON players.id = byeGone.id;
 
--- Opponent match wins
+-- Accrue and Calculate Opponent match wins
 CREATE VIEW v_omw AS
         SELECT opponent.id,
                (
@@ -218,7 +219,7 @@ CREATE VIEW v_omw AS
                         WHERE opponent.id = matchByeGone.id
                 GROUP BY opponent.id, matchByeGone.num_matches;
 
--- Final player results with tie breakers
+-- Display and formatFinal player results with tie breakers
 CREATE VIEW v_results AS
         SELECT v_standings.id,
                 v_standings.name,
