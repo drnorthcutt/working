@@ -1,16 +1,22 @@
 from tournament import *
 
 def test():
+    """Test various functions
+
+    Most particularly, playerStandings may be tested along with BYE insertion
+    and deletion prior to match results. Also allows clearing of players and/or
+    matches, and registration of players.
+    """
     print ""
-    print "1 -- player standings"
+    print "s -- player standings"
     print "p -- to register players"
     print "c -- clear players  *note*  Players cannot be cleared if they have matches."
     print "m to clear matches  *note* Clearing matches will not clear players."
-    print "Press any other key to exit"
     print "bye -- delete bye"
+    print "Press any other key to exit"
     print ""
     answer = raw_input("What would you like to do? \n")
-    if answer == "1":
+    if answer == "s":
         standings = playerStandings()
         current = countPlayers()
         print ""
@@ -73,7 +79,7 @@ def test():
     elif answer == "bye":
         deleteByes()
         test()
-    elif answer == 3:
+    else:
         end
 
 if __name__ == '__main__':

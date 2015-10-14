@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-#
+# Author: Daniel R. Northcutt
+# October 2015
 # tournament.py -- implementation of a Swiss-system tournament
-#
 
 import psycopg2
 
@@ -142,17 +142,17 @@ def evenCheck():
 
 
 def playerStandings():
-    """Returns a list of the players and their win records, sorted by wins.
+    """Return a list of the players and their win records, sorted by wins.
 
     The first entry in the list should be the player in first place, or a
     player tied for first place if there is currently a tie.
 
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
-        id: the unique id of a player (assigned by the database)
-        name: the full name of a player (as registered)
-        wins: the number of matches the player has won
-        matches: the number of matches the player has played
+        id: the unique id of a player (assigned by the database);
+        name: the full name of a player (as registered);
+        wins: the number of matches the player has won;
+        matches: the number of matches the player has played.
     """
     evenCheck()
     DB = connect()
@@ -169,11 +169,11 @@ def playerStandings():
 
 
 def reportMatch(winner, loser):
-    """Records the outcome of a single match between two players.
+    """Record the outcome of a single match between two players.
 
     Args:
-      winner:  the id number of the player who won
-      loser:  the id number of the player who lost
+      winner:  the id number of the player who won;
+      loser:  the id number of the player who lost.
     """
     DB = connect()
     c = DB.cursor()
@@ -190,11 +190,11 @@ def reportMatch(winner, loser):
 
 
 def reportMatchTie(player1, player2):
-    """Records the tied outcome of a single match between two players.
+    """Record the tied outcome of a single match between two players.
 
     Args:
-      player1:  the id number of either player in a tied match
-      player2:  the id number of the other player in a tied match
+      player1:  the id number of either player in a tied match;
+      player2:  the id number of the other player in a tied match.
     """
     DB = connect()
     c = DB.cursor()
@@ -211,7 +211,7 @@ def reportMatchTie(player1, player2):
 
 
 def swissPairings():
-    """Returns a list of pairs of players for the next round of a match.
+    """Return a list of pairs of players for the next round of a match.
 
     Assuming that there are an even number of players registered, each player
     appears exactly once in the pairings.  Each player is paired with another
@@ -222,10 +222,10 @@ def swissPairings():
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
 
-        id1: the first player's unique id
-        name1: the first player's name
-        id2: the second player's unique id
-        name2: the second player's name
+        id1: the first player's unique id;
+        name1: the first player's name;
+        id2: the second player's unique id;
+        name2: the second player's name.
     """
     evenCheck()
     DB = connect()
@@ -262,22 +262,22 @@ def finalResults():
       A list of tuples, each of which contains (id, name, wins, matches, score,
       match wins, opponent match wins):
 
-        id: the player's unique id (assigned by the database)
-        name: the player's full name (as registered)
-        wins: the number of matches the player has won
-        draws: the number of draws for each player
-        matches: the number of matches the player has played
+        id: the player's unique id (assigned by the database);
+        name: the player's full name (as registered);
+        wins: the number of matches the player has won;
+        draws: the number of draws for each player;
+        matches: the number of matches the player has played;
         score: the points the player has won, calculated as 3 points for a win,
-            0 points for a loss, 3 points for a BYE, 1 point for a tie
+            0 points for a loss, 3 points for a BYE, 1 point for a tie;
         match wins: the player's score divided by three times the number of
             matches the player has played, discounting both score and match for
             a round when a player recieved a BYE. If less than 0.33, then 0.33
-            is displayed.  (Used to rank players that have a tied score)
+            is displayed.  (Used to rank players that have a tied score);
         omw: opponent match wins, the average match wins of the opponents of a
             player. Calculated by the sum of the match wins of each opponent
             of the player (or 0.33 if an opponent has a match wins score of
             less) divided by the number of rounds played by the player (Used to
-            rank players that have both a tied score and match wins)
+            rank players that have both a tied score and match wins).
     """
     DB = connect()
     c = DB.cursor()

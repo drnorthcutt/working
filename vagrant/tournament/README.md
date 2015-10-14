@@ -22,6 +22,24 @@ wins in the quarterfinals, they advance to the semi-finals, and so on.
 In straight Swiss tournaments, once the Swiss rounds are over the tournament is
 complete and prizes are awarded based on the final standings. There is no top
 cut or playoff.
+#Contents:
+
+[Objectives](#objectives)
+
+[Requirements](#required-libraries-and-dependencies)
+
+[How to](#how-to-run-this-project)
+
+[Extra Credit](#extra-credit-description)
+  * [Functionality](#functionality)
+  * [Table Design](#table-design)
+  * [Column Design](#column-design)
+  * [Code Quality](#code-quality)
+
+[Miscellaneous](#miscellaneous)
+* [Image](#miscellaneous)
+* [Functions added](#functions-added)
+* [Views utilized](#views-utilized)
 
 #Objectives
 
@@ -44,6 +62,7 @@ Other:
    4.  Appropriate commenting and README
 
 May also have (for exceeds):
+
 1.  One or more of the following:
 	* Prevent rematches between players
     * [x] Allowance for "bye" rounds if players odd.  No more than one per
@@ -58,11 +77,14 @@ May also have (for exceeds):
 
 
 #Required Libraries and Dependencies
-[VirtualBox](https://www.virtualbox.org) (5.0.5 was used)
-[Vagrant](https://www.vagrantup.com) (1.7.4 was used)
-Python v2.*
-PostgreSQL
 
+[VirtualBox](https://www.virtualbox.org) (5.0.5 was used)
+
+[Vagrant](https://www.vagrantup.com) (1.7.4 was used)
+
+Python v2.*
+
+PostgreSQL
 
 #How to Run this Project
 
@@ -71,7 +93,6 @@ Clone this full repository and ensure the files are all in the same directory.
 (if already cloned from the original repository, only this directory is required.)
 
 From the command line, or terminal, navigate to the vagrant from this repository directory, type:
-
 
 ```
 vagrant up
@@ -104,9 +125,23 @@ To run the added input based mini-tester:
 python tester.py
 ```
 
-
 #Extra Credit Description
 ####(Image below in Miscellaneous)
+**NOTE:  tournament_test.py amended...**
+
+testStandingsBeforeMatches:
+* variable added for draws
+
+testReportMatches:
+* variable added for draws
+* name changed to SQL injection form
+
+Other tests added, but commented out:
+* BYE creation with uneven players
+* Swiss pairings with BYE
+* Opponent match-wins
+
+
 ###Functionality
 Allowance for BYE round if players are odd in number.  Upon checking
 playerStandings, or calling swissRounds, a BYE is created with the id 9999 to
@@ -130,13 +165,13 @@ Additional input-based mini-tester added as tester.py
 
 ###Table Design
 Two tables:
-* players
-    * id
+1. players
+    * id - primary key
     * name
-* matches
-    * id
-    * winner
-    * loser
+2. matches
+    * id - primary key
+    * winner - foreign key to players(id)
+    * loser - foreign key to players(id)
     * draw
 
 Multiple views utilized to handle all stats. (Specifically listed below, in Miscellaneous)
@@ -177,7 +212,7 @@ In this example, Riker shows 3 wins and 1 draw over 4 matches, so:
     Therefore:
         1.9298 divided by 4 for an omw of 0.4825 or 48.25%.
 
-In this example output, Chester Tester had 1 BYE.
+Also, Chester Tester had 1 BYE.
 
     His matchwins, instead of 6 points divided by 3 matches (3 x 3),
     (or 6 / 9 = 0.66 repeating) show properly, disregarding the BYE as:
@@ -193,8 +228,10 @@ deleteByes():
 
     Remove a BYE when unnecessary.
 
-    This assumes that playerStandings was checked before rounds were played.
-    Once a round has been played and a BYE win has been issued, it cannot be
+    This assumes that playerStandings was checked before rounds were played,
+    or that swissPairings was called prior to matches being recorded and the
+    number of players was now even after creation of a prior BYE.  Once a
+    round has been played and a BYE win has been issued, it cannot be
     deleted due to Foreign Key constraints.
 
 evenCheck():
