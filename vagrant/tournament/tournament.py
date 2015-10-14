@@ -1,20 +1,24 @@
 #!/usr/bin/env python
 # Author: Daniel R. Northcutt
-# October 2015
+# 14 October 2015
 # tournament.py -- implementation of a Swiss-system tournament
 
 import psycopg2
 
 
-def connect():
-    """Connect to the PostgreSQL database.  Returns a database connection."""
-    return psycopg2.connect("dbname=tournament")
+def connect(database_name="tournament"):
+    """Return a database connection and cursor."""
+    try:
+        DB = psycopg2.connect("dbname={}".format(database_name))
+        c = DB.cursor()
+        return DB, c
+    except:
+        print("Database not found")
 
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     c.execute('''
 
                 DELETE
@@ -27,8 +31,7 @@ def deleteMatches():
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     c.execute('''
 
                 DELETE
@@ -46,8 +49,7 @@ def deleteByes():
     Once a round has been played and a BYE win has been issued, it cannot be
     deleted due to Foreign Key constraints.
     """
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     c.execute('''
 
                 DELETE
@@ -61,8 +63,7 @@ def deleteByes():
 
 def countPlayers():
     """Return the number of players currently registered."""
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     c.execute('''
 
                 SELECT COUNT(id) AS num
@@ -82,8 +83,7 @@ def registerPlayer(name):
     Args:
       name: the full name of a player (need not be unique).
     """
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     c.execute('''
 
                 INSERT INTO players
@@ -101,8 +101,7 @@ def evenCheck():
     BYE id is set to 9999 to drastically lower the likelihood that any player
     will already have this id number.
     """
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     s = countPlayers()
     # Check for even players.
     if (+s % 2) == 0:
@@ -155,8 +154,7 @@ def playerStandings():
         matches: the number of matches the player has played.
     """
     evenCheck()
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     c.execute('''
 
                 SELECT *
@@ -175,8 +173,7 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won;
       loser:  the id number of the player who lost.
     """
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     result = '''
 
                 INSERT INTO matches
@@ -196,8 +193,7 @@ def reportMatchTie(player1, player2):
       player1:  the id number of either player in a tied match;
       player2:  the id number of the other player in a tied match.
     """
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     result = '''
 
                 INSERT INTO matches
@@ -228,8 +224,7 @@ def swissPairings():
         name2: the second player's name.
     """
     evenCheck()
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     c.execute('''
 
                 SELECT id, name
@@ -279,8 +274,7 @@ def finalResults():
             less) divided by the number of rounds played by the player (Used to
             rank players that have both a tied score and match wins).
     """
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     c.execute('''
 
                 SELECT *
