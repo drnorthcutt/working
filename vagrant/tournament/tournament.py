@@ -19,12 +19,13 @@ def connect(database_name="tournament"):
 def deleteMatches():
     """Remove all the match records from the database."""
     DB, c = connect()
-    c.execute('''
+    query = ('''
 
                 DELETE
                     FROM matches;
 
-              ''')
+             ''')
+    c.execute(query)
     DB.commit()
     DB.close()
 
@@ -32,12 +33,13 @@ def deleteMatches():
 def deletePlayers():
     """Remove all the player records from the database."""
     DB, c = connect()
-    c.execute('''
+    query = ('''
 
                 DELETE
                     FROM players;
 
-              ''')
+             ''')
+    c.execute(query)
     DB.commit()
     DB.close()
 
@@ -50,13 +52,14 @@ def deleteByes():
     deleted due to Foreign Key constraints.
     """
     DB, c = connect()
-    c.execute('''
+    query = ('''
 
                 DELETE
                     FROM players
                         WHERE id = 9999;
 
-              ''')
+             ''')
+    c.execute(query)
     DB.commit()
     DB.close()
 
@@ -64,12 +67,13 @@ def deleteByes():
 def countPlayers():
     """Return the number of players currently registered."""
     DB, c = connect()
-    c.execute('''
+    query = ('''
 
                 SELECT COUNT(id) AS num
                     FROM players;
 
-              ''')
+             ''')
+    c.execute(query)
     players = c.fetchone()[0]
     DB.close()
     return players
@@ -84,13 +88,15 @@ def registerPlayer(name):
       name: the full name of a player (need not be unique).
     """
     DB, c = connect()
-    c.execute('''
+    query = ('''
 
                 INSERT INTO players
                            (name)
                     VALUES (%s);
 
-              ''', (name,))
+             ''')
+    param = (name,)
+    c.execute(query, param)
     DB.commit()
     DB.close()
 
@@ -108,7 +114,7 @@ def evenCheck():
         DB.close()
     # Check whether BYE already exists.
     else:
-        c.execute('''
+        query = ('''
 
                 SELECT exists
                     (
@@ -119,7 +125,8 @@ def evenCheck():
 
                     );
 
-                  ''')
+                 ''')
+        c.execute(query)
         rows = c.fetchall()
         tf = [row[0] for row in rows]
         if tf == [True]:
@@ -127,13 +134,15 @@ def evenCheck():
             DB.close()
         # Add BYE if needed.
         elif tf == [False]:
-            c.execute('''
+            query = ('''
 
                 INSERT INTO players
                            (id, name)
                     VALUES (%s, %s);
 
-              ''', (9999, 'BYE',))
+                     ''')
+            params = (9999, 'BYE',)
+            c.execute(query, params)
             DB.commit()
             DB.close()
         else:
@@ -155,12 +164,13 @@ def playerStandings():
     """
     evenCheck()
     DB, c = connect()
-    c.execute('''
+    query = ('''
 
                 SELECT *
                     FROM v_standings;
 
-              ''')
+             ''')
+    c.execute(query)
     standing = c.fetchall()
     DB.close()
     return standing
@@ -174,14 +184,15 @@ def reportMatch(winner, loser):
       loser:  the id number of the player who lost.
     """
     DB, c = connect()
-    result = '''
+    query = ('''
 
                 INSERT INTO matches
                            (winner, loser)
                     VALUES (%s, %s);
 
-             '''
-    c.execute(result, (winner, loser,))
+             ''')
+    params = (winner, loser,)
+    c.execute(query, params)
     DB.commit()
     DB.close()
 
@@ -194,14 +205,15 @@ def reportMatchTie(player1, player2):
       player2:  the id number of the other player in a tied match.
     """
     DB, c = connect()
-    result = '''
+    query = ('''
 
                 INSERT INTO matches
                            (winner, loser, draw)
                     VALUES (%s, %s, %s);
 
-             '''
-    c.execute(result, (player1, player2, 'True',))
+             ''')
+    params = (player1, player2, 'True',)
+    c.execute(query, params)
     DB.commit()
     DB.close()
 
@@ -225,13 +237,14 @@ def swissPairings():
     """
     evenCheck()
     DB, c = connect()
-    c.execute('''
+    query = ('''
 
                 SELECT id, name
                     FROM v_standings
                     Order by wins desc;
 
-              ''')
+             ''')
+    c.execute(query)
     pairings = []
     # Pull rows and append two at a time from aggregating view.
     each_pair = c.fetchmany(2)
@@ -275,12 +288,13 @@ def finalResults():
             rank players that have both a tied score and match wins).
     """
     DB, c = connect()
-    c.execute('''
+    query = ('''
 
                 SELECT *
                     FROM v_results;
 
-              ''')
+             ''')
+    c.execute(query)
     standing = c.fetchall()
     DB.close()
     return standing
