@@ -1,40 +1,45 @@
 #!/usr/bin/env python
 # Author: Daniel R. Northcutt
-# October 2015
+# 14 October 2015
 # tournament.py -- implementation of a Swiss-system tournament
 
 import psycopg2
 
 
-def connect():
-    """Connect to the PostgreSQL database.  Returns a database connection."""
-    return psycopg2.connect("dbname=tournament")
+def connect(database_name="tournament"):
+    """Return a database connection and cursor."""
+    try:
+        DB = psycopg2.connect("dbname={}".format(database_name))
+        c = DB.cursor()
+        return DB, c
+    except:
+        print("Database not found")
 
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    DB = connect()
-    c = DB.cursor()
-    c.execute('''
+    DB, c = connect()
+    query = ('''
 
                 DELETE
                     FROM matches;
 
-              ''')
+             ''')
+    c.execute(query)
     DB.commit()
     DB.close()
 
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    DB = connect()
-    c = DB.cursor()
-    c.execute('''
+    DB, c = connect()
+    query = ('''
 
                 DELETE
                     FROM players;
 
-              ''')
+             ''')
+    c.execute(query)
     DB.commit()
     DB.close()
 
@@ -46,29 +51,29 @@ def deleteByes():
     Once a round has been played and a BYE win has been issued, it cannot be
     deleted due to Foreign Key constraints.
     """
-    DB = connect()
-    c = DB.cursor()
-    c.execute('''
+    DB, c = connect()
+    query = ('''
 
                 DELETE
                     FROM players
                         WHERE id = 9999;
 
-              ''')
+             ''')
+    c.execute(query)
     DB.commit()
     DB.close()
 
 
 def countPlayers():
     """Return the number of players currently registered."""
-    DB = connect()
-    c = DB.cursor()
-    c.execute('''
+    DB, c = connect()
+    query = ('''
 
                 SELECT COUNT(id) AS num
                     FROM players;
 
-              ''')
+             ''')
+    c.execute(query)
     players = c.fetchone()[0]
     DB.close()
     return players
@@ -82,15 +87,16 @@ def registerPlayer(name):
     Args:
       name: the full name of a player (need not be unique).
     """
-    DB = connect()
-    c = DB.cursor()
-    c.execute('''
+    DB, c = connect()
+    query = ('''
 
                 INSERT INTO players
                            (name)
                     VALUES (%s);
 
-              ''', (name,))
+             ''')
+    param = (name,)
+    c.execute(query, param)
     DB.commit()
     DB.close()
 
@@ -101,15 +107,14 @@ def evenCheck():
     BYE id is set to 9999 to drastically lower the likelihood that any player
     will already have this id number.
     """
-    DB = connect()
-    c = DB.cursor()
+    DB, c = connect()
     s = countPlayers()
     # Check for even players.
     if (+s % 2) == 0:
         DB.close()
     # Check whether BYE already exists.
     else:
-        c.execute('''
+        query = ('''
 
                 SELECT exists
                     (
@@ -120,7 +125,8 @@ def evenCheck():
 
                     );
 
-                  ''')
+                 ''')
+        c.execute(query)
         rows = c.fetchall()
         tf = [row[0] for row in rows]
         if tf == [True]:
@@ -128,13 +134,15 @@ def evenCheck():
             DB.close()
         # Add BYE if needed.
         elif tf == [False]:
-            c.execute('''
+            query = ('''
 
                 INSERT INTO players
                            (id, name)
                     VALUES (%s, %s);
 
-              ''', (9999, 'BYE',))
+                     ''')
+            params = (9999, 'BYE',)
+            c.execute(query, params)
             DB.commit()
             DB.close()
         else:
@@ -155,14 +163,14 @@ def playerStandings():
         matches: the number of matches the player has played.
     """
     evenCheck()
-    DB = connect()
-    c = DB.cursor()
-    c.execute('''
+    DB, c = connect()
+    query = ('''
 
                 SELECT *
                     FROM v_standings;
 
-              ''')
+             ''')
+    c.execute(query)
     standing = c.fetchall()
     DB.close()
     return standing
@@ -175,16 +183,16 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won;
       loser:  the id number of the player who lost.
     """
-    DB = connect()
-    c = DB.cursor()
-    result = '''
+    DB, c = connect()
+    query = ('''
 
                 INSERT INTO matches
                            (winner, loser)
                     VALUES (%s, %s);
 
-             '''
-    c.execute(result, (winner, loser,))
+             ''')
+    params = (winner, loser,)
+    c.execute(query, params)
     DB.commit()
     DB.close()
 
@@ -196,16 +204,16 @@ def reportMatchTie(player1, player2):
       player1:  the id number of either player in a tied match;
       player2:  the id number of the other player in a tied match.
     """
-    DB = connect()
-    c = DB.cursor()
-    result = '''
+    DB, c = connect()
+    query = ('''
 
                 INSERT INTO matches
                            (winner, loser, draw)
                     VALUES (%s, %s, %s);
 
-             '''
-    c.execute(result, (player1, player2, 'True',))
+             ''')
+    params = (player1, player2, 'True',)
+    c.execute(query, params)
     DB.commit()
     DB.close()
 
@@ -228,15 +236,15 @@ def swissPairings():
         name2: the second player's name.
     """
     evenCheck()
-    DB = connect()
-    c = DB.cursor()
-    c.execute('''
+    DB, c = connect()
+    query = ('''
 
                 SELECT id, name
                     FROM v_standings
                     Order by wins desc;
 
-              ''')
+             ''')
+    c.execute(query)
     pairings = []
     # Pull rows and append two at a time from aggregating view.
     each_pair = c.fetchmany(2)
@@ -279,14 +287,14 @@ def finalResults():
             less) divided by the number of rounds played by the player (Used to
             rank players that have both a tied score and match wins).
     """
-    DB = connect()
-    c = DB.cursor()
-    c.execute('''
+    DB, c = connect()
+    query = ('''
 
                 SELECT *
                     FROM v_results;
 
-              ''')
+             ''')
+    c.execute(query)
     standing = c.fetchall()
     DB.close()
     return standing
