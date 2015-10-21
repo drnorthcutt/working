@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Edit {{i.name}} for {{r.name}}</title>
+</head>
+
+<body>
+
+    <h1>Edit Menu Item for {{r.name}}</h1>
+    <form action="{{url_for('editMenuItem', restaurant_id=restaurant_id, menu_id=i.id)}}" method='post'>
+        <p>Name:
+            <input type='text' size='30' name='name' placeholder='{{i.name}}' autofocus>
+        </p>
+        <p>Price: &#36;
+            <input type='text' size='5' name='price' placeholder='{{i.price}}'>
+        </p>
+        <p>Description:
+            <input type='text' maxlength='250' size='50' name='desc' placeholder='{{i.description}}.'>
+        </p>
+        <input type='submit' value='Save'>
+        <a href='{{url_for('restaurantMenu', restaurant_id=i.restaurant_id)}}'>Cancel</a>
+    </form>
+
+    &#120149; &#120163; &#120159;
+</body>
+
+</html>
