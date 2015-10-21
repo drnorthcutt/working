@@ -31,7 +31,7 @@ def newMenuItem(restaurant_id):
         )
         session.add(newItem)
         session.commit()
-        flash("New item created!")
+        flash(newItem.name +" created!")
         return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
     else:
         rest = session.query(Restaurant).filter_by(id = restaurant_id).one()
