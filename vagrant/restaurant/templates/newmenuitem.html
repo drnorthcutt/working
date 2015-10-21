@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head><title>New Item for {{ restaurant_name }} </title></head>
+<body>
+
+    <h1>New Menu Item for {{restaurant_name}}</h1>
+    <form action="{{url_for('newMenuItem', restaurant_id=restaurant_id, restaurant_name=restaurant_name)}}" method='post'>
+        <p>Name:
+            <input type='text' size='30' name='name' placeholder='Item' autofocus>
+        </p>
+        <p>Price: &#36;
+            <input type='text' size='5' name='price' placeholder='0.00'>
+        </p>
+        <p>Description:
+            <input type='text' maxlength='250' size='50' name='desc' placeholder='Please describe the item.'>
+        </p>
+        <input type='submit' value='Create'>
+    </form>
+    &#120149; &#120163; &#120159;
+</body>
+
+</html>
