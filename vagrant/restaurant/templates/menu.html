@@ -1,10 +1,23 @@
 <!DOCTYPE html>
 
 <html>
-<head><title>New Item for {{ restaurant.name }} </title></head>
+
+<head>
+    <title>New Item for {{ restaurant.name }} </title>
+</head>
+
 <body>
     <h1>{{ restaurant.name }}</h1>
-    <a href = '{{url_for('newMenuItem', restaurant_id=restaurant.id)}}'>Create New Item</a>
+     {% with messages = get_flashed_messages() %}
+     {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li><strong>{{message}}</strong></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    <a href={{url_for('newMenuItem', restaurant_id=restaurant.id)}}>Create New Item</a>
     <p>{% for i in items %} {{i.name}}
         <br> {{i.description}}
         <br> {{i.price}}

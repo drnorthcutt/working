@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, flash
 app = Flask(__name__)
 
 from restaurant_setup import Base, Restaurant, MenuItem
@@ -31,6 +31,7 @@ def newMenuItem(restaurant_id):
         )
         session.add(newItem)
         session.commit()
+        flash("New item created!")
         return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
     else:
         rest = session.query(Restaurant).filter_by(id = restaurant_id).one()
@@ -52,6 +53,7 @@ def editMenuItem(restaurant_id, menu_id):
             editedItem.description = request.form['desc']
         session.add(editedItem)
         session.commit()
+        flash(editedItem.name +" edited!")
         return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
     else:
         return render_template('editmenuitem.html',
@@ -68,6 +70,7 @@ def deleteMenuItem(restaurant_id, menu_id):
     if request.method == 'POST':
         session.delete(deleteItem)
         session.commit()
+        flash(deleteItem.name +" deleted!")
         return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
     else:
         return render_template('deletemenuitem.html',
@@ -77,5 +80,6 @@ def deleteMenuItem(restaurant_id, menu_id):
 
 
 if __name__ == '__main__':
+    app.secret_key = 'super_secret_key'
     app.debug = True
     app.run(host = '0.0.0.0', port = 5000)
