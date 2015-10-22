@@ -4,7 +4,7 @@
 
 <head>
     <title>New Item for {{ restaurant.name }}</title>
-    <link rel=stylesheet type=text/css href={{url_for( "static", filename='styles.css' )}}>
+    <link rel=stylesheet type=text/css href="{{url_for('static', filename='styles.css')}}">
 </head>
 
 <body>
@@ -19,7 +19,7 @@
             </ul>
             {% endif %} {% endwith %}
         </div>
-        <a href={{url_for( 'newMenuItem', restaurant_id=restaurant.id)}}>Create New Item</a>
+        <a href="{{url_for('newMenuItem', restaurant_id=restaurant.id)}}">Create New Item</a>
         <hr/>
         {% for i in items %}
         <div>
@@ -29,8 +29,8 @@
             </div>
             <span class='description'>{{ i.description }}</span>
             <div class='editdeletepane'>
-                <a href={{url_for( "editMenuItem", restaurant_id=restaurant.id, menu_id=i.id)}}>Edit</a>
-                <a href={{ url_for( "deleteMenuItem", restaurant_id=restaurant.id, menu_id=i.id) }}>Delete</a>
+                <a href="{{url_for('editMenuItem', restaurant_id=restaurant.id, menu_id=i.id)}}">Edit</a>
+                <a href="{{url_for('deleteMenuItem', restaurant_id=restaurant.id, menu_id=i.id)}}">Delete</a>
             </div>
             <hr/>
         </div>
