@@ -22,7 +22,8 @@ def allRestaurants():
 
 @app.route('/restaurant/new')
 def newRestaurant():
-    return "New Restaurant"
+    #return "New Restaurant"
+    return render_template('newrestaurant.html', restaurants=restaurants)
 
 @app.route('/restaurant/<int:restaurant_id>/edit')
 def editRestaurant(restaurant_id):
