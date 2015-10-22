@@ -13,6 +13,15 @@
             <h1>New Menu Item for {{r.name}}</h1>
         </div>
         <form action="{{url_for('newMenuItem', restaurant_id=restaurant_id)}}" method='post'>
+           <p>Course:
+                <select name='course'>
+                    <option value='Appetizer'>Appetizer</option>
+                    <option value='Beverage'>Beverage</option>
+                    <option value='Dessert'>Dessert</option>
+                    <option value='Entree' selected>Entree</option>
+                    <option value='Side'>Side</option>
+                </select>
+            </p>
             <p>Name:
                 <input type='text' size='30' name='name' placeholder='Item' autofocus required>
             </p>

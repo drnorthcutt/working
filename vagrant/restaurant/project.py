@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect, flash
+from flask import Flask, render_template, url_for, request, redirect, flash, jsonify
 app = Flask(__name__)
 
 from restaurant_setup import Base, Restaurant, MenuItem
@@ -10,6 +10,20 @@ Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
+# Make API Endpoint for all items per restaurant (GET)
+@app.route('/restaurants/<int:restaurant_id>/menu/JSON')
+def restaurantMenuJSON(restaurant_id):
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    items = session.query(MenuItem).filter_by(restaurant_id=restaurant_id).all()
+    return jsonify(MenuItems=[i.serialize for i in items])
+
+
+# Make API Endpoint for one item from a restaurant (GET)
+@app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/JSON')
+def MenuJSON(restaurant_id, menu_id):
+    item = session.query(MenuItem).filter_by(id=menu_id).one()
+    return jsonify(MenuItem=item.serialize)
 
 
 @app.route('/')
@@ -27,6 +41,7 @@ def newMenuItem(restaurant_id):
                             name=request.form['name'],
                             price='$' +request.form['price'],
                             description=request.form['desc'],
+                            course=request.form['course'],
                             restaurant_id=restaurant_id
         )
         session.add(newItem)
@@ -45,6 +60,8 @@ def editMenuItem(restaurant_id, menu_id):
     restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
     editedItem = session.query(MenuItem).filter_by(id=menu_id).one()
     if request.method == 'POST':
+        if request.form['course']:
+            editedItem.course = request.form['course']
         if request.form['name']:
             editedItem.name = request.form['name']
         if request.form['price']:
