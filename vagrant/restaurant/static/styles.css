@@ -1,0 +1,86 @@
+body {
+    font-family: sans-serif;
+    background-image: url('img3.jpg');
+    background-color: #6f6f6f
+}
+
+h1,
+h2,
+h3,
+h4 {
+    color: #f7f7c3;
+}
+
+h1,
+h2 {
+    font-family: 'Georgia', serif;
+    margin: 0;
+}
+
+h1 {
+    border-bottom: 2px solid #eee;
+}
+
+h2 {
+    font-size: 1.2em;
+}
+
+p,
+dd,
+dt {
+    color: #CCCCCC;
+}
+
+a {
+    text-decoration: none;
+    color: #FFFFCC;
+    font-size: .75em;
+}
+
+.pane {
+    position: absolute;
+    left: 25%;
+    right: 25%;
+    border: 2px solid;
+    border-radius: 25px;
+    padding: 5px;
+    margin: 5px;
+    border-color: #999999;
+    background-color: #333333
+}
+
+.header {
+    left: 50%;
+    text-align: center;
+}
+
+.course {
+    left: 50%
+    text-align: center;
+    font-size: 1.2em;
+    color: #d99d4e;
+}
+
+.name {
+    width: 50%;
+    display: inline-block;
+    float: left;
+    color: antiquewhite;
+}
+
+.description {
+    color: burlywood;
+}
+
+.price {
+    text-align: right;
+    width: 50%;
+    float: right;
+    color: azure;
+}
+
+.editdeletepane {}
+
+.flash {
+    background: #cee5F5;
+}
