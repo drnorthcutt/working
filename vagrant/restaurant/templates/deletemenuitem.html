@@ -13,12 +13,12 @@
             <h1>{{item.name}}</h1>
             <h3> from {{restaurant.name}}?</h3>
 
-    <form action="{{url_for('deleteMenuItem', restaurant_id=item.restaurant_id, menu_id=menu_id)}}" method='post'>
-        <input type='submit' value='Yes, delete it.'>
-        <a href="{{url_for('restaurantMenu', restaurant_id=item.restaurant_id)}}">Cancel</a>
-    </form>
+            <form action="{{url_for('deleteMenuItem', restaurant_id=item.restaurant_id, menu_id=menu_id)}}" method='post'>
+                <input type='submit' value='Yes, delete it.'>
+                <a href="{{url_for('restaurantMenu', restaurant_id=item.restaurant_id)}}">Cancel</a>
+            </form>
         </div>
-    &#120149; &#120163; &#120159;
+        &#120149; &#120163; &#120159;
     </div>
 </body>
 
