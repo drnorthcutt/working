@@ -31,19 +31,23 @@ def newRestaurant():
 def editRestaurant(restaurant_id):
     #return "Edit restaurant"
     return render_template('editrestaurant.html',
-                           restaurants=restaurants,
+                           restaurant=restaurant,
                            restaurant_id=restaurant_id)
 
 @app.route('/restaurant/<int:restaurant_id>/delete')
 def deleteRestaurant(restaurant_id):
     #return "delete restaurant"
     return render_template('deleterestaurant.html',
-                           restaurants=restaurants,
+                           restaurant=restaurant,
                            restaurant_id=restaurant_id)
 
 @app.route('/restaurant/<int:restaurant_id>/')
 def restaurantMenu(restaurant_id):
-    return "restaurant menu"
+    #return "restaurant menu"
+    return render_template('menu.html',
+                           restaurant=restaurant,
+                           items=items,
+                           ristaurant_id=restaurant_id)
 
 @app.route('/restaurant/<int:restaurant_id>/new/', methods=['GET','POST'])
 def newMenuItem(restaurant_id):

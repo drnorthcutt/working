@@ -11,17 +11,15 @@
 
         <div class='header'>
             <h1>Delete</h1>
-            {% for r in restaurants %}
             <br/>
-            <h2>{{r.name}}?</h2>
+            <h2>{{restaurant.name}}?</h2>
             <br/>
 
-    <form action="{{url_for('deleteRestaurant', restaurant_id=r.id)}}" method='post'>
+    <form action="{{url_for('deleteRestaurant', restaurant_id=restaurant.id)}}" method='post'>
         <input type='submit' value='Yes, delete it.'>
         <a href="{{url_for('allRestaurants')}}">Cancel</a>
     </form>
     <hr/>
-    {% endfor %}
         </div>
         <a href="{{url_for('allRestaurants')}}">Go back</a>
     &#120149; &#120163; &#120159;

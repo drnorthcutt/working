@@ -8,18 +8,16 @@
 
 <body>
     <div class='pane'>
-       {% for i in restaurants %}
         <div class='header'>
-            <h1>Edit {{i.name}}</h1>
+            <h1>Edit Restaurant Name</h1>
         </div>
         <form action="{{url_for('editRestaurant', restaurant_id=restaurant_id)}}" method='post'>
             <p>Name:
-                <input type='text' size='30' maxlength='250' name='name' placeholder='{{i.name}}' autofocus>
+                <input type='text' size='30' maxlength='250' name='name' placeholder='{{restaurant.name}}' autofocus>
             </p>
             <input type="submit" value="Save">
             <a href="{{url_for('allRestaurants')}}">Cancel</a>
         </form>
-        {% endfor %}
         &#120149; &#120163; &#120159;
     </div>
 </body>
