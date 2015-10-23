@@ -51,7 +51,10 @@ def restaurantMenu(restaurant_id):
 
 @app.route('/restaurant/<int:restaurant_id>/new/', methods=['GET','POST'])
 def newMenuItem(restaurant_id):
-    return "new menu item"
+    #return "new menu item"
+    return render_template('newmenuitem.html',
+                           restaurant=restaurant,
+                           restaurant_id=restaurant_id)
 
 @app.route('/restaurant/<int:restaurant_id>/<int:menu_id>/edit/',
            methods=['GET','POST'])

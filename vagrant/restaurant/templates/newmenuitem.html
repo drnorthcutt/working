@@ -3,14 +3,14 @@
 <html>
 
 <head>
-    <title>New Item for {{ r.name }}</title>
+    <title>New Item for {{ restaurant.name }}</title>
     <link rel=stylesheet type=text/css href="{{url_for('static', filename='styles.css')}}">
 </head>
 
 <body>
     <div class='pane'>
         <div class='header'>
-            <h1>New Menu Item for {{r.name}}</h1>
+            <h1>New Menu Item for {{restaurant.name}}</h1>
         </div>
         <form action="{{url_for('newMenuItem', restaurant_id=restaurant_id)}}" method='post'>
            <p>Course:
