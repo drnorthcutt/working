@@ -15,14 +15,13 @@
             <h1>{{r.name}}?</h1>
             <br/>
 
-    <form action="{{url_for('deleteRestaurant', restaurant_id=r.id)}}" method='post'>
-        <input type='submit' value='Yes, delete it.'>
-        <a href="{{url_for('allRestaurants')}}">Cancel</a>
-    </form>
-    <hr/>
+            <form action="{{url_for('deleteRestaurant', restaurant_id=r.id)}}" method='post'>
+                <input type='submit' value='Yes, delete it.'>
+                <a href="{{url_for('allRestaurants')}}">Cancel</a>
+            </form>
+            <hr/>
         </div>
-        <a href="{{url_for('allRestaurants')}}">Go back</a>
-    &#120149; &#120163; &#120159;
+        <a href="{{url_for('allRestaurants')}}">Go back</a> &#120149; &#120163; &#120159;
     </div>
 </body>
 
