@@ -1,14 +1,14 @@
 body {
     font-family: sans-serif;
     background-image: url('img3.jpg');
-    background-color: #333333
+    background-color: #6f6f6f
 }
 
 h1,
 h2,
 h3,
 h4 {
-    color: #FFFFFF;
+    color: #f7f7c3;
 }
 
 h1,
@@ -40,6 +40,7 @@ a {
 .pane {
     position: absolute;
     left: 25%;
+    right: 25%;
     border: 2px solid;
     border-radius: 25px;
     padding: 5px;
@@ -51,6 +52,13 @@ a {
 .header {
     left: 50%;
     text-align: center;
+}
+
+.course {
+    left: 50%
+    text-align: center;
+    font-size: 1.2em;
+    color: #d99d4e;
 }
 
 .name {
