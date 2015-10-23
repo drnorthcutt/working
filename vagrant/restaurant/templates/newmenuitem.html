@@ -3,16 +3,16 @@
 <html>
 
 <head>
-    <title>New Item for {{ restaurant.name }}</title>
+    <title>New Item for {{ r.name }}</title>
     <link rel=stylesheet type=text/css href="{{url_for('static', filename='styles.css')}}">
 </head>
 
 <body>
     <div class='pane'>
         <div class='header'>
-            <h1>New Menu Item for {{restaurant.name}}</h1>
+            <h1>New Menu Item for {{r.name}}</h1>
         </div>
-        <form action="{{url_for('newMenuItem', restaurant_id=restaurant_id)}}" method='post'>
+        <form action="{{url_for('newMenuItem', restaurant_id=r.id)}}" method='post'>
            <p>Course:
                 <select name='course'>
                     <option value='Appetizer'>Appetizer</option>
@@ -32,7 +32,7 @@
                 <input type='text' maxlength='250' size='50' name='desc' placeholder='Please describe the item.' required>
             </p>
             <input type='submit' value='Create'>
-            <a href="{{url_for('restaurantMenu', restaurant_id=restaurant_id)}}">Cancel</a>
+            <a href="{{url_for('restaurantMenu', restaurant_id=r.id)}}">Cancel</a>
         </form>
         &#120149; &#120163; &#120159;
     </div>
