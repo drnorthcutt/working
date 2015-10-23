@@ -2,19 +2,19 @@
 <html>
 
 <head>
-    <title>Edit {{i.name}} for {{r.name}}</title>
+    <title>Edit {{item.name}} for {{restaurant.name}}</title>
     <link rel=stylesheet type=text/css href="{{url_for('static', filename='styles.css')}}">
 </head>
 
 <body>
     <div class='pane'>
         <div class='header'>
-            <h1>Edit {{i.name}} for {{r.name}}</h1>
+            <h1>Edit {{item.name}} for {{restaurant.name}}</h1>
         </div>
-        <form action="{{url_for('editMenuItem', restaurant_id=restaurant_id, menu_id=i.id)}}" method='post'>
+        <form action="{{url_for('editMenuItem', restaurant_id=restaurant_id, menu_id=item.id)}}" method='post'>
             <p>Course:
                 <select name='course'>
-                    <option value='{{i.course}}'>{{i.course}}</option>
+                    <option value='{{item.course}}'>{{item.course}}</option>
                     <option value='Appetizer'>Appetizer</option>
                     <option value='Beverage'>Beverage</option>
                     <option value='Dessert'>Dessert</option>
@@ -23,16 +23,16 @@
                 </select>
             </p>
             <p>Name:
-                <input type='text' size='30' name='name' placeholder='{{i.name}}' autofocus>
+                <input type='text' size='30' name='name' placeholder='{{item.name}}' autofocus>
             </p>
             <p>Price: &#36;
-                <input type='text' size='5' name='price' placeholder='{{i.price}}'>
+                <input type='text' size='5' name='price' placeholder='{{item.price}}'>
             </p>
             <p>Description:
-                <input type='text' maxlength='250' size='50' name='desc' placeholder='{{i.description}}'>
+                <input type='text' maxlength='250' size='50' name='desc' placeholder='{{item.description}}'>
             </p>
             <input type="submit" value="Save">
-            <a href="{{url_for('restaurantMenu', restaurant_id=i.restaurant_id)}}">Cancel</a>
+            <a href="{{url_for('restaurantMenu', restaurant_id=item.restaurant_id)}}">Cancel</a>
         </form>
         &#120149; &#120163; &#120159;
     </div>
