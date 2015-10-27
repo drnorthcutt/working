@@ -1,0 +1,162 @@
+body {
+    font-family: sans-serif;
+    background-image: url('img3.jpg');
+    background-color: #6f6f6f
+}
+
+h1,
+h2,
+h3,
+h4 {
+    color: #f7f7c3;
+}
+
+h1,
+h2 {
+    font-family: 'Georgia', serif;
+    margin: 0;
+}
+
+h1 {
+    border-bottom: 2px solid #eee;
+}
+
+h2 {
+    font-size: 1.2em;
+}
+
+p,
+dd,
+dt {
+    color: #CCCCCC;
+}
+
+a {
+    text-decoration: none;
+    color: #FFFFCC;
+    font-size: .75em;
+}
+
+.pane {
+    position: absolute;
+    left: 25%;
+    right: 25%;
+    border: 2px solid;
+    border-radius: 25px;
+    padding: 5px;
+    margin: 5px;
+    border-color: #999999;
+    background-color: #333333
+}
+
+.header {
+    left: 50%;
+    text-align: center;
+}
+
+.course {
+    left: 50%
+    text-align: center;
+    font-size: 1.2em;
+    color: #d99d4e;
+}
+
+.name {
+    width: 50%;
+    display: inline-block;
+    float: left;
+    color: antiquewhite;
+}
+
+.description {
+    color: burlywood;
+}
+
+.price {
+    text-align: right;
+    width: 50%;
+    float: right;
+    color: azure;
+}
+
+.editdeletepane {}
+
+.flash {
+    background: #cee5F5;
+}
+
+// Modal
+// ----------------------
+
+.modal{
+
+
+  // This is modal bg
+  &:before{
+    content: "";
+    display: none;
+    background: rgba(0,0,0,.6);
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 10;
+  }
+
+  &:target{
+
+    // Active animate in modal
+    &:before{
+      display: block;
+    }
+    .modal-dialog{
+      .translate(0, 0);
+      top: 20%;
+    }
+
+  }
+
+}
+
+// Modal Dialog
+// ----------------------
+
+.modal-dialog{
+  background: #fefefe;
+  border: @gray solid 1px;
+  border-radius: 5px;
+  margin-left: -200px;
+  position: fixed;
+  left: 50%;
+  top: -100%;
+  z-index: 11;
+  width: 360px;
+  .translate(0, -500%);
+  .transition-transform(~"0.3s ease-out");
+}
+
+.modal-body{
+  padding: @space/2;
+}
+
+.modal-header,
+.modal-footer{
+  padding: @space/4 @space/2;
+}
+
+.modal-header{
+  border-bottom: @gray-lighter solid 1px;
+
+  h2{
+    font-size: 20px;
+  }
+
+}
+
+.modal-footer{
+  border-top: @gray-lighter solid 1px;
+  text-align: right;
+}
+
+/*ADDED TO STOP SCROLLING TO TOP*/
+#close {
+  display: none;
+}
