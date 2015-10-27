@@ -7,14 +7,24 @@ from sqlalchemy import create_engine
 
 Base = declarative_base()
 
+class Users(Base):
+    __tablename__ = 'users'
+    name = Column(String(80), nullable = False)
+    id = Column(Integer, primary_key = True)
+    email = Column(String(250), nullable = False)
+    picture = Column(String(250))
+
+
 class Restaurant(Base):
     __tablename__ = 'restaurant'
     name = Column(String(80), nullable = False)
     id = Column(Integer, primary_key = True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    users = relationship(Users)
 
     @property
     def serialize(self):
-        # Returns data serializeable
+        # Return data serializeable
         return {
             'id' : self.id,
             'name' : self.name,
@@ -30,10 +40,12 @@ class MenuItem(Base):
     price = Column(String(8))
     restaurant_id = Column(Integer, ForeignKey('restaurant.id'))
     restaurant = relationship(Restaurant)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    users = relationship(Users)
 
     @property
     def serialize(self):
-        # Returns data serializeable
+        # Return data serializeable
         return {
             'name' : self.name,
             'description' : self.description,
@@ -44,5 +56,5 @@ class MenuItem(Base):
 
 
 # end of file
-engine = create_engine('sqlite:///restaurantmenu.db')
+engine = create_engine('sqlite:///restaurantmenuwithusers.db')
 Base.metadata.create_all(engine)
