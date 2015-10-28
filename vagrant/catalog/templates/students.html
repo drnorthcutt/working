@@ -100,7 +100,7 @@
 							<div class="menu-item">
 								{{student.name}}
 								<a href="{{url_for('editstudent', school_id=school.id, user_id=student.id)}}">Edit</a> |
-								<a href='#'>Delete</a>
+								<a href="{{url_for('deletestudent', school_id = school.id, user_id = student.id)}}">Delete</a>
 							</div>
 
 					{% endif %}{% endfor %}

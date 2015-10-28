@@ -160,10 +160,31 @@ def editstudent(school_id, user_id):
         return redirect(url_for('schoolstudents', school_id=school_id))
     else:
         return render_template('editstudent.html',
-                               school_id=school_id,
-                               user_id=user_id,
+                               school_id = school_id,
+                               user_id = user_id,
                                student = student,
-                               school=school)
+                               school = school)
+
+# Delete a student
+@app.route('/school/<int:school_id>/student/<int:user_id>/delete', methods=['GET', 'POST'])
+def deletestudent(school_id, user_id):
+#    if 'username' not in login_session:
+#        return redirect('/login')
+    school = session.query(Schools).filter_by(id=school_id).one()
+    student = session.query(Users).filter_by(id=user_id).one()
+#    if school.user_id != login_session['user_id']:
+#        return "<script>function myFunction() {alert('You are not authorized to delete this restaurant.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        session.delete(student)
+        session.commit()
+        flash(student.name + " deleted!")
+        return redirect(url_for('schoolstudents', school_id = school_id))
+    else:
+        return render_template('deletestudent.html',
+                               school = school,
+                               student = student,
+                               user_id = user_id,
+                               school_id = school_id)
 
 
 if __name__ == '__main__':
