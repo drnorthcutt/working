@@ -1,0 +1,58 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+	<div class="row top-menu">
+		<div class="col-md-10"></div>
+		<div class="col-md-2 text-right">
+					</div>
+	</div>
+	<div class="row divider blue">
+		<div class="col-md-12"></div>
+	</div>
+	<div class="row banner main">
+		<div class="col-md-1"></div>
+		<div class="col-md-11 padding-none">
+			<h1>Schools</h1>
+		</div>
+	</div>
+
+<div class = 'flash'>
+		      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+
+        <ul>
+        {% for message in messages %}
+            <li> <strong> {{ message }} </strong> </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
+
+</div>
+
+	<div class="row padding-top padding-bottom">
+		<div class="col-md-1"></div>
+		<div class="col-md-10 padding-none">
+			<a href="{{url_for('newschool')}}">
+				<button class="btn btn-default" id="new-school">
+					<span class="glyphicon glyphicon-book" aria-hidden="true"></span>Add School
+				</button>
+			</a>
+		</div>
+		<div class="col-md-1"></div>
+	</div>
+	{% for school in schools %}
+		<a href = "#showgrades">
+			<div class="row">
+				<div class="col-md-1"></div>
+					<div class="col-md-10 restaurant-list">
+						<h3>{{school.name}}</h3>
+						<h4>{{school.state}}</h4>
+						County: {{school.county}}<br/>
+				        District: {{school.district}}
+					</div>
+				<div class="col-md-1"><a href = "{{url_for('schoolstudents', school_id = school.id)}}">All Students</a></div>
+			</div>
+
+	{% endfor %}
+{% endblock %}
