@@ -83,9 +83,9 @@ def editschool(school_id):
 # Show a specific school's students
 @app.route('/school/<int:school_id>/students')
 def schoolstudents(school_id):
-    school = session.query(Schools).filter_by(id=school_id).one()
+    school = session.query(Schools).filter_by(id=school_id)
+    teacher = session.query(Teachers).join(Schools)
     students = (session.query(Users)
-             .filter_by(school_id=school.id)
              .order_by(Users.name))
 #    creator = getUserInfo(restaurant.user_id)
 #    if 'username' not in login_session or creator.id != login_session['user_id']:
@@ -97,6 +97,53 @@ def schoolstudents(school_id):
     return render_template('students.html',
                            school = school,
                            students = students)
+
+@app.route('/school/<int:school_id>/student/new', methods=['GET', 'POST'])
+def newstudent(school_id):
+    school = session.query(Schools).filter_by(id=school_id).one()
+    if request.method == 'POST':
+        new = Users(name=request.form['name'],
+                    email=request.form['email'],
+                    picture=request.form['picture'],
+                    grade=request.form['grade'],
+                    teacher_id=request.form['teacher'],
+                    school_id=school_id
+                    )
+        session.add(new)
+        session.commit()
+        flash(new.name + " added!")
+        return redirect(url_for('schoolstudents', school_id=school_id))
+    else:
+        return render_template('newstudent.html',
+                               school_id=school_id,
+                               school=school)
+
+@app.route('/school/<int:school_id>/student/<int:user_id>/edit', methods=['GET', 'POST'])
+def editstudent(school_id, user_id):
+    school = session.query(Schools).filter_by(id=school_id).one()
+    student = session.query(Users).filter_by(id=user_id).one()
+    if request.method == 'POST':
+        if request.form['name']:
+            student.name = request.form['name']
+        if request.form['email']:
+            student.state = request.form['email']
+        if request.form['picture']:
+            student.county = request.form['picture']
+        if request.form['grade']:
+            student.district = request.form['grade']
+        if request.form['teacher']:
+            student.teacher_id = request.form['teacher']
+        session.add(student)
+        session.commit()
+        flash(student.name + " edited!")
+        return redirect(url_for('schoolstudents', school_id=school_id))
+    else:
+        return render_template('editstudent.html',
+                               school_id=school_id,
+                               user_id=user_id,
+                               student = student,
+                               school=school)
+
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'

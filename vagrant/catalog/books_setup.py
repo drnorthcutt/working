@@ -48,7 +48,9 @@ class Users(Base):
     picture = Column(String(250))
     grade = Column(Integer, nullable = False)
     teacher_id = Column(Integer, ForeignKey('teachers.id'))
+    school_id = Column(Integer, ForeignKey('schools.id'))
     teachers = relationship(Teachers)
+    schools = relationship(Schools)
 
 class Genres(Base):
     __tablename__ = 'genres'

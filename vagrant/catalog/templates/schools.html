@@ -42,7 +42,8 @@
 		<div class="col-md-1"></div>
 	</div>
 	{% for school in schools %}
-		<a href = "#showgrades">
+		<a href = "
+{{url_for('schoolstudents', school_id = school.id)}}">
 			<div class="row">
 				<div class="col-md-1"></div>
 					<div class="col-md-10 restaurant-list">
