@@ -62,7 +62,8 @@ student1 = Users(name="Johnny Q",
                  email="something@email.com",
                  picture='https://pbs.twimg.com/profile_images/2671170543/18debd694829ed78203a5a36dd364160_400x400.png',
                  grade="13",
-                 teacher_id=1,)
+                 teacher_id=1,
+                school_id=1,)
 
 session.add(student1)
 session.commit()
@@ -89,4 +90,4 @@ session.add(book2)
 session.commit()
 
 
-print "added menu items!"
+print "added school stuff!"
