@@ -11,7 +11,7 @@
 	</div>
 	<div class="row">
 		<div class="col-md-6 col-md-offset-1 padding-top">
-			<form action="{{url_for('newstudent', school_id=school.id)}}" method = "post">
+			<form action="{{url_for('newschool')}}" method = "post">
 				<div class="form-group">
 				<label for="name">Name:</label>
 				<input type ="text" class="form-control" maxlength="80" name="name" required>
@@ -77,6 +77,10 @@
 				<div class="padding-bottom"></div>
 				<button type="submit" class="btn btn-default" id="submit" type="submit">
 				<span class="glyphicon glyphicon-book" aria-hidden="true"></span>Create</button>
+				<a href = "{{url_for('schools')}}">
+						<button class="btn btn-default delete">
+						<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel</button>
+					</a>
 				</div>
 			</form>
 		</div>

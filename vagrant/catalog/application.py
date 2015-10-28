@@ -75,18 +75,38 @@ def editschool(school_id):
         session.add(school)
         session.commit()
         flash(school.name + " edited!")
-        return redirect(url_for('schools'))
+        return redirect(url_for('schoolstudents', school_id = school_id))
     else:
         return render_template('editschool.html',
                                school_id=school_id,
                                school=school)
+
+# Delete a school
+@app.route('/school/<int:school_id>/delete', methods=['GET', 'POST'])
+def deleteschool(school_id):
+#    if 'username' not in login_session:
+#        return redirect('/login')
+    school = session.query(Schools).filter_by(id=school_id).one()
+#    if school.user_id != login_session['user_id']:
+#        return "<script>function myFunction() {alert('You are not authorized to delete this restaurant.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        session.delete(school)
+        session.commit()
+        flash(school.name + " deleted!")
+        return redirect(url_for('schools'))
+    else:
+        return render_template('deleteschool.html',
+                               school = school,
+                               school_id = school_id)
+
 # Show a specific school's students
 @app.route('/school/<int:school_id>/students')
 def schoolstudents(school_id):
-    school = session.query(Schools).filter_by(id=school_id)
+    school = session.query(Schools).filter_by(id=school_id).one()
     teacher = session.query(Teachers).join(Schools)
     students = (session.query(Users)
-             .order_by(Users.name))
+                .filter_by(school_id=school_id)
+                .order_by(Users.name))
 #    creator = getUserInfo(restaurant.user_id)
 #    if 'username' not in login_session or creator.id != login_session['user_id']:
 #        return render_template('publicmenu.html',
@@ -96,7 +116,8 @@ def schoolstudents(school_id):
 #    else:
     return render_template('students.html',
                            school = school,
-                           students = students)
+                           students = students,
+                           school_id = school_id)
 
 @app.route('/school/<int:school_id>/student/new', methods=['GET', 'POST'])
 def newstudent(school_id):
@@ -126,11 +147,11 @@ def editstudent(school_id, user_id):
         if request.form['name']:
             student.name = request.form['name']
         if request.form['email']:
-            student.state = request.form['email']
+            student.email = request.form['email']
         if request.form['picture']:
-            student.county = request.form['picture']
+            student.picture = request.form['picture']
         if request.form['grade']:
-            student.district = request.form['grade']
+            student.grade = request.form['grade']
         if request.form['teacher']:
             student.teacher_id = request.form['teacher']
         session.add(student)
