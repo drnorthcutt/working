@@ -55,7 +55,7 @@
 					{% for student in students %}
 						{% if student.grade == 3 %}
 							<div class="menu-item">
-								{{student.name}}
+								<a href="{{url_for('student', student_id = student.id, teacher_id = student.teacher_id)}}">{{student.name}}</a>
 								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
 								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
 							</div>
@@ -74,7 +74,7 @@
 					{% for student in students %}
 						{% if student.grade == 4 %}
 							<div class="menu-item">
-								{{student.name}}
+								<a href="{{url_for('student', student_id = student.id, teacher_id = student.teacher_id)}}">{{student.name}}</a>
 								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
 								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
 							</div>
@@ -91,7 +91,7 @@
 					{% for student in students %}
 						{% if student.grade == 5 %}
 							<div class="menu-item">
-								{{student.name}}
+								<a href="{{url_for('student', student_id = student.id, teacher_id = student.teacher_id)}}">{{student.name}}</a>
 								<a href="{{url_for('editstudent', school_id = student.school_id, user_id=student.id)}}">Edit</a> |
 								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
 							</div>
@@ -108,7 +108,7 @@
 					{% for student in students %}
 						{% if student.grade == 6 %}
 							<div class="menu-item">
-								{{student.name}}
+								<a href="{{url_for('student', student_id = student.id, teacher_id = student.teacher_id)}}">{{student.name}}</a>
 								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
 								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
 							</div>
@@ -125,7 +125,7 @@
 					{% for student in students %}
 						{% if student.grade == 7 %}
 							<div class="menu-item">
-								{{student.name}}
+								<a href="{{url_for('student', student_id = student.id, teacher_id = student.teacher_id)}}">{{student.name}}</a>
 								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
 								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
 							</div>
@@ -142,7 +142,7 @@
 					{% for student in students %}
 						{% if student.grade == 8 %}
 							<div class="menu-item">
-								{{student.name}}
+								<a href="{{url_for('student', student_id = student.id, teacher_id = student.teacher_id)}}">{{student.name}}</a>
 								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
 								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
 							</div>
@@ -159,7 +159,7 @@
 					{% for student in students %}
 						{% if student.grade == 13 %}
 							<div class="menu-item">
-								{{student.name}}
+								<a href="{{url_for('student', student_id = student.id, teacher_id = student.teacher_id)}}">{{student.name}}</a>
 								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
 								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
 							</div>

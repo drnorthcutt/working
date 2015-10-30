@@ -291,6 +291,31 @@ def deletestudent(school_id, user_id):
                                user_id = user_id,
                                school_id = school_id)
 
+# Show a student's books
+@app.route('/<int:teacher_id>/student/<int:student_id>')
+def student(student_id, teacher_id):
+    student = session.query(Users).filter_by(id=student_id).one()
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    grade = session.query(Grades).filter_by(teacher_id=teacher_id, num=student.grade).one()
+    genre = session.query(Genres).join(Grades).filter_by(teacher_id=teacher_id)
+    books = session.query(Books).filter_by(user_id=student_id)
+#    creator = getUserInfo(restaurant.user_id)
+#    if 'username' not in login_session or creator.id != login_session['user_id']:
+#        return render_template('publicmenu.html',
+#                               items = items,
+#                               restaurant = restaurant,
+#                               creator = creator)
+#    else:
+    print student
+    print genre
+    return render_template('student.html',
+                           student = student,
+                           books = books,
+                           grade = grade,
+                           genre = genre,
+                           student_id = student_id,
+                           teacher_id = teacher_id)
+
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
