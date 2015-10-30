@@ -182,7 +182,6 @@ def deleteteacher(school_id, teacher_id):
 @app.route('/school/<int:school_id>/students')
 def schoolstudents(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
-    teacher = session.query(Teachers).join(Schools)
     students = (session.query(Users)
                 .filter_by(school_id=school_id)
                 .order_by(Users.name))
@@ -201,6 +200,7 @@ def schoolstudents(school_id):
 @app.route('/school/<int:school_id>/student/new', methods=['GET', 'POST'])
 def newstudent(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
+    teachers = session.query(Teachers).filter_by(school_id=school_id).all()
     if request.method == 'POST':
         new = Users(name=request.form['name'],
                     email=request.form['email'],
@@ -216,11 +216,13 @@ def newstudent(school_id):
     else:
         return render_template('newstudent.html',
                                school_id=school_id,
+                               teachers = teachers,
                                school=school)
 
 @app.route('/school/<int:school_id>/student/<int:user_id>/edit', methods=['GET', 'POST'])
 def editstudent(school_id, user_id):
     school = session.query(Schools).filter_by(id=school_id).one()
+    teachers = session.query(Teachers).filter_by(school_id=school_id).all()
     student = session.query(Users).filter_by(id=user_id).one()
     if request.method == 'POST':
         if request.form['name']:
@@ -242,6 +244,7 @@ def editstudent(school_id, user_id):
                                school_id = school_id,
                                user_id = user_id,
                                student = student,
+                               teachers = teachers,
                                school = school)
 
 # Delete a student

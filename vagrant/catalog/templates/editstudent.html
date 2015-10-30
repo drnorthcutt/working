@@ -18,9 +18,9 @@
 
                 <br/><label for="email">email:</label>
 				<input type ="text" class="form-control" maxlength="80" name="email" placeholder="{{student.email}}">
-				<label for="picture">Picture:</label>
+				<br/><label for="picture">Picture:</label>
 				<input type ="text" class="form-control" maxlength="80" name="picture" placeholder="{{student.picture}}">
-				<label for="grade">Grade:</label>
+				<br/><span><label for="grade">Grade:</label>
 				<select name='grade'>
                    <option value="{{student.grade}}">{{student.grade}}</option>
                     <option value="3">3rd</option>
@@ -31,8 +31,12 @@
 	                <option value="8">8th</option>
 	                <option value="13">Other</option>
                 </select>
-				<br/><label for="Teacher">Teacher:</label>
-				<input type ="text" class="form-control" maxlength="80" name="teacher" placeholder="{{student.teacher_id}}">
+				<label for="Teacher">Teacher:</label>
+				<select name='teacher'>
+                   {% for teacher in teachers %}
+                    <option value="teacher.id">{{teacher.name}}</option>
+	               {% endfor %}
+                    </select></span>
 					<div class="padding-bottom"></div>
 					<button type="submit" class="btn btn-default" id="submit" type="submit">
 					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Save</button>

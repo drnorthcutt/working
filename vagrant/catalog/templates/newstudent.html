@@ -30,9 +30,11 @@
 	                <option value="13">Other</option>
                 </select>
 				<label for="Teacher">Teacher:</label>
-				<input type ="text" class="form-control" maxlength="80" name="teacher" placeholder="will be teacher id">
-				<label for="school">School ID:</label>
-				<input type ="text" class="form-control" maxlength="80" name="school" placeholder="{{school.id}}">
+				<select name='teacher'>
+                   {% for teacher in teachers %}
+                    <option value="teacher.id">{{teacher.name}}</option>
+	               {% endfor %}
+                </select>
 					<div class="padding-bottom"></div>
 					<button type="submit" class="btn btn-default" id="submit" type="submit">
 					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Save</button>
