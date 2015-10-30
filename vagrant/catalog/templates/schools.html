@@ -42,17 +42,17 @@
 		<div class="col-md-1"></div>
 	</div>
 	{% for school in schools %}
-		<a href = "
-{{url_for('schoolstudents', school_id = school.id)}}">
 			<div class="row">
 				<div class="col-md-1"></div>
-					<div class="col-md-10 restaurant-list">
+					<div class="col-md-5 restaurant-list">
 						<h3>{{school.name}}</h3>
 						<h4>{{school.state}}</h4>
 						County: {{school.county}}<br/>
 				        District: {{school.district}}
+				        <a href = "{{url_for('schoolstudents', school_id = school.id)}}">All Students</a>
+				        <a href = "{{url_for('schoolteachers', school_id = school.id)}}">All Teachers</a>
 					</div>
-				<div class="col-md-1"><a href = "{{url_for('schoolstudents', school_id = school.id)}}">All Students</a></div>
+				<div class="col-md-1"></div>
 			</div>
 
 	{% endfor %}

@@ -99,7 +99,86 @@ def deleteschool(school_id):
                                school = school,
                                school_id = school_id)
 
-# Show a specific school's students
+# Show a specific school's teachers
+@app.route('/school/<int:school_id>/teachers')
+def schoolteachers(school_id):
+    school = session.query(Schools).filter_by(id=school_id).one()
+    teachers = session.query(Teachers).filter_by(school_id=school_id)
+#    creator = getUserInfo(restaurant.user_id)
+#    if 'username' not in login_session or creator.id != login_session['user_id']:
+#        return render_template('publicmenu.html',
+#                               items = items,
+#                               restaurant = restaurant,
+#                               creator = creator)
+#    else:
+    return render_template('schoolteachers.html',
+                           school = school,
+                           teachers = teachers,
+                           school_id = school_id)
+
+@app.route('/school/<int:school_id>/teacher/new', methods=['GET', 'POST'])
+def newteacher(school_id):
+    school = session.query(Schools).filter_by(id=school_id).one()
+    if request.method == 'POST':
+        new = Teachers(name=request.form['name'],
+                    email=request.form['email'],
+                    picture=request.form['picture'],
+                    school_id=school_id
+                    )
+        session.add(new)
+        session.commit()
+        flash(new.name + " added!")
+        return redirect(url_for('schoolteachers', school_id=school_id))
+    else:
+        return render_template('newteacher.html',
+                               school_id=school_id,
+                               school=school)
+
+# Edit a teacher.
+@app.route('/school/<int:school_id>/teacher/<int:teacher_id>/edit', methods=['GET', 'POST'])
+def editteacher(school_id, teacher_id):
+    school = session.query(Schools).filter_by(id=school_id).one()
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    if request.method == 'POST':
+        if request.form['name']:
+            teacher.name = request.form['name']
+        if request.form['email']:
+            teacher.email = request.form['email']
+        if request.form['picture']:
+            teacher.picture = request.form['picture']
+        session.add(teacher)
+        session.commit()
+        flash(teacher.name + " edited!")
+        return redirect(url_for('schoolteachers', school_id=school_id))
+    else:
+        return render_template('editteacher.html',
+                               school_id = school_id,
+                               teacher_id = teacher_id,
+                               teacher = teacher,
+                               school = school)
+
+# Delete a teacher.
+@app.route('/school/<int:school_id>/teacher/<int:teacher_id>/delete', methods=['GET', 'POST'])
+def deleteteacher(school_id, teacher_id):
+#    if 'username' not in login_session:
+#        return redirect('/login')
+    school = session.query(Schools).filter_by(id=school_id).one()
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+#    if school.user_id != login_session['user_id']:
+#        return "<script>function myFunction() {alert('You are not authorized to delete this restaurant.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        session.delete(teacher)
+        session.commit()
+        flash(teacher.name + " deleted!")
+        return redirect(url_for('schoolteachers', school_id = school_id))
+    else:
+        return render_template('deleteteacher.html',
+                               school = school,
+                               teacher = teacher,
+                               teacher_id = teacher_id,
+                               school_id = school_id)
+
+# Show a specific school's students.
 @app.route('/school/<int:school_id>/students')
 def schoolstudents(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
