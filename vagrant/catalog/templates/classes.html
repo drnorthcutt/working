@@ -1,0 +1,173 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+	<div class="row divider green">
+		<div class="col-md-12"></div>
+	</div>
+	<div class="row banner menu">
+		<div class="col-md-11 col-md-offset-1 padding-none">
+			<h1>{{ teacher.name }}
+			<figure class="creator">
+				<img src="{{teacher.picture}}">
+				<figcaption>Teacher</figcaption>
+			</figure>
+			</h1>
+
+        </div>
+	</div>
+
+<div class = 'flash'>
+		      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+
+        <ul>
+        {% for message in messages %}
+            <li> <strong> {{ message }} </strong> </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
+
+</div>
+	<div class="row padding-top padding-bottom">
+		<div class="col-md-1"></div>
+		<div class="col-md-11 padding-none">
+			<a href="{{url_for('newstudent', school_id=teacher.school_id)}}">
+				<button class="btn btn-default" id="new-student">
+					<span class="glyphicon glyphicon-user" aria-hidden="true"></span>Add New Student
+				</button>
+			</a>
+
+
+		</div>
+
+		<div class="col-md-7"></div>
+	</div>
+	{% if students !=[] %}
+		<div class="row">
+<!--  Check whether any student exists in a particular grade  -->
+        {% for student in students if student.grade == 3 %}
+<!--  Run the loop only once to display the heading once  -->
+            {% if loop.index == 1 %}
+			<div class="col-md-3">
+				<h2>3rd Grade</h2>
+<!--  Display each student with the parameter given. Loop until none remain  -->
+					{% for student in students %}
+						{% if student.grade == 3 %}
+							<div class="menu-item">
+								{{student.name}}
+								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
+								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
+							</div>
+						{% endif %}
+					{% endfor %}
+<!--  End student loop  -->
+			</div>
+           {% endif %}
+<!--  End once loop  -->
+        {% endfor %}
+<!--  End full for loop, Skip if none exists  -->
+		{% for student in students if student.grade == 4 %}
+            {% if loop.index == 1 %}
+			<div class="col-md-3">
+				<h2>4th Grade</h2>
+					{% for student in students %}
+						{% if student.grade == 4 %}
+							<div class="menu-item">
+								{{student.name}}
+								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
+								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
+							</div>
+						{% endif %}
+					{% endfor %}
+
+			</div>
+           {% endif %}
+        {% endfor %}
+        {% for student in students if student.grade == 5 %}
+            {% if loop.index == 1 %}
+			<div class="col-md-3">
+				<h2>5th Grade</h2>
+					{% for student in students %}
+						{% if student.grade == 5 %}
+							<div class="menu-item">
+								{{student.name}}
+								<a href="{{url_for('editstudent', school_id = student.school_id, user_id=student.id)}}">Edit</a> |
+								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
+							</div>
+						{% endif %}
+					{% endfor %}
+
+			</div>
+           {% endif %}
+        {% endfor %}
+        {% for student in students if student.grade == 6 %}
+            {% if loop.index == 1 %}
+			<div class="col-md-3">
+				<h2>6th Grade</h2>
+					{% for student in students %}
+						{% if student.grade == 6 %}
+							<div class="menu-item">
+								{{student.name}}
+								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
+								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
+							</div>
+						{% endif %}
+					{% endfor %}
+
+			</div>
+           {% endif %}
+        {% endfor %}
+        {% for student in students if student.grade == 7 %}
+            {% if loop.index == 1 %}
+			<div class="col-md-3">
+				<h2>7th Grade</h2>
+					{% for student in students %}
+						{% if student.grade == 7 %}
+							<div class="menu-item">
+								{{student.name}}
+								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
+								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
+							</div>
+						{% endif %}
+					{% endfor %}
+
+			</div>
+           {% endif %}
+        {% endfor %}
+        {% for student in students if student.grade == 8 %}
+            {% if loop.index == 1 %}
+			<div class="col-md-3">
+				<h2>8th Grade</h2>
+					{% for student in students %}
+						{% if student.grade == 8 %}
+							<div class="menu-item">
+								{{student.name}}
+								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
+								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
+							</div>
+						{% endif %}
+					{% endfor %}
+
+			</div>
+           {% endif %}
+        {% endfor %}
+        {% for student in students if student.grade == 13 %}
+            {% if loop.index == 1 %}
+			<div class="col-md-3">
+				<h2>Other</h2>
+					{% for student in students %}
+						{% if student.grade == 13 %}
+							<div class="menu-item">
+								{{student.name}}
+								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
+								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
+							</div>
+						{% endif %}
+					{% endfor %}
+			</div>
+           {% endif %}
+        {% endfor %}
+		</div>
+	{% endif %}
+{% endblock %}

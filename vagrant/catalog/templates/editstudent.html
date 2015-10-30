@@ -34,7 +34,7 @@
 				<label for="Teacher">Teacher:</label>
 				<select name='teacher'>
                    {% for teacher in teachers %}
-                    <option value="teacher.id">{{teacher.name}}</option>
+                    <option value="{{teacher.id}}">{{teacher.name}} {{teacher.id}}</option>
 	               {% endfor %}
                     </select></span>
 					<div class="padding-bottom"></div>

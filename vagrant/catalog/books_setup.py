@@ -37,6 +37,7 @@ class Grades(Base):
     __tablename__ = 'grades'
     id = Column(Integer, primary_key = True)
     num = Column(Integer, nullable = False)
+    name = Column(String(80))
     teacher_id = Column(Integer, ForeignKey('teachers.id'))
     teachers = relationship(Teachers)
 

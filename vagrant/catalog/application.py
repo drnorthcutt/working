@@ -111,7 +111,7 @@ def schoolteachers(school_id):
 #                               restaurant = restaurant,
 #                               creator = creator)
 #    else:
-    return render_template('schoolteachers.html',
+    return render_template('teachers.html',
                            school = school,
                            teachers = teachers,
                            school_id = school_id)
@@ -179,12 +179,35 @@ def deleteteacher(school_id, teacher_id):
                                school_id = school_id)
 
 # Show a specific school's students.
+@app.route('/class/<int:teacher_id>/students')
+def classroom(teacher_id):
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    students = (session.query(Users)
+                .filter_by(teacher_id=teacher_id)
+                .order_by(Users.name)
+                .all())
+#    creator = getUserInfo(restaurant.user_id)
+#    if 'username' not in login_session or creator.id != login_session['user_id']:
+#        return render_template('publicmenu.html',
+#                               items = items,
+#                               restaurant = restaurant,
+#                               creator = creator)
+#    else:
+    print students
+    print teacher
+    return render_template('classes.html',
+                           teacher = teacher,
+                           students = students,
+                           teacher_id = teacher_id)
+
+# Show a specific school's students.
 @app.route('/school/<int:school_id>/students')
 def schoolstudents(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
     students = (session.query(Users)
                 .filter_by(school_id=school_id)
-                .order_by(Users.name))
+                .order_by(Users.name)
+                .all())
 #    creator = getUserInfo(restaurant.user_id)
 #    if 'username' not in login_session or creator.id != login_session['user_id']:
 #        return render_template('publicmenu.html',
