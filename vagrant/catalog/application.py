@@ -220,6 +220,7 @@ def schoolstudents(school_id):
                            students = students,
                            school_id = school_id)
 
+# Add a student.
 @app.route('/school/<int:school_id>/student/new', methods=['GET', 'POST'])
 def newstudent(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -242,6 +243,7 @@ def newstudent(school_id):
                                teachers = teachers,
                                school=school)
 
+# Edit a student.
 @app.route('/school/<int:school_id>/student/<int:user_id>/edit', methods=['GET', 'POST'])
 def editstudent(school_id, user_id):
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -291,7 +293,7 @@ def deletestudent(school_id, user_id):
                                user_id = user_id,
                                school_id = school_id)
 
-# Show a student's books
+# Show a student's books.
 @app.route('/<int:teacher_id>/student/<int:student_id>')
 def student(student_id, teacher_id):
     student = session.query(Users).filter_by(id=student_id).one()
@@ -315,6 +317,78 @@ def student(student_id, teacher_id):
                            genre = genre,
                            student_id = student_id,
                            teacher_id = teacher_id)
+
+# Add a student book.
+@app.route('/student/<int:student_id>/book/add', methods=['GET', 'POST'])
+def addbook(student_id):
+    student = session.query(Users).filter_by(id=student_id).one()
+    if request.method == 'POST':
+        new = Books(title = request.form['title'],
+                    author = request.form['author'],
+                    image = request.form['image'],
+                    review = request.form['review'],
+                    genre = request.form['genre'],
+                    user_id = student_id
+                    )
+        session.add(new)
+        session.commit()
+        flash(new.title + " added!")
+        return redirect(url_for('student', student_id=student.id, teacher_id=student.teacher_id))
+    else:
+        return render_template('addbook.html',
+                               student_id = student_id,
+                               student = student)
+
+# Edit a student book
+@app.route('/student/<int:student_id>/book/<int:book_id>/edit', methods=['GET', 'POST'])
+def editbook(student_id, book_id):
+    student = session.query(Users).filter_by(id=student_id).one()
+    book = session.query(Books).filter_by(id=book_id).one()
+    if request.method == 'POST':
+        if request.form['title']:
+            book.title = request.form['title']
+        if request.form['author']:
+            book.author = request.form['author']
+        if request.form['image']:
+            book.image = request.form['image']
+        if request.form['review']:
+            book.review = request.form['review']
+        if request.form['genre']:
+            book.genre = request.form['genre']
+        book.user_id = student_id
+        session.add(book)
+        session.commit()
+        flash(book.title + " edited!")
+        return redirect(url_for('student', student_id=student.id, teacher_id=student.teacher_id))
+    else:
+        return render_template('editbook.html',
+                               student_id = student_id,
+                               book_id = book_id,
+                               student = student,
+                               book = book)
+
+# Delete a student book.
+@app.route('/student/<int:student_id>/book/<int:book_id>/delete', methods=['GET', 'POST'])
+def deletebook(student_id, book_id):
+#    if 'username' not in login_session:
+#        return redirect('/login')
+    book = session.query(Books).filter_by(id=book_id).one()
+    student = session.query(Users).filter_by(id=student_id).one()
+#    if school.user_id != login_session['user_id']:
+#        return "<script>function myFunction() {alert('You are not authorized to delete this restaurant.');}</script><body onload='myFunction()''>"
+    if request.method == 'POST':
+        session.delete(book)
+        session.commit()
+        flash(book.title + " deleted!")
+        return redirect(url_for('student',
+                                student_id = student.id,
+                                teacher_id = student.teacher_id))
+    else:
+        return render_template('deletebook.html',
+                               student = student,
+                               student_id = student_id,
+                               book = book,
+                               book_id = book_id)
 
 
 if __name__ == '__main__':

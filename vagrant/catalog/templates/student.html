@@ -40,19 +40,6 @@
 
 
 		</div>
-{{genres_historical}}
-    {{genre.historical}}
-    {% for g in genre %}
-    {{g.historical}}
-
-    {% endfor %}
-    <br/>{{student}}
-    {{student.genres}}
-    {% for need in needs if user_id == student.id %}
-    {{need.genres_historical}}
-{% endfor %}
-    {{student.column_descriptions}}
-    {{student.columns}}
 		<div class="col-md-7"></div>
 	</div>
 	{% if books !=[] %}
@@ -74,7 +61,7 @@
 								{{book.author}}
 								<img src="{{book.img}}">
 								{{book.review}}
-								<a href="#">Edit</a> |
+								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
 								<a href="#">Delete</a>
 							</div>
 						{% endif %}
@@ -93,28 +80,31 @@
     {{g.historical}} Needed
 
     {% endfor %}</h3>
+    <ol>
 					{% for book in books %}
+
 						{% if book.genre == 'historical' %}
-							<ol>
+
 							<li><div class="menu-item">
-								<dt>{{book.title}}</dt>
+							<div class="col-md-10">	<dt>{{book.title}}</dt>
 								<dd>{{book.author}}</dd>
-								<img src="{{book.img}}">
-								<dd>{{book.review}}</dd>
-								<a href="#">Edit</a> |
-								<a href="#">Delete</a>
+                                <dd>{{book.review}}</dd></div>
+								<div class="col-md-2"><img src={{book.image}} height="150"></div>
+								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
+								<a href="{{url_for('deletebook', student_id = student.id, book_id = book.id)}}">Delete</a>
 							</div>
 							</li>
-							</ol>
-						{% endif %}
-					{% endfor %}
 
+						{% endif %}
+
+					{% endfor %}
+</ol>
 			</div>
            {% endif %}
         {% endfor %}
         {% for book in books if book.genre == 'fantasy' %}
             {% if loop.index == 1 %}
-			<div class="col-md-3">
+			<div class="col-md-12">
 				<h2>Fantasy</h2>
 				<h3>{% for g in genre %}
     {{g.fantasy}} Needed
@@ -138,7 +128,7 @@
         {% endfor %}
         {% for book in books if book.genre == 'poetry' %}
             {% if loop.index == 1 %}
-			<div class="col-md-3">
+			<div class="col-md-12">
 				<h2>Poetry / Verse Novel</h2>
 				<h3>{% for g in genre %}
     {{g.poetry}} Needed
@@ -151,7 +141,7 @@
 								{{book.author}}
 								<img src="{{book.img}}">
 								{{book.review}}
-								<a href="#">Edit</a> |
+								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
 								<a href="#">Delete</a>
 							</div>
 						{% endif %}
@@ -162,7 +152,7 @@
         {% endfor %}
         {% for book in books if book.genre == 'realistic' %}
             {% if loop.index == 1 %}
-			<div class="col-md-3">
+			<div class="col-md-12">
 				<h2>Realistic</h2>
 				<h3>{% for g in genre %}
     {{g.realistic}} Needed
@@ -175,7 +165,7 @@
 								{{book.author}}
 								<img src="{{book.img}}">
 								{{book.review}}
-								<a href="#">Edit</a> |
+								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
 								<a href="#">Delete</a>
 							</div>
 						{% endif %}
@@ -186,8 +176,8 @@
         {% endfor %}
         {% for book in books if book.genre == 'scifi' %}
             {% if loop.index == 1 %}
-			<div class="col-md-3">
-				<h2>Science Fiction</h2>
+			<div class="col-md-12">
+				<div class="col-md-10"><h2>Science Fiction</h2>
 				<h3>{% for g in genre %}
     {{g.scifi}} Needed
 
@@ -197,9 +187,8 @@
 							<div class="menu-item">
 								{{book.title}}
 								{{book.author}}
-								<img src="{{book.img}}">
-								{{book.review}}
-								<a href="#">Edit</a> |
+								{{book.review}}</div>
+								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
 								<a href="#">Delete</a>
 							</div>
 						{% endif %}
@@ -210,7 +199,7 @@
         {% endfor %}
         {% for book in books if book.genre == 'mystery' %}
             {% if loop.index == 1 %}
-			<div class="col-md-3">
+			<div class="col-md-12">
 				<h2>Mystery</h2>
 				<h3>{% for g in genre %}
     {{g.mystery}} Needed
@@ -223,7 +212,7 @@
 								{{book.author}}
 								<img src="{{book.img}}">
 								{{book.review}}
-								<a href="#">Edit</a> |
+								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
 								<a href="#">Delete</a>
 							</div>
 						{% endif %}
@@ -234,7 +223,7 @@
         {% endfor %}
         {% for book in books if book.genre == 'info' %}
             {% if loop.index == 1 %}
-			<div class="col-md-3">
+			<div class="col-md-12">
 				<h2>Informational</h2>
 					{% for book in books %}
 						{% if book.genre == 'info' %}
@@ -243,7 +232,7 @@
 								{{book.author}}
 								<img src="{{book.img}}">
 								{{book.review}}
-								<a href="#">Edit</a> |
+								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
 								<a href="#">Delete</a>
 							</div>
 						{% endif %}
@@ -254,7 +243,7 @@
         {% endfor %}
         {% for book in books if book.genre == 'bio' %}
             {% if loop.index == 1 %}
-			<div class="col-md-3">
+			<div class="col-md-12">
 				<h2>Biography / Autobiography</h2>
 				<h3>{% for g in genre %}
     {{g.bio}} Needed
@@ -267,7 +256,7 @@
 								{{book.author}}
 								<img src="{{book.img}}">
 								{{book.review}}
-								<a href="#">Edit</a> |
+								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
 								<a href="#">Delete</a>
 							</div>
 						{% endif %}
