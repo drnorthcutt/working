@@ -34,10 +34,24 @@
 	                <option value="8">8th</option>
 	                <option value="13">Other</option>
                 </select>
+                <label for="setlist">Challenge List</label>
+                <select name="set">
+                    <option value="{{ classroom.set_id }}">
+                        {% for set in sets if set.id == classroom.set_id %}
+                            {{ set.name }}
+                        {% endfor %}
+                    </option>
+                {% if sets !=[] %}
+                {% for set in sets %}
+                    <option value="{{set.id}}">{{ set.name }}</option>
+                {% endfor %}
+                {% endif %}
+                </select>
+                <label for="teacher">Teachr</label>
                 <select name="teacher">
                 <option value="{{ teacher.id }}" selected>{{ teacher.name }}</option>
                    {% for row in allteach %}
-                    <option value="3">3rd</option>
+                    <option value="{{ row.id }}">{{ row.name }}</option>
 	               {% endfor %}
                 </select>
 					<div class="padding-bottom"></div>

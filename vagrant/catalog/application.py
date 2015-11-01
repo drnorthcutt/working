@@ -1,6 +1,6 @@
 from flask import Flask, render_template, url_for, request, redirect, flash
 from flask import jsonify
-from books_setup import Schools, Teachers, Grades, Users, Genres, Books, Base
+from books_setup import Schools, Teachers, Classrooms, Students, Books, Genres, Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -28,7 +28,7 @@ session = DBSession()
 @app.route('/schools')
 def schools():
     # return "All schools alphabetical"
-    schools = session.query(Schools).order_by(Schools.name).all()
+    schools = session.query(Schools).order_by(name).all()
 #    if 'username' not in login_session:
 #        return render_template('publicschools.html',
 #                               schools=schools)
@@ -181,12 +181,12 @@ def deleteteacher(school_id, teacher_id):
                                school_id = school_id)
 
 # Show a specific classroom.
-@app.route('/class/<int:teacher_id>/classroom')
+@app.route('/teacher/<int:teacher_id>/classroom')
 def classroom(teacher_id):
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
-    students = (session.query(Users)
+    students = (session.query(Students)
                 .filter_by(teacher_id=teacher_id)
-                .order_by(Users.name)
+                .order_by(Students.name)
                 .all())
 #    creator = getUserInfo(restaurant.user_id)
 #    if 'username' not in login_session or creator.id != login_session['user_id']:
@@ -202,18 +202,21 @@ def classroom(teacher_id):
                            students = students,
                            teacher_id = teacher_id)
 
-# Add a classroom.
+# Add a classroom by teacher.
 @app.route('/teacher/<int:teacher_id>/classroom/new', methods=['GET', 'POST'])
 def newclass(teacher_id):
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
-    grades = (session.query(Grades)
+    classes = (session.query(Classrooms)
               .filter_by(teacher_id=teacher_id)
-              .order_by(num, name))
+              .order_by(grade, name))
+    sets = session.query(Genres).filter_by(teacher_id=teacher_id).all()
     if request.method == 'POST':
-        new = Grades(name=request.form['name'],
-                    num=request.form['grade'],
-                    teacher_id=teacher_id
-                    )
+        new = Classrooms(name=request.form['name'],
+                         grade=request.form['grade'],
+                         set_id=request.form['set'],
+                         teacher_id=teacher_id,
+                         school_id=teacher.school_id
+                        )
         session.add(new)
         session.commit()
         flash(new.num +  new.name + " added!")
@@ -221,28 +224,32 @@ def newclass(teacher_id):
     else:
         return render_template('newclass.html',
                                teacher = teacher,
-                               grades = grades,
+                               classes = classes,
+                               sets = sets,
                                teacher_id = teacher_id)
 
 # Edit a teacher.
 @app.route('/teacher/<int:teacher_id>/classroom/<int:class_id>/edit', methods=['GET', 'POST'])
 def editclass(teacher_id, class_id):
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
-    grades = (session.query(Grades)
+    grades = (session.query(Classrooms)
               .filter_by(teacher_id=teacher_id)
-              .order_by(num, name))
+              .order_by(grade, name))
     allteach = session.query(Teachers).filter_by(school_id=teacher.school_id)
-    classroom = session.query(Grades).filter_by(class_id).one()
+    classroom = session.query(Classrooms).filter_by(class_id).one()
+    sets = session.query(Genres).filter_by(teacher_id=teacher_id).all()
     if request.method == 'POST':
         if request.form['name']:
             classroom.name = request.form['name']
         if request.form['grade']:
-            classroom.num = request.form['grade']
+            classroom.grade = request.form['grade']
+        if request.form['set']:
+            classroom.set_id = request.form['set']
         if request.form['teacher']:
             classroom.teacher_id = request.form['teacher']
-        session.add(teacher)
+        session.add(classroom)
         session.commit()
-        flash(new.num +  new.name + " edited!")
+        flash(classroom.grade +  classroom.name + " edited!")
         return redirect(url_for('classroom', teacher_id=teacher_id))
     else:
         return render_template('editclass.html',
@@ -253,13 +260,31 @@ def editclass(teacher_id, class_id):
                                teacher_id = teacher_id,
                                class_id = class_id)
 
+# Delete a classroom.
+@app.route('/teacher/<int:teacher_id>/classroom/<int:class_id>/delete', methods=['GET', 'POST'])
+def deleteclass(teacher_id, class_id):
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    classroom = session.query(Classrooms).filter_by(id=class_id).one()
+    if request.method == 'POST':
+        session.delete(classroom)
+        session.commit()
+        flash(classroom.name + " deleted!")
+        return redirect(url_for('classroom', teacher_id = teacher_id))
+    else:
+        return render_template('deleteclass.html',
+                               teacher = teacher,
+                               classroom = classroom,
+                               teacher_id = teacher_id,
+                               class_id = class_id)
+
+
 # Show a specific school's students.
 @app.route('/school/<int:school_id>/students')
 def schoolstudents(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
-    students = (session.query(Users)
+    students = (session.query(Students)
                 .filter_by(school_id=school_id)
-                .order_by(Users.name)
+                .order_by(name)
                 .all())
 #    creator = getUserInfo(restaurant.user_id)
 #    if 'username' not in login_session or creator.id != login_session['user_id']:
@@ -277,13 +302,13 @@ def schoolstudents(school_id):
 @app.route('/school/<int:school_id>/student/new', methods=['GET', 'POST'])
 def newstudent(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
+    classes = session.query(Classrooms).filter_by(teacher_id=teachers.id
     teachers = session.query(Teachers).filter_by(school_id=school_id).all()
     if request.method == 'POST':
         new = Users(name=request.form['name'],
                     email=request.form['email'],
                     picture=request.form['picture'],
-                    grade=request.form['grade'],
-                    teacher_id=request.form['teacher'],
+                    classroom=request.form['grade'],
                     school_id=school_id
                     )
         session.add(new)
@@ -293,7 +318,7 @@ def newstudent(school_id):
     else:
         return render_template('newstudent.html',
                                school_id=school_id,
-                               teachers = teachers,
+                               classes = classes,
                                school=school)
 
 # Edit a student.
@@ -301,7 +326,7 @@ def newstudent(school_id):
 def editstudent(school_id, user_id):
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id).all()
-    student = session.query(Users).filter_by(id=user_id).one()
+    student = session.query(Students).filter_by(id=user_id).one()
     if request.method == 'POST':
         if request.form['name']:
             student.name = request.form['name']
@@ -331,7 +356,7 @@ def deletestudent(school_id, user_id):
 #    if 'username' not in login_session:
 #        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
-    student = session.query(Users).filter_by(id=user_id).one()
+    student = session.query(Students).filter_by(id=user_id).one()
 #    if school.user_id != login_session['user_id']:
 #        return "<script>function myFunction() {alert('You are not authorized to delete this restaurant.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
@@ -351,8 +376,8 @@ def deletestudent(school_id, user_id):
 def student(student_id, teacher_id):
     student = session.query(Users).filter_by(id=student_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
-    grade = session.query(Grades).filter_by(teacher_id=teacher_id, num=student.grade).one()
-    genre = session.query(Genres).join(Grades).filter_by(teacher_id=teacher_id)
+    grade = session.query(Classrooms).filter_by(teacher_id=teacher_id, num=student.grade).one()
+    genre = session.query(Genres).join(Classrooms).filter_by(teacher_id=teacher_id)
     books = session.query(Books).filter_by(user_id=student_id)
 #    creator = getUserInfo(restaurant.user_id)
 #    if 'username' not in login_session or creator.id != login_session['user_id']:
@@ -374,7 +399,7 @@ def student(student_id, teacher_id):
 # Add a student book.
 @app.route('/student/<int:student_id>/book/add', methods=['GET', 'POST'])
 def newbook(student_id):
-    student = session.query(Users).filter_by(id=student_id).one()
+    student = session.query(Students).filter_by(id=student_id).one()
     if request.method == 'POST':
         new = Books(title = request.form['title'],
                     author = request.form['author'],
@@ -395,7 +420,7 @@ def newbook(student_id):
 # Edit a student book
 @app.route('/student/<int:student_id>/book/<int:book_id>/edit', methods=['GET', 'POST'])
 def editbook(student_id, book_id):
-    student = session.query(Users).filter_by(id=student_id).one()
+    student = session.query(Students).filter_by(id=student_id).one()
     book = session.query(Books).filter_by(id=book_id).one()
     if request.method == 'POST':
         if request.form['title']:
@@ -426,7 +451,7 @@ def deletebook(student_id, book_id):
 #    if 'username' not in login_session:
 #        return redirect('/login')
     book = session.query(Books).filter_by(id=book_id).one()
-    student = session.query(Users).filter_by(id=student_id).one()
+    student = session.query(Students).filter_by(id=student_id).one()
 #    if school.user_id != login_session['user_id']:
 #        return "<script>function myFunction() {alert('You are not authorized to delete this restaurant.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
