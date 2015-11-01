@@ -12,9 +12,9 @@
 	<div class="row">
 		<div class="col-md-6 col-md-offset-1 padding-top">
 		<div class="col-md-6 col-md-offset-1">
-		    <div class="col-md-2">Current Classes:
-		    {% for row in classes %}
-		    {{ row.num }} - {{ row.name }}
+		    <div class="col-md-2">Current Grades / Classes:
+		    {% for grade in grades %}
+		    {{ grade.num }} - {{ grade.name }}
 		    {% endfor %}
 		    </div>
 		</div>
@@ -33,15 +33,6 @@
 	                <option value="7">7th</option>
 	                <option value="8">8th</option>
 	                <option value="13">Other</option>
-                </select>
-                <label for="setlist">Challenge List</label>
-                <select name="set">
-                    <option value=""></option>
-                {% if sets !=[] %}
-                {% for set in sets %}
-                    <option value="{{set.id}}">{{ set.name }}</option>
-                {% endfor %}
-                {% endif %}
                 </select>
 					<div class="padding-bottom"></div>
 					<button type="submit" class="btn btn-default" id="submit" type="submit">
