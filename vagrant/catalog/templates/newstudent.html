@@ -19,20 +19,11 @@
 				<input type ="text" class="form-control" maxlength="250" name="email" placeholder="Required" required>
 				<label for="picture">Picture:</label>
 				<input type ="text" class="form-control" maxlength="250" name="picture" placeholder="Optional">
-				<label for="grade">Grade:</label>
-				<select name='grade'>
-                    <option value="3">3rd</option>
-	                <option value="4">4th</option>
-	                <option value="5">5th</option>
-	                <option value="6">6th</option>
-	                <option value="7">7th</option>
-	                <option value="8">8th</option>
-	                <option value="13">Other</option>
-                </select>
-				<label for="Teacher">Teacher:</label>
-				<select name='teacher'>
-                   {% for teacher in teachers %}
-                    <option value="{{teacher.id}}">{{teacher.name}}</option>
+				<label for="grade">Classroom:</label>
+				<select name='classroom'>
+                  <option value="0">Unclassified</option>
+                   {% for row in classes %}
+                    <option value="{{ row.id }}">{{ row.name }}</option>
 	               {% endfor %}
                 </select>
 					<div class="padding-bottom"></div>

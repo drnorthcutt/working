@@ -10,14 +10,15 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-md-6 col-md-offset-1 padding-top">
-		<div class="col-md-6 col-md-offset-1">
-		    <div class="col-md-2">Current Classes:
+		<div class="col-md-10 col-md-offset-1 padding-top">
+		<div class="col-md-10 col-md-offset-1">
+		    <div class="col-md-10">Current Classes:
 		    {% for row in classes %}
-		    {{ row.num }} - {{ row.name }}
+		    <br />{{ row.grade }} - {{ row.name }}
 		    {% endfor %}
 		    </div>
 		</div>
+		<div class="col-md-6 col-md-offset-1">
 			<form action="{{url_for('newclass', teacher_id=teacher.id)}}" method = "post">
 				<div class="form-group">
 					<label for="name">Name:</label>
@@ -52,6 +53,7 @@
 					</a>
 				</div>
 			</form>
+            </div>
 		</div>
 	</div>
 {% endblock %}

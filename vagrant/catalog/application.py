@@ -28,7 +28,7 @@ session = DBSession()
 @app.route('/schools')
 def schools():
     # return "All schools alphabetical"
-    schools = session.query(Schools).order_by(name).all()
+    schools = session.query(Schools).order_by(Schools.name).all()
 #    if 'username' not in login_session:
 #        return render_template('publicschools.html',
 #                               schools=schools)
@@ -114,7 +114,6 @@ def schoolteachers(school_id):
     return render_template('teachers.html',
                            school = school,
                            teachers = teachers,
-                           num = num,
                            school_id = school_id)
 
 # Add a teacher.
@@ -184,10 +183,13 @@ def deleteteacher(school_id, teacher_id):
 @app.route('/teacher/<int:teacher_id>/classroom')
 def classroom(teacher_id):
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    classroom = session.query(Classrooms).filter_by(teacher_id=teacher_id)
+    classes = (session.query(Classrooms)
+              .filter_by(teacher_id=teacher_id)
+              .order_by(Classrooms.grade, Classrooms.name))
     students = (session.query(Students)
-                .filter_by(teacher_id=teacher_id)
-                .order_by(Students.name)
-                .all())
+                .filter_by(Students.classes.teacher_id==teacher.id)
+                .order_by(Students.name).all())
 #    creator = getUserInfo(restaurant.user_id)
 #    if 'username' not in login_session or creator.id != login_session['user_id']:
 #        return render_template('publicmenu.html',
@@ -200,6 +202,7 @@ def classroom(teacher_id):
     return render_template('classes.html',
                            teacher = teacher,
                            students = students,
+                           classroom = classroom,
                            teacher_id = teacher_id)
 
 # Add a classroom by teacher.
@@ -208,7 +211,7 @@ def newclass(teacher_id):
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     classes = (session.query(Classrooms)
               .filter_by(teacher_id=teacher_id)
-              .order_by(grade, name))
+              .order_by(Classrooms.grade, Classrooms.name))
     sets = session.query(Genres).filter_by(teacher_id=teacher_id).all()
     if request.method == 'POST':
         new = Classrooms(name=request.form['name'],
@@ -219,7 +222,7 @@ def newclass(teacher_id):
                         )
         session.add(new)
         session.commit()
-        flash(new.num +  new.name + " added!")
+        flash(new.name + " added!")
         return redirect(url_for('classroom', teacher_id=teacher_id))
     else:
         return render_template('newclass.html',
@@ -234,9 +237,9 @@ def editclass(teacher_id, class_id):
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     grades = (session.query(Classrooms)
               .filter_by(teacher_id=teacher_id)
-              .order_by(grade, name))
+              .order_by(Classrooms.grade, Classrooms.name))
     allteach = session.query(Teachers).filter_by(school_id=teacher.school_id)
-    classroom = session.query(Classrooms).filter_by(class_id).one()
+    classroom = session.query(Classrooms).filter_by(id=class_id).one()
     sets = session.query(Genres).filter_by(teacher_id=teacher_id).all()
     if request.method == 'POST':
         if request.form['name']:
@@ -249,7 +252,7 @@ def editclass(teacher_id, class_id):
             classroom.teacher_id = request.form['teacher']
         session.add(classroom)
         session.commit()
-        flash(classroom.grade +  classroom.name + " edited!")
+        flash(classroom.name + " edited!")
         return redirect(url_for('classroom', teacher_id=teacher_id))
     else:
         return render_template('editclass.html',
@@ -282,10 +285,12 @@ def deleteclass(teacher_id, class_id):
 @app.route('/school/<int:school_id>/students')
 def schoolstudents(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
-    students = (session.query(Students)
+    grades = (session.query(Students)
                 .filter_by(school_id=school_id)
-                .order_by(name)
+                .order_by(Students.name)
                 .all())
+    students = session.query(Students).filter_by(school_id=school_id).all()
+    tests = session.query(Classrooms).outerjoin(Students).filter_by(school_id=school_id).all()
 #    creator = getUserInfo(restaurant.user_id)
 #    if 'username' not in login_session or creator.id != login_session['user_id']:
 #        return render_template('publicmenu.html',
@@ -293,22 +298,27 @@ def schoolstudents(school_id):
 #                               restaurant = restaurant,
 #                               creator = creator)
 #    else:
+    print grades
+    for student in students:
+        print student
     return render_template('students.html',
                            school = school,
                            students = students,
+                           grades = grades,
+                           tests = tests,
                            school_id = school_id)
 
 # Add a student.
 @app.route('/school/<int:school_id>/student/new', methods=['GET', 'POST'])
 def newstudent(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
-    classes = session.query(Classrooms).filter_by(teacher_id=teachers.id
     teachers = session.query(Teachers).filter_by(school_id=school_id).all()
+    classes = session.query(Classrooms).filter_by(school_id=school_id)
     if request.method == 'POST':
-        new = Users(name=request.form['name'],
+        new = Students(name=request.form['name'],
                     email=request.form['email'],
                     picture=request.form['picture'],
-                    classroom=request.form['grade'],
+                    classroom=request.form['classroom'],
                     school_id=school_id
                     )
         session.add(new)
@@ -326,6 +336,7 @@ def newstudent(school_id):
 def editstudent(school_id, user_id):
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id).all()
+    classes = session.query(Classrooms).filter_by(school_id=school_id)
     student = session.query(Students).filter_by(id=user_id).one()
     if request.method == 'POST':
         if request.form['name']:
@@ -334,10 +345,8 @@ def editstudent(school_id, user_id):
             student.email = request.form['email']
         if request.form['picture']:
             student.picture = request.form['picture']
-        if request.form['grade']:
-            student.grade = request.form['grade']
-        if request.form['teacher']:
-            student.teacher_id = request.form['teacher']
+        if request.form['classroom']:
+            student.classroom = request.form['classroom']
         session.add(student)
         session.commit()
         flash(student.name + " edited!")
@@ -347,6 +356,7 @@ def editstudent(school_id, user_id):
                                school_id = school_id,
                                user_id = user_id,
                                student = student,
+                               classes = classes,
                                teachers = teachers,
                                school = school)
 

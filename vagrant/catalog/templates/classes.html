@@ -37,27 +37,36 @@
 					<span class="glyphicon glyphicon-user" aria-hidden="true"></span>Add New Student
 				</button>
 			</a>
-
+            <a href="{{url_for('newclass', teacher_id=teacher.id)}}">
+				<button class="btn btn-default" id="new-student">
+					<span class="glyphicon glyphicon-list" aria-hidden="true"></span>Add New Class
+				</button>
+			</a>
 
 		</div>
 
-		<div class="col-md-7"></div>
+		<div class="col-md-7">Current Classes:
+		    {% for row in classroom %}
+		    <br />{{ row.grade }} - {{ row.name }}
+		    <a href="{{url_for('editclass', teacher_id = teacher.id, class_id = row.id)}}">Edit</a>
+		    <a href="{{url_for('deleteclass', teacher_id = teacher.id, class_id = row.id)}}">Delete</a>
+		    {% endfor %}</div>
 	</div>
 	{% if students !=[] %}
 		<div class="row">
 <!--  Check whether any student exists in a particular grade  -->
-        {% for student in students if student.grade == 3 %}
+        {% for student in students if student.classes.grade == 3 %}
 <!--  Run the loop only once to display the heading once  -->
             {% if loop.index == 1 %}
 			<div class="col-md-3">
 				<h2>3rd Grade</h2>
 <!--  Display each student with the parameter given. Loop until none remain  -->
 					{% for student in students %}
-						{% if student.grade == 3 %}
+						{% if student.classes.grade == 3 %}
 							<div class="menu-item">
-								<a href="{{url_for('student', student_id = student.id, teacher_id = student.teacher_id)}}">{{student.name}}</a>
-								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
-								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
+								{{student.name}}
+								<a href="{{url_for('editstudent', school_id=school.id, user_id=student.id)}}">Edit</a> |
+								<a href="{{url_for('deletestudent', school_id = school.id, user_id = student.id)}}">Delete</a>
 							</div>
 						{% endif %}
 					{% endfor %}
@@ -67,16 +76,16 @@
 <!--  End once loop  -->
         {% endfor %}
 <!--  End full for loop, Skip if none exists  -->
-		{% for student in students if student.grade == 4 %}
+		{% for student in students if student.classes.grade == 4 %}
             {% if loop.index == 1 %}
 			<div class="col-md-3">
 				<h2>4th Grade</h2>
 					{% for student in students %}
-						{% if student.grade == 4 %}
+						{% if student.classes.grade == 4 %}
 							<div class="menu-item">
-								<a href="{{url_for('student', student_id = student.id, teacher_id = student.teacher_id)}}">{{student.name}}</a>
-								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
-								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
+								{{student.name}}
+								<a href="{{url_for('editstudent', school_id=school.id, user_id=student.id)}}">Edit</a> |
+								<a href="{{url_for('deletestudent', school_id = school.id, user_id = student.id)}}">Delete</a>
 							</div>
 						{% endif %}
 					{% endfor %}
@@ -84,16 +93,16 @@
 			</div>
            {% endif %}
         {% endfor %}
-        {% for student in students if student.grade == 5 %}
+        {% for student in students if student.classes.grade == 5 %}
             {% if loop.index == 1 %}
 			<div class="col-md-3">
 				<h2>5th Grade</h2>
 					{% for student in students %}
-						{% if student.grade == 5 %}
+						{% if student.classes.grade == 5 %}
 							<div class="menu-item">
-								<a href="{{url_for('student', student_id = student.id, teacher_id = student.teacher_id)}}">{{student.name}}</a>
-								<a href="{{url_for('editstudent', school_id = student.school_id, user_id=student.id)}}">Edit</a> |
-								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
+								{{student.name}}
+								<a href="{{url_for('editstudent', school_id=school.id, user_id=student.id)}}">Edit</a> |
+								<a href="{{url_for('deletestudent', school_id = school.id, user_id = student.id)}}">Delete</a>
 							</div>
 						{% endif %}
 					{% endfor %}
@@ -101,16 +110,16 @@
 			</div>
            {% endif %}
         {% endfor %}
-        {% for student in students if student.grade == 6 %}
+        {% for student in students if student.classes.grade == 6 %}
             {% if loop.index == 1 %}
 			<div class="col-md-3">
 				<h2>6th Grade</h2>
 					{% for student in students %}
-						{% if student.grade == 6 %}
+						{% if student.classes.grade == 6 %}
 							<div class="menu-item">
-								<a href="{{url_for('student', student_id = student.id, teacher_id = student.teacher_id)}}">{{student.name}}</a>
-								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
-								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
+								{{student.name}}
+								<a href="{{url_for('editstudent', school_id=school.id, user_id=student.id)}}">Edit</a> |
+								<a href="{{url_for('deletestudent', school_id = school.id, user_id = student.id)}}">Delete</a>
 							</div>
 						{% endif %}
 					{% endfor %}
@@ -123,11 +132,11 @@
 			<div class="col-md-3">
 				<h2>7th Grade</h2>
 					{% for student in students %}
-						{% if student.grade == 7 %}
+						{% if student.classes.grade == 7 %}
 							<div class="menu-item">
-								<a href="{{url_for('student', student_id = student.id, teacher_id = student.teacher_id)}}">{{student.name}}</a>
-								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
-								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
+								{{student.name}}
+								<a href="{{url_for('editstudent', school_id=school.id, user_id=student.id)}}">Edit</a> |
+								<a href="{{url_for('deletestudent', school_id = school.id, user_id = student.id)}}">Delete</a>
 							</div>
 						{% endif %}
 					{% endfor %}
@@ -135,16 +144,16 @@
 			</div>
            {% endif %}
         {% endfor %}
-        {% for student in students if student.grade == 8 %}
+        {% for student in students if student.classes.grade == 8 %}
             {% if loop.index == 1 %}
 			<div class="col-md-3">
 				<h2>8th Grade</h2>
 					{% for student in students %}
-						{% if student.grade == 8 %}
+						{% if student.classes.grade == 8 %}
 							<div class="menu-item">
-								<a href="{{url_for('student', student_id = student.id, teacher_id = student.teacher_id)}}">{{student.name}}</a>
-								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
-								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
+								{{student.name}}
+								<a href="{{url_for('editstudent', school_id=school.id, user_id=student.id)}}">Edit</a> |
+								<a href="{{url_for('deletestudent', school_id = school.id, user_id = student.id)}}">Delete</a>
 							</div>
 						{% endif %}
 					{% endfor %}
@@ -152,19 +161,36 @@
 			</div>
            {% endif %}
         {% endfor %}
-        {% for student in students if student.grade == 13 %}
+        {% for student in students if student.classes.grade == 13 %}
             {% if loop.index == 1 %}
 			<div class="col-md-3">
 				<h2>Other</h2>
 					{% for student in students %}
-						{% if student.grade == 13 %}
+						{% if student.classes.grade == 13 %}
 							<div class="menu-item">
-								<a href="{{url_for('student', student_id = student.id, teacher_id = student.teacher_id)}}">{{student.name}}</a>
+								{{student.name}}
 								<a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">Edit</a> |
 								<a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">Delete</a>
 							</div>
 						{% endif %}
 					{% endfor %}
+			</div>
+           {% endif %}
+        {% endfor %}
+        {% for student in students if student.classroom == 0 %}
+            {% if loop.index == 1 %}
+			<div class="col-md-3">
+				<h2>Unclassified</h2>
+					{% for student in students %}
+						{% if student.classroom == 0 %}
+							<div class="menu-item">
+								{{student.name}}
+								<a href="{{url_for('editstudent', school_id=school.id, user_id=student.id)}}">Edit</a> |
+								<a href="{{url_for('deletestudent', school_id = school.id, user_id = student.id)}}">Delete</a>
+							</div>
+						{% endif %}
+					{% endfor %}
+
 			</div>
            {% endif %}
         {% endfor %}

@@ -12,20 +12,21 @@
 	<div class="row">
 		<div class="col-md-6 col-md-offset-1 padding-top">
 		<div class="col-md-6 col-md-offset-1">
-		    <div class="col-md-2">Current Grades / Classes:
+		    <div class="col-md-6">Current Classes:
 		    {% for grade in grades %}
-		    {{ grade.num }} - {{ grade.name }}
+		    {{ grade.grade }} - {{ grade.name }}
 		    {% endfor %}
 		    </div>
 		</div>
-			<form action="{{url_for('editclass', teacher_id=teacher.id, class_id=grade.id)}}" method = "post">
+		<div class="col-md-6 col-md-offset-1">
+			<form action="{{url_for('editclass', teacher_id=teacher.id, class_id=class_id)}}" method = "post">
 				<div class="form-group">
 					<label for="name">Name:</label>
 					<input type ="text" class="form-control" maxlength="80" name="name" placeholder="{{ classroom.name }}" autofocus>
                 <br/>
 				<label for="grade">Grade:</label>
 				<select name='grade'>
-                   <option value="{{ classroom.num }}" selected>{{ grade.num }}</option>
+                   <option value="{{ classroom.grade }}" selected>{{ classroom.grade }}</option>
                     <option value="3">3rd</option>
 	                <option value="4">4th</option>
 	                <option value="5">5th</option>
@@ -63,6 +64,7 @@
 					</a>
 				</div>
 			</form>
+            </div>
 		</div>
 	</div>
 {% endblock %}
