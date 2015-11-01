@@ -114,8 +114,10 @@ def schoolteachers(school_id):
     return render_template('teachers.html',
                            school = school,
                            teachers = teachers,
+                           num = num,
                            school_id = school_id)
 
+# Add a teacher.
 @app.route('/school/<int:school_id>/teacher/new', methods=['GET', 'POST'])
 def newteacher(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -178,8 +180,8 @@ def deleteteacher(school_id, teacher_id):
                                teacher_id = teacher_id,
                                school_id = school_id)
 
-# Show a specific school's students.
-@app.route('/class/<int:teacher_id>/students')
+# Show a specific classroom.
+@app.route('/class/<int:teacher_id>/classroom')
 def classroom(teacher_id):
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     students = (session.query(Users)
@@ -199,6 +201,57 @@ def classroom(teacher_id):
                            teacher = teacher,
                            students = students,
                            teacher_id = teacher_id)
+
+# Add a classroom.
+@app.route('/teacher/<int:teacher_id>/classroom/new', methods=['GET', 'POST'])
+def newclass(teacher_id):
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    grades = (session.query(Grades)
+              .filter_by(teacher_id=teacher_id)
+              .order_by(num, name))
+    if request.method == 'POST':
+        new = Grades(name=request.form['name'],
+                    num=request.form['grade'],
+                    teacher_id=teacher_id
+                    )
+        session.add(new)
+        session.commit()
+        flash(new.num +  new.name + " added!")
+        return redirect(url_for('classroom', teacher_id=teacher_id))
+    else:
+        return render_template('newclass.html',
+                               teacher = teacher,
+                               grades = grades,
+                               teacher_id = teacher_id)
+
+# Edit a teacher.
+@app.route('/teacher/<int:teacher_id>/classroom/<int:class_id>/edit', methods=['GET', 'POST'])
+def editclass(teacher_id, class_id):
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    grades = (session.query(Grades)
+              .filter_by(teacher_id=teacher_id)
+              .order_by(num, name))
+    allteach = session.query(Teachers).filter_by(school_id=teacher.school_id)
+    classroom = session.query(Grades).filter_by(class_id).one()
+    if request.method == 'POST':
+        if request.form['name']:
+            classroom.name = request.form['name']
+        if request.form['grade']:
+            classroom.num = request.form['grade']
+        if request.form['teacher']:
+            classroom.teacher_id = request.form['teacher']
+        session.add(teacher)
+        session.commit()
+        flash(new.num +  new.name + " edited!")
+        return redirect(url_for('classroom', teacher_id=teacher_id))
+    else:
+        return render_template('editclass.html',
+                               teacher = teacher,
+                               grades = grades,
+                               classroom = classroom,
+                               allteach = allteach,
+                               teacher_id = teacher_id,
+                               class_id = class_id)
 
 # Show a specific school's students.
 @app.route('/school/<int:school_id>/students')
@@ -320,7 +373,7 @@ def student(student_id, teacher_id):
 
 # Add a student book.
 @app.route('/student/<int:student_id>/book/add', methods=['GET', 'POST'])
-def addbook(student_id):
+def newbook(student_id):
     student = session.query(Users).filter_by(id=student_id).one()
     if request.method == 'POST':
         new = Books(title = request.form['title'],
@@ -335,7 +388,7 @@ def addbook(student_id):
         flash(new.title + " added!")
         return redirect(url_for('student', student_id=student.id, teacher_id=student.teacher_id))
     else:
-        return render_template('addbook.html',
+        return render_template('newbook.html',
                                student_id = student_id,
                                student = student)
 
