@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from books_setup import Schools, Base, Teachers, Grades, Users, Genres, Books
+from books_setup import Schools, Base, Teachers, Classrooms, Students, Genres, Books
 
 engine = create_engine('sqlite:///book.db')
 # Bind the engine to the metadata of the Base class so that the
@@ -26,21 +26,34 @@ School1 = Schools(name="Udacity",
 session.add(School1)
 session.commit()
 
-# Create dummy user
+School2 = Schools(name="Life",
+                  state="CA",
+                  county="Orange",
+                  district="Online",
+                 )
+session.add(School2)
+session.commit()
+
+# Create dummy teacher
 Teacher1 = Teachers(name="Robo Teacha",
                  email="tinnyTim@udacity.com",
                  picture='https://pbs.twimg.com/profile_images/2671170543/18debd694829ed78203a5a36dd364160_400x400.png',
+                    school_id=1,
                  )
 session.add(Teacher1)
 session.commit()
 
-Grade1 = Grades(num="13",
-                teacher_id=1,
+
+Teacher2 = Teachers(name="Anudder Teacha",
+                 email="tinnyTony@udacity.com",
+                 picture='https://pbs.twimg.com/profile_images/2671170543/18debd694829ed78203a5a36dd364160_400x400.png',
+                    school_id=1,
                  )
-session.add(Grade1)
+session.add(Teacher2)
 session.commit()
 
-genre1 = Genres(grade_id=1,
+genre1 = Genres(teacher_id=1,
+                name="Test name",
                 poetry="2",
                 graphic="2",
                 realistic="5",
@@ -50,25 +63,41 @@ genre1 = Genres(grade_id=1,
                 mystery="3",
                 info="7",
                 bio="2",
-                choice="10",
                 pages="350",
                 )
 session.add(genre1)
 session.commit()
 
 
+Classroom1 = Classrooms(grade=13,
+                teacher_id=1,
+                name="FullStack",
+                school_id=1,
+                set_id=1,
+                 )
+session.add(Classroom1)
+session.commit()
+
+Classroom2 = Classrooms(grade=5,
+                teacher_id=1,
+                name="Half-stack",
+                school_id=1,
+                set_id=1,
+                 )
+session.add(Classroom2)
+session.commit()
+
 # Dummy Student
-student1 = Users(name="Johnny Q",
+student1 = Students(name="Johnny Q",
                  email="something@email.com",
                  picture='https://pbs.twimg.com/profile_images/2671170543/18debd694829ed78203a5a36dd364160_400x400.png',
-                 grade="13",
-                 teacher_id=1,
+                 classroom=1,
                 school_id=1,)
 
 session.add(student1)
 session.commit()
 
-book1 = Books(users=student1,
+book1 = Books(student_id=1,
               title="Great Expectations",
               author="Charles Dickens",
               image="https://upload.wikimedia.org/wikipedia/commons/8/8d/Greatexpectations_vol1.jpg",
@@ -79,7 +108,7 @@ book1 = Books(users=student1,
 session.add(book1)
 session.commit()
 
-book2 = Books(users=student1,
+book2 = Books(student_id=1,
               title="The Book Thief",
               author="Markus Zusak",
               review="Set in Germany in the years 1939-1943, The Book Thief tells the story of Liesel, narrated by Death who has in his possession the book she wrote about these years. So, in a way, they are both book thieves.",
@@ -87,6 +116,49 @@ book2 = Books(users=student1,
               )
 
 session.add(book2)
+session.commit()
+
+book3 = Books(student_id=1,
+              title="Greater Expectations",
+              author="Charles Dickens",
+              image="https://upload.wikimedia.org/wikipedia/commons/8/8d/Greatexpectations_vol1.jpg",
+              review="I thought this was a different book.  Still made me cry... But since it could also be another category, I kept reading.",
+              genre="historical",
+              )
+
+session.add(book3)
+session.commit()
+
+book4 = Books(student_id=1,
+              title="The Watchmen",
+              author="Alan Moore",
+              image="https://upload.wikimedia.org/wikipedia/en/a/a2/Watchmen%2C_issue_1.jpg",
+              review="Loved it so much I watched the movie... .",
+              genre="graphic",
+              )
+
+session.add(book4)
+session.commit()
+
+book5 = Books(student_id=1,
+              title="The Cat in the Hat",
+              author="Dr. Seuss",
+              image="https://upload.wikimedia.org/wikipedia/en/b/b5/Seuss-cat-hat.gif",
+              review="Loved it so much I watched the movie...",
+              genre="poetry",
+              )
+
+session.add(book5)
+session.commit()
+
+book6 = Books(student_id=1,
+              title="Do Androids Dream of Elecric Sheep?",
+              author="Philip K. Dick",
+              review="Bladerunner!!!!!",
+              genre="scifi",
+              )
+
+session.add(book6)
 session.commit()
 
 
