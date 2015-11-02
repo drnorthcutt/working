@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 
 Base = declarative_base()
 
+
 class Schools(Base):
     __tablename__ = 'schools'
     name = Column(String(80), nullable = False)
@@ -16,6 +17,7 @@ class Schools(Base):
     district = Column(String(80))
     students = relationship("Students")
     teachers = relationship("Teachers")
+    admins = relationship("Admins")
 
     @property
     def serialize(self):
@@ -25,6 +27,15 @@ class Schools(Base):
             'name' : self.name,
             'state': self.state,
         }
+class Admins(Base):
+    __tablename__ = 'admins'
+    name = Column(String(80), nullable = False)
+    id = Column(Integer, primary_key =True)
+    email = Column(String(250), nullable = False)
+    password = Column(String(250), nullable = False)
+    picture = Column(String(250))
+    school_id = Column(Integer, ForeignKey('schools.id'))
+    school = relationship("Schools")
 
 class Teachers(Base):
     __tablename__ = 'teachers'
@@ -63,6 +74,7 @@ class Classrooms(Base):
     school = relationship("Schools", backref="classrooms")
     teacher = relationship("Teachers", backref="classroom")
     genres = relationship("Genres", backref="classrooms")
+    studs = relationship("Students")
 
 class Students(Base):
     __tablename__ = 'students'
@@ -74,6 +86,7 @@ class Students(Base):
     school_id = Column(Integer, ForeignKey('schools.id'))
     school = relationship("Schools", backref="student")
     classes = relationship("Classrooms", backref="students")
+    book = relationship("Books")
 
 
 class Books(Base):

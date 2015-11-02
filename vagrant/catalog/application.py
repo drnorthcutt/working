@@ -36,6 +36,30 @@ def schools():
     return render_template('schools.html',
                            schools=schools)
 
+# Show a specific school.
+@app.route('/school/<int:school_id>')
+def school(school_id):
+    school = session.query(Schools).filter_by(id=school_id).one()
+    students = (session.query(Students)
+                .filter_by(school_id=school_id)
+                .order_by(Students.name)
+    )
+    teachers = session.query(Teachers).filter_by(school_id=school_id).order_by(Teachers.name)
+    books = session.query(Books).join(Students).filter(Students.school_id==school_id).all()
+#    creator = getUserInfo(restaurant.user_id)
+#    if 'username' not in login_session or creator.id != login_session['user_id']:
+#        return render_template('publicmenu.html',
+#                               items = items,
+#                               restaurant = restaurant,
+#                               creator = creator)
+#    else:
+    return render_template('school.html',
+                           school = school,
+                           students = students,
+                           books = books,
+                           teachers = teachers,
+                           school_id = school_id)
+
 # Create a new school
 @app.route('/school/new', methods=['GET', 'POST'])
 def newschool():
@@ -122,10 +146,10 @@ def newteacher(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
     if request.method == 'POST':
         new = Teachers(name=request.form['name'],
-                    email=request.form['email'],
-                    picture=request.form['picture'],
-                    school_id=school_id
-                    )
+                       email=request.form['email'],
+                       picture=request.form['picture'],
+                       school_id=school_id
+        )
         session.add(new)
         session.commit()
         flash(new.name + " added!")
@@ -136,7 +160,8 @@ def newteacher(school_id):
                                school=school)
 
 # Edit a teacher.
-@app.route('/school/<int:school_id>/teacher/<int:teacher_id>/edit', methods=['GET', 'POST'])
+@app.route('/school/<int:school_id>/teacher/<int:teacher_id>/edit',
+           methods=['GET', 'POST'])
 def editteacher(school_id, teacher_id):
     school = session.query(Schools).filter_by(id=school_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
@@ -159,7 +184,8 @@ def editteacher(school_id, teacher_id):
                                school = school)
 
 # Delete a teacher.
-@app.route('/school/<int:school_id>/teacher/<int:teacher_id>/delete', methods=['GET', 'POST'])
+@app.route('/school/<int:school_id>/teacher/<int:teacher_id>/delete',
+           methods=['GET', 'POST'])
 def deleteteacher(school_id, teacher_id):
 #    if 'username' not in login_session:
 #        return redirect('/login')
@@ -179,17 +205,23 @@ def deleteteacher(school_id, teacher_id):
                                teacher_id = teacher_id,
                                school_id = school_id)
 
-# Show a specific classroom.
+# Show a teacher's classroom(s).
 @app.route('/teacher/<int:teacher_id>/classroom')
 def classroom(teacher_id):
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     classroom = session.query(Classrooms).filter_by(teacher_id=teacher_id)
-    classes = (session.query(Classrooms)
-              .filter_by(teacher_id=teacher_id)
-              .order_by(Classrooms.grade, Classrooms.name))
     students = (session.query(Students)
-                .filter_by(Students.classes.teacher_id==teacher.id)
-                .order_by(Students.name).all())
+                .filter(Students.classroom == Classrooms.id)
+                .filter(Classrooms.teacher_id == teacher_id)
+                .order_by(Students.name))
+    noclass = (session.query(Students)
+               .filter(Students.classroom == '0')
+               .filter(Students.school_id == teacher.school_id)
+               .order_by(Students.name).all())
+    books = (session.query(Books)
+             .join(Students)
+             .join(Classrooms)
+             .filter_by(teacher_id=teacher_id).all())
 #    creator = getUserInfo(restaurant.user_id)
 #    if 'username' not in login_session or creator.id != login_session['user_id']:
 #        return render_template('publicmenu.html',
@@ -197,13 +229,46 @@ def classroom(teacher_id):
 #                               restaurant = restaurant,
 #                               creator = creator)
 #    else:
-    print students
-    print teacher
+    print books
     return render_template('classes.html',
                            teacher = teacher,
                            students = students,
                            classroom = classroom,
+                           noclass = noclass,
+                           books = books,
                            teacher_id = teacher_id)
+
+# Show a specific room (for cases when more than one exist for a teacher).
+@app.route('/teacher/<int:teacher_id>/classroom/<int:room_id>')
+def room(teacher_id, room_id):
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    classroom = session.query(Classrooms).filter_by(id=room_id).one()
+    classother = session.query(Classrooms).filter_by(teacher_id=teacher_id)
+    students = (session.query(Students)
+                .filter(Students.classroom == Classrooms.id)
+                .filter(Classrooms.teacher_id == teacher_id)
+                .order_by(Students.name))
+    students = (session.query(Students)
+                .filter(Students.classroom==room_id)
+                .order_by(Students.name))
+    books = (session.query(Books)
+             .join(Students)
+             .filter(Students.classroom==room_id).all())
+#    creator = getUserInfo(restaurant.user_id)
+#    if 'username' not in login_session or creator.id != login_session['user_id']:
+#        return render_template('publicmenu.html',
+#                               items = items,
+#                               restaurant = restaurant,
+#                               creator = creator)
+#    else:
+    return render_template('classroom.html',
+                           teacher = teacher,
+                           students = students,
+                           books = books,
+                           classroom = classroom,
+                           classother = classother,
+                           teacher_id = teacher_id,
+                           room_id = room_id)
 
 # Add a classroom by teacher.
 @app.route('/teacher/<int:teacher_id>/classroom/new', methods=['GET', 'POST'])
@@ -232,7 +297,8 @@ def newclass(teacher_id):
                                teacher_id = teacher_id)
 
 # Edit a teacher.
-@app.route('/teacher/<int:teacher_id>/classroom/<int:class_id>/edit', methods=['GET', 'POST'])
+@app.route('/teacher/<int:teacher_id>/classroom/<int:class_id>/edit',
+           methods=['GET', 'POST'])
 def editclass(teacher_id, class_id):
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     grades = (session.query(Classrooms)
@@ -384,11 +450,9 @@ def deletestudent(school_id, user_id):
 # Show a student's books.
 @app.route('/<int:teacher_id>/student/<int:student_id>')
 def student(student_id, teacher_id):
-    student = session.query(Users).filter_by(id=student_id).one()
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
-    grade = session.query(Classrooms).filter_by(teacher_id=teacher_id, num=student.grade).one()
+    student = session.query(Students).filter_by(id=student_id).one()
     genre = session.query(Genres).join(Classrooms).filter_by(teacher_id=teacher_id)
-    books = session.query(Books).filter_by(user_id=student_id)
+    books = session.query(Books).filter_by(student_id=student_id)
 #    creator = getUserInfo(restaurant.user_id)
 #    if 'username' not in login_session or creator.id != login_session['user_id']:
 #        return render_template('publicmenu.html',
@@ -396,12 +460,9 @@ def student(student_id, teacher_id):
 #                               restaurant = restaurant,
 #                               creator = creator)
 #    else:
-    print student
-    print genre
     return render_template('student.html',
                            student = student,
                            books = books,
-                           grade = grade,
                            genre = genre,
                            student_id = student_id,
                            teacher_id = teacher_id)
@@ -416,12 +477,12 @@ def newbook(student_id):
                     image = request.form['image'],
                     review = request.form['review'],
                     genre = request.form['genre'],
-                    user_id = student_id
+                    student_id = student_id
                     )
         session.add(new)
         session.commit()
         flash(new.title + " added!")
-        return redirect(url_for('student', student_id=student.id, teacher_id=student.teacher_id))
+        return redirect(url_for('student', student_id=student.id, teacher_id=student.classes.teacher_id))
     else:
         return render_template('newbook.html',
                                student_id = student_id,
@@ -447,7 +508,7 @@ def editbook(student_id, book_id):
         session.add(book)
         session.commit()
         flash(book.title + " edited!")
-        return redirect(url_for('student', student_id=student.id, teacher_id=student.teacher_id))
+        return redirect(url_for('student', student_id=student.id, teacher_id=student.classes.teacher_id))
     else:
         return render_template('editbook.html',
                                student_id = student_id,
@@ -470,7 +531,7 @@ def deletebook(student_id, book_id):
         flash(book.title + " deleted!")
         return redirect(url_for('student',
                                 student_id = student.id,
-                                teacher_id = student.teacher_id))
+                                teacher_id = student.classes.teacher_id))
     else:
         return render_template('deletebook.html',
                                student = student,

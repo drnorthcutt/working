@@ -1,271 +1,393 @@
-{% extends "main.html" %}
-{% block content %}
-{% include "header.html" %}
-	<div class="row divider green">
-		<div class="col-md-12"></div>
-	</div>
-	<div class="row banner menu">
-		<div class="col-md-11 col-md-offset-1 padding-none">
-			<h1>{{ student.name }}
+{% extends "main.html" %} {% block content %} {% include "studentheader.html" %}
+<div class="row divider green">
+    <div class="col-md-12"></div>
+</div>
+<div class="row banner menu">
+    <div class="col-md-11 col-md-offset-1 padding-none">
+        <h1>{{ student.name }} <small>{{books.count()}} of 40 read so far</small>
 			<figure class="creator">
 				<img src="{{student.picture}}">
 				<figcaption>Student</figcaption>
 			</figure>
 			</h1>
+    </div>
+</div>
 
-        </div>
-	</div>
+<div class='flash'>
+    {% with messages = get_flashed_messages() %} {% if messages %}
 
-<div class = 'flash'>
-		      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-
-        <ul>
+    <ul>
         {% for message in messages %}
-            <li> <strong> {{ message }} </strong> </li>
+        <li> <strong> {{ message }} </strong> </li>
         {% endfor %}
-        </ul>
-        {% endif %}
-    {% endwith %}
+    </ul>
+    {% endif %} {% endwith %}
 
 </div>
-	<div class="row padding-top padding-bottom">
-		<div class="col-md-1"></div>
-		<div class="col-md-11 padding-none">
-			<a href="{{url_for('newbook', student_id = student.id)}}">
-				<button class="btn btn-default" id="new-book">
-					<span class="glyphicon glyphicon-user" aria-hidden="true"></span>Add New Book
-				</button>
-			</a>
+<div class="row padding-top padding-bottom">
+    <div class="col-md-1"></div>
+    <div class="col-md-11 padding-none">
+        <a href="{{url_for('newbook', student_id = student.id)}}">
+            <button class="btn-sm btn-success" id="new-book">
+                <span class="glyphicon glyphicon-book" aria-hidden="true"></span>Add New Book
+            </button>
+        </a>
 
 
-		</div>
-		<div class="col-md-7"></div>
-	</div>
-	{% if books !=[] %}
-		<div class="row">
-<!--  Check whether any book exists in a particular genre  -->
-        {% for book in books if book.genre == 'graphic' %}
-<!--  Run the loop only once to display the heading once  -->
-            {% if loop.index == 1 %}
-			<div class="col-md-3">
-				<h2>Graphic Novel</h2>
-				<h3>{% for g in genre %}
-    {{g.graphic}} Needed
-    {% endfor %}</h3>
-<!--  Display each student with the parameter given. Loop until none remain  -->
-					{% for book in books %}
-						{% if book.genre == 'graphic' %}
-							<div class="menu-item">
-								{{book.title}}
-								{{book.author}}
-								<img src="{{book.img}}">
-								{{book.review}}
-								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
-								<a href="#">Delete</a>
-							</div>
-						{% endif %}
-					{% endfor %}
-<!--  End student loop  -->
-			</div>
-           {% endif %}
-<!--  End once loop  -->
-        {% endfor %}
-<!--  End full for loop, Skip if none exists  -->
-		{% for book in books if book.genre == 'historical' %}
-            {% if loop.index == 1 %}
-			<div class="col-md-12">
-				<h2>Historical</h2>
-				<h3>{% for g in genre %}
-    {{g.historical}} Needed
+    </div>
+    <div class="col-md-7"></div>
+</div>
+{% if books !=[] %}
+<div class="row">
+    <!-- Graphic Novel -->
+    <!--  Check whether any book exists in a particular genre  -->
+    {% for book in books if book.genre == 'graphic' %}
+    <!--  Run the loop only once to display the heading once  -->
+    {% if loop.index == 1 %}
+    <div class="col-md-12">
+        <h2>Graphic Novel
+            <span class="badge">
+            {% for g in genre %}
+                {{g.graphic}} Needed
+            </span>
+            {% endfor %}
+        </h2>
+        <!--  Display each book with the parameter given. Loop until none remain  -->
+        <ol>
+            {% for book in books %} {% if book.genre == 'graphic' %}
+            <div class="menu-item col-md-12">
+                    <div class="panel panel-default col-md-10">
+                        <div class="panel-heading">
+                            <h2 class="panel-title"><li>{{book.title}}</li> <small>Author: {{book.author}}</small>
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            {{book.review}}
+                        </div>
+                    </div>
+                    {% if book.image is none %}
+                        <div class="col-md-2"></div>
+                    {% else %}
+                        <div class="col-md-2"><img src={{book.image}} height="150"></div>
+                    {% endif %}
+                    <div class="col-md-10">
+                        <a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-warning" id="edit">edit</button></a>
+                        <a href="{{url_for('deletebook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-danger" id="edit">delete</button></a>
+                    </div>
+                </div>
+            {% endif %} {% endfor %}
+        </ol>
+    </div>
+    {% endif %}
+    <!--  End once loop  -->
+    {% endfor %}
+    <!--  End full for loop, Skip if none exists  -->
+    <!--  Historical Fiction  -->
+    {% for book in books if book.genre == 'historical' %} {% if loop.index == 1 %}
+    <div class="col-md-12">
+        <h2>Historical
+            <span class="badge">
+            {% for g in genre %}
+                {{g.historical}} Needed
+            {% endfor %}
+            </span>
+        </h2>
+        <ol>
+            {% for book in books %} {% if book.genre == 'historical' %}
+               <div class="menu-item col-md-12">
+                    <div class="panel panel-default col-md-10">
+                        <div class="panel-heading">
+                            <h2 class="panel-title"><li>{{book.title}}</li> <small>Author: {{book.author}}</small>
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            {{book.review}}
+                        </div>
+                    </div>
+                    {% if book.image is none %}
+                        <div class="col-md-2"></div>
+                    {% else %}
+                        <div class="col-md-2"><img src={{book.image}} height="150"></div>
+                    {% endif %}
+                    <div class="col-md-10">
+                        <a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-warning" id="edit">edit</button></a>
+                        <a href="{{url_for('deletebook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-danger" id="edit">delete</button></a>
+                    </div>
+                </div>
+            {% endif %} {% endfor %}
+        </ol>
+    </div>
+    {% endif %} {% endfor %}
+    <!--  Fantasy  -->
+    {% for book in books if book.genre == 'fantasy' %} {% if loop.index == 1 %}
+    <div class="col-md-12">
+        <h2>Fantasy
+           <span class="badge">
+            {% for g in genre %}
+                {{g.fantasy}} Needed
+            {% endfor %}
+            </span>
+        </h2>
+        <ol>
+        {% for book in books %} {% if book.genre == 'fantasy' %}
+        <div class="menu-item col-md-12">
+                    <div class="panel panel-default col-md-10">
+                        <div class="panel-heading">
+                            <h2 class="panel-title"><li>{{book.title}}</li> <small>Author: {{book.author}}</small>
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            {{book.review}}
+                        </div>
+                    </div>
+                    {% if book.image is none %}
+                        <div class="col-md-2"></div>
+                    {% else %}
+                        <div class="col-md-2"><img src={{book.image}} height="150"></div>
+                    {% endif %}
+                    <div class="col-md-10">
+                        <a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-warning" id="edit">edit</button></a>
+                        <a href="{{url_for('deletebook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-danger" id="edit">delete</button></a>
+                    </div>
+                </div>
+            {% endif %} {% endfor %}
+        </ol>
+    </div>
+    {% endif %} {% endfor %}
+    <!--  Poetry  -->
+    {% for book in books if book.genre == 'poetry' %} {% if loop.index == 1 %}
+    <div class="col-md-12">
+        <h2>Poetry / Verse Novel
+           <span class="badge">
+            {% for g in genre %}
+                {{g.poetry}} Needed
+            {% endfor %}
+            </span>
+        </h2>
+        <ol>
+        {% for book in books %} {% if book.genre == 'poetry' %}
+        <div class="menu-item col-md-12">
+                    <div class="panel panel-default col-md-10">
+                        <div class="panel-heading">
+                            <h2 class="panel-title"><li>{{book.title}}</li> <small>Author: {{book.author}}</small>
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            {{book.review}}
+                        </div>
+                    </div>
+                    {% if book.image is none %}
+                        <div class="col-md-2"></div>
+                    {% else %}
+                        <div class="col-md-2"><img src={{book.image}} height="150"></div>
+                    {% endif %}
+                    <div class="col-md-10">
+                        <a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-warning" id="edit">edit</button></a>
+                        <a href="{{url_for('deletebook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-danger" id="edit">delete</button></a>
+                    </div>
+                </div>
+            {% endif %} {% endfor %}
+        </ol>
+    </div>
+    {% endif %} {% endfor %}
+    <!--  Realistic  -->
+    {% for book in books if book.genre == 'realistic' %} {% if loop.index == 1 %}
+    <div class="col-md-12">
+        <h2>Realistic
+           <span class="badge">
+            {% for g in genre %}
+                {{g.realistic}} Needed
+            {% endfor %}
+            </span>
+        </h2>
+        <ol>
+        {% for book in books %} {% if book.genre == 'realistic' %}
+        <div class="menu-item col-md-12">
+                    <div class="panel panel-default col-md-10">
+                        <div class="panel-heading">
+                            <h2 class="panel-title"><li>{{book.title}}</li> <small>Author: {{book.author}}</small>
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            {{book.review}}
+                        </div>
+                    </div>
+                    {% if book.image is none %}
+                        <div class="col-md-2"></div>
+                    {% else %}
+                        <div class="col-md-2"><img src={{book.image}} height="150"></div>
+                    {% endif %}
+                    <div class="col-md-10">
+                        <a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-warning" id="edit">edit</button></a>
+                        <a href="{{url_for('deletebook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-danger" id="edit">delete</button></a>
+                    </div>
+                </div>
+            {% endif %} {% endfor %}
+        </ol>
+    </div>
+    {% endif %} {% endfor %}
+    <!--  Science Fiction  -->
+    {% for book in books if book.genre == 'scifi' %} {% if loop.index == 1 %}
+    <div class="col-md-12">
+            <h2>Science Fiction
+            <span class="badge">
+            {% for g in genre %}
+                {{g.scifi}} Needed
+            {% endfor %}
+            </span>
+        </h2>
+        <ol>
+        {% for book in books %} {% if book.genre == 'scifi' %}
+         <div class="menu-item col-md-12">
+                    <div class="panel panel-default col-md-10">
+                        <div class="panel-heading">
+                            <h2 class="panel-title"><li>{{book.title}}</li> <small>Author: {{book.author}}</small>
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            {{book.review}}
+                        </div>
+                    </div>
+                    {% if book.image is none %}
+                        <div class="col-md-2"></div>
+                    {% else %}
+                        <div class="col-md-2"><img src={{book.image}} height="150"></div>
+                    {% endif %}
+                    <div class="col-md-10">
+                        <a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-warning" id="edit">edit</button></a>
+                        <a href="{{url_for('deletebook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-danger" id="edit">delete</button></a>
+                    </div>
+                </div>
+            {% endif %} {% endfor %}
+        </ol>
+    </div>
+    {% endif %} {% endfor %}
+    <!--  Mystery  -->
+    {% for book in books if book.genre == 'mystery' %} {% if loop.index == 1 %}
+    <div class="col-md-12">
+        <h2>Mystery
+            <span class="badge">
+            {% for g in genre %}
+                {{g.mystery}} Needed
+            {% endfor %}
+            </span>
+        </h2>
+        <ol>
+        {% for book in books %} {% if book.genre == 'mystery' %}
+        <div class="menu-item col-md-12">
+                    <div class="panel panel-default col-md-10">
+                        <div class="panel-heading">
+                            <h2 class="panel-title"><li>{{book.title}}</li> <small>Author: {{book.author}}</small>
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            {{book.review}}
+                        </div>
+                    </div>
+                    {% if book.image is none %}
+                        <div class="col-md-2"></div>
+                    {% else %}
+                        <div class="col-md-2"><img src={{book.image}} height="150"></div>
+                    {% endif %}
+                    <div class="col-md-10">
+                        <a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-warning" id="edit">edit</button></a>
+                        <a href="{{url_for('deletebook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-danger" id="edit">delete</button></a>
+                    </div>
+                </div>
+            {% endif %} {% endfor %}
+        </ol>
+    </div>
+    {% endif %} {% endfor %}
+    <!--  Informational -->
+    {% for book in books if book.genre == 'info' %} {% if loop.index == 1 %}
+    <div class="col-md-12">
+        <h2>Informational
+            <span class="badge">
+            {% for g in genre %}
+                {{g.info}} Needed
+            {% endfor %}
+            </span>
+        </h2>
+        <ol>
+        {% for book in books %} {% if book.genre == 'info' %}
+        <div class="menu-item col-md-12">
+                    <div class="panel panel-default col-md-10">
+                        <div class="panel-heading">
+                            <h2 class="panel-title"><li>{{book.title}}</li> <small>Author: {{book.author}}</small>
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            {{book.review}}
+                        </div>
+                    </div>
+                    {% if book.image is none %}
+                        <div class="col-md-2"></div>
+                    {% else %}
+                        <div class="col-md-2"><img src={{book.image}} height="150"></div>
+                    {% endif %}
+                    <div class="col-md-10">
+                        <a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-warning" id="edit">edit</button></a>
+                        <a href="{{url_for('deletebook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-danger" id="edit">delete</button></a>
+                    </div>
+                </div>
+            {% endif %} {% endfor %}
+        </ol>
+    </div>
+    {% endif %} {% endfor %}
+    <!--  Biography/ Autobiography  -->
+    {% for book in books if book.genre == 'bio' %} {% if loop.index == 1 %}
+    <div class="col-md-12">
+        <h2>Biography / Autobiography
+            <span class="badge">
+            {% for g in genre %}
+                {{g.fantasy}} Needed
+            {% endfor %}
+            </span>
+        </h2>
+        <ol>
+        {% for book in books %} {% if book.genre == 'bio' %}
+        <div class="menu-item col-md-12">
+                    <div class="panel panel-default col-md-10">
+                        <div class="panel-heading">
+                            <h2 class="panel-title"><li>{{book.title}}</li> <small>Author: {{book.author}}</small>
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            {{book.review}}
+                        </div>
+                    </div>
+                    {% if book.image is none %}
+                        <div class="col-md-2"></div>
+                    {% else %}
+                        <div class="col-md-2"><img src={{book.image}} height="150"></div>
+                    {% endif %}
+                    <div class="col-md-10">
+                        <a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-warning" id="edit">edit</button></a>
+                        <a href="{{url_for('deletebook', student_id = student.id, book_id = book.id)}}">
+                            <button class="btn-xs btn-danger" id="edit">delete</button></a>
+                    </div>
+                </div>
+            {% endif %} {% endfor %}
+        </ol>
+    </div>
+    {% endif %} {% endfor %}
 
-    {% endfor %}</h3>
-    <ol>
-					{% for book in books %}
-
-						{% if book.genre == 'historical' %}
-
-							<li><div class="menu-item">
-							<div class="col-md-10">	<dt>{{book.title}}</dt>
-								<dd>{{book.author}}</dd>
-                                <dd>{{book.review}}</dd></div>
-								<div class="col-md-2"><img src={{book.image}} height="150"></div>
-								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
-								<a href="{{url_for('deletebook', student_id = student.id, book_id = book.id)}}">Delete</a>
-							</div>
-							</li>
-
-						{% endif %}
-
-					{% endfor %}
-</ol>
-			</div>
-           {% endif %}
-        {% endfor %}
-        {% for book in books if book.genre == 'fantasy' %}
-            {% if loop.index == 1 %}
-			<div class="col-md-12">
-				<h2>Fantasy</h2>
-				<h3>{% for g in genre %}
-    {{g.fantasy}} Needed
-
-    {% endfor %}</h3>
-					{% for book in books %}
-						{% if book.genre == 'fantasy' %}
-							<div class="menu-item">
-								{{book.title}}
-								{{book.author}}
-								<img src="{{book.img}}">
-								{{book.review}}
-								<a href="#">Edit</a> |
-								<a href="#">Delete</a>
-							</div>
-						{% endif %}
-					{% endfor %}
-
-			</div>
-           {% endif %}
-        {% endfor %}
-        {% for book in books if book.genre == 'poetry' %}
-            {% if loop.index == 1 %}
-			<div class="col-md-12">
-				<h2>Poetry / Verse Novel</h2>
-				<h3>{% for g in genre %}
-    {{g.poetry}} Needed
-
-    {% endfor %}</h3>
-					{% for book in books %}
-						{% if book.genre == 'poetry' %}
-							<div class="menu-item">
-								{{book.title}}
-								{{book.author}}
-								<img src="{{book.img}}">
-								{{book.review}}
-								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
-								<a href="#">Delete</a>
-							</div>
-						{% endif %}
-					{% endfor %}
-
-			</div>
-           {% endif %}
-        {% endfor %}
-        {% for book in books if book.genre == 'realistic' %}
-            {% if loop.index == 1 %}
-			<div class="col-md-12">
-				<h2>Realistic</h2>
-				<h3>{% for g in genre %}
-    {{g.realistic}} Needed
-
-    {% endfor %}</h3>
-					{% for book in books %}
-						{% if book.genre == 'realistic' %}
-							<div class="menu-item">
-								{{book.title}}
-								{{book.author}}
-								<img src="{{book.img}}">
-								{{book.review}}
-								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
-								<a href="#">Delete</a>
-							</div>
-						{% endif %}
-					{% endfor %}
-
-			</div>
-           {% endif %}
-        {% endfor %}
-        {% for book in books if book.genre == 'scifi' %}
-            {% if loop.index == 1 %}
-			<div class="col-md-12">
-				<div class="col-md-10"><h2>Science Fiction</h2>
-				<h3>{% for g in genre %}
-    {{g.scifi}} Needed
-
-    {% endfor %}</h3>
-					{% for book in books %}
-						{% if book.genre == 'scifi' %}
-							<div class="menu-item">
-								{{book.title}}
-								{{book.author}}
-								{{book.review}}</div>
-								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
-								<a href="#">Delete</a>
-							</div>
-						{% endif %}
-					{% endfor %}
-
-			</div>
-           {% endif %}
-        {% endfor %}
-        {% for book in books if book.genre == 'mystery' %}
-            {% if loop.index == 1 %}
-			<div class="col-md-12">
-				<h2>Mystery</h2>
-				<h3>{% for g in genre %}
-    {{g.mystery}} Needed
-
-    {% endfor %}</h3>
-					{% for book in books %}
-						{% if book.genre == 'mystery' %}
-							<div class="menu-item">
-								{{book.title}}
-								{{book.author}}
-								<img src="{{book.img}}">
-								{{book.review}}
-								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
-								<a href="#">Delete</a>
-							</div>
-						{% endif %}
-					{% endfor %}
-
-			</div>
-           {% endif %}
-        {% endfor %}
-        {% for book in books if book.genre == 'info' %}
-            {% if loop.index == 1 %}
-			<div class="col-md-12">
-				<h2>Informational</h2>
-					{% for book in books %}
-						{% if book.genre == 'info' %}
-							<div class="menu-item">
-								{{book.title}}
-								{{book.author}}
-								<img src="{{book.img}}">
-								{{book.review}}
-								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
-								<a href="#">Delete</a>
-							</div>
-						{% endif %}
-					{% endfor %}
-
-			</div>
-           {% endif %}
-        {% endfor %}
-        {% for book in books if book.genre == 'bio' %}
-            {% if loop.index == 1 %}
-			<div class="col-md-12">
-				<h2>Biography / Autobiography</h2>
-				<h3>{% for g in genre %}
-    {{g.bio}} Needed
-
-    {% endfor %}</h3>
-					{% for book in books %}
-						{% if book.genre == 'bio' %}
-							<div class="menu-item">
-								{{book.title}}
-								{{book.author}}
-								<img src="{{book.img}}">
-								{{book.review}}
-								<a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">Edit</a> |
-								<a href="#">Delete</a>
-							</div>
-						{% endif %}
-					{% endfor %}
-
-			</div>
-           {% endif %}
-        {% endfor %}
-
-		</div>
-	{% endif %}
-{% endblock %}
+</div>
+{% endif %} {% endblock %}
