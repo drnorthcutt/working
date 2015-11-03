@@ -1,0 +1,64 @@
+{% extends "main.html" %} {% block content %} {% include "schoolheader.html" %}
+<div class="row divider green">
+    <div class="col-md-12"></div>
+</div>
+<div class="row banner school">
+    <div class="col-md-11 col-md-offset-1 padding-none">
+        <h1>{{ school.name }}
+        </h1>
+    </div>
+</div>
+<div class="row  padding-bottom">
+    <div class="col-md-1"></div>
+</div>
+{% if students !=[] %}
+    <h2 id="students">
+        Students
+        <span class="badge">
+            {{ students.count() }}</span>
+        <small>
+            with</small>
+        <span class="badge">
+            {{ books|count }} books read
+        </span>
+    </h2>
+    <div class="row">
+        {% for student in students %}
+            <div class="col-md-1"></div>
+            {% if student.classes.teacher_id %}
+                <a href="{{url_for('student', student_id = student.id, teacher_id = student.classes.teacher_id)}}">
+            {% endif %}
+            <div class="col-md-2 menu-item">
+                {{student.name}}
+                <span class="badge">
+                    {{student.books|count}} read
+                 </span>
+            </div>
+            </a>
+        {% endfor %}
+    </div>
+{% endif %}
+<div class="row">
+    {% if teachers !=[] %}
+        <h2 id="teachers">
+            Teachers
+            <span class="badge">
+                {{ teachers.count() }}
+            </span>
+        </h2>
+        {% for teacher in teachers %}
+            <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-10">
+                    <a href="{{url_for('classroom', teacher_id=teacher.id)}}">
+                        <div class="menu-item">
+                            {{ teacher.name }}
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-1"></div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}
