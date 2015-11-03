@@ -1,6 +1,6 @@
 from flask import Flask, render_template, url_for, request, redirect, flash
 from flask import jsonify
-from books_setup import Schools, Teachers, Classrooms, Students, Books, Genres, Base
+from books_setup import Schools, Admins, Teachers, Classrooms, Students, Books, Genres, Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -14,6 +14,10 @@ import json
 from flask import make_response
 import requests
 
+CLIENT_ID = json.loads(
+    open('client_secrets.json', 'r').read())['web']['client_id']
+APPLICATION_NAME = '40 Books'
+
 app = Flask(__name__)
 
 # Connect to Database and create database session
@@ -23,17 +27,248 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+# Create a state token to prevent request forgery
+# Store the token in session for validation
+@app.route('/login')
+def login():
+    state = (
+        ''.join(random.choice(string.ascii_uppercase + string.digits)
+                for x in xrange(32))
+        )
+    login_session['state'] = state
+    return render_template('login.html', STATE=state)
+
+def newadmin(login_session):
+    new = Admins(name = login_session['username'],
+                   email = login_session['email'],
+                   picture = login_session['picture'])
+    session.add(new)
+    session.commit()
+    user = session.query(Admins).filter_by(email = login_session['email']).one()
+    return user.id
+
+def getuserinfo(user_id):
+    user = session.query(Schools).filter_by(id=user_id).one()
+    return user
+
+def getadmin(school_id):
+    user = session.query(Schools).filter_by(id=school_id).one()
+    return user.admin_id
+
+def getadmininfo(user_id):
+    school = session.query(Schools).filter_by(id=user_id).one()
+    user = session.query(Admins).filter_by(id=school.admin_id).one()
+    return user
+
+def credentials(admin, teacher, student):
+    if admin == login_session['email']:
+        return "true"
+    elif teacher == login_session['email']:
+        return "true"
+    elif student == login_session['email']:
+        return "true"
+    else:
+        return "false"
+
+def getuserID(email):
+    try:
+        user = session.query(Admins).filter_by(email = email).one()
+        return user.id
+    except:
+        return None
+
+# Google Plus OAuth
+@app.route('/gconnect', methods=['POST'])
+def gconnect():
+    if request.args.get('state') != login_session['state']:
+        response = make_response(json.dumps('Invalid state parameter.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    # Obtain Auth code.
+    code = request.data
+    try:
+        # Upgrade authorization code to a credentials object
+        oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
+        oauth_flow.redirect_uri = 'postmessage'
+        credentials = oauth_flow.step2_exchange(code)
+    except FlowExchangeError:
+        response = make_response(json.dumps('Failed to upgrade the auth code.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    # Check access token.
+    access_token = credentials.access_token
+    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
+           % access_token)
+    h = httplib2.Http()
+    result = json.loads(h.request(url, 'GET')[1])
+    # If any error in token info, abort.
+    if result.get('error') is not None:
+        response = make_response(json.dumps(result.get('error')), 500)
+        response.headers['Content-Type'] = 'application/json'
+    # Verify the token is for the intended user.
+    gplus_id = credentials.id_token['sub']
+    if result['user_id'] != gplus_id:
+        response = make_response(json.dumps('Token user ID does not match given user ID'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    # Verify the access token is valid for app.
+    if result['issued_to'] != CLIENT_ID:
+        response = make_response(json.dumps('Token client ID does not match given client ID'), 401)
+        print 'Token client ID does not match app ID.'
+        response.headers['Content-type'] = 'application/json'
+        return response
+    # Check whether user is already logged in.
+    stored_credentials = login_session.get('gplus_id')
+    stored_gplus_id = login_session.get('gplus_id')
+    if stored_credentials is not None and gplus_id == stored_gplus_id:
+        response = make_response(json.dumps('Current user is already connected.'), 200)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    # Store access token for later use in the session.
+    login_session['provider'] = 'google'
+    login_session['credentials'] = credentials
+    login_session['gplus_id'] = gplus_id
+    # Get user info.
+    userinfo_url = 'https://www.googleapis.com/oauth2/v1/userinfo'
+    params = {'access_token': credentials.access_token, 'alt': 'json'}
+    answer = requests.get(userinfo_url, params=params)
+    data = answer.json()
+    login_session['username'] = data['name']
+    login_session['picture'] = data['picture']
+    login_session['email'] = data['email']
+    # Check whether user exists in database.
+    user_id = getuserID(login_session['email'])
+    if not user_id:
+        user_id = newadmin(login_session)
+    login_session['user_id'] = user_id
+    # Display welcome
+    output = ''
+    output += '<h1>Welcome, '
+    output += login_session['username']
+    output += '!</h1>'
+    output += '<img src="'
+    output += login_session['picture']
+    output += '" style="width: 300px; height: 300px; border-radius: 150px; -webkit-border-radius: 150px; -moz-border-radius: 150px;">'
+    flash("Logged in as %s" %login_session['username'])
+    print 'done!'
+    return output
+
+# Disconnect Google Plus - Revoke token and reset session.
+@app.route('/gdisconnect')
+def gdisconnect():
+    # Disconnect a connected user.
+    credentials = login_session.get('credentials')
+    # If not connected, say so.
+    if credentials is None:
+        response = make_response(json.dumps('Current user not connected.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    # Revoke token if connected.
+    access_token = credentials.access_token
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+    h = httplib2.Http()
+    result = h.request(url, 'GET')[0]
+    if result['status'] != '200':
+        response = make_response(json.dumps('Failed to revoke token.'), 400)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
+# Facebook OAuth
+@app.route('/fbconnect', methods=['POST'])
+def fbconnect():
+    if request.args.get('state') != login_session['state']:
+        response = make_response(json.dumps('Invalid state parameter.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    access_token = request.data
+    print 'access token received %s' % access_token
+    # Exchange token for long-lived server-side token.
+    app_id = json.loads(open('fb_client_secrets.json', 'r').read())['web']['app_id']
+    app_secret = json.loads(open('fb_client_secrets.json', 'r').read())['web']['app_secret']
+    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (app_id, app_secret, access_token)
+    h = httplib2.Http()
+    result = h.request(url, 'GET')[1]
+    print result
+    # Use token to get user info from API
+    userinfo_url = 'https://graph.facebook.com/v2.5/me'
+    # Strip expire tag from access token.
+    token = result.split("&")[0]
+    url = 'https://graph.facebook.com/v2.5/me?%s&fields=name,id,email' % token
+    h = httplib2.Http()
+    result = h.request(url, 'GET')[1]
+    print 'url sent for API access: %s' % url
+    # print 'API JSON result: %s' % result
+    data = json.loads(result)
+    # Transfer user info to session.
+    login_session['provider'] = 'facebook'
+    login_session['username'] = data['name']
+    login_session['email'] = data['email']
+    login_session['facebook_id'] = data['id']
+    # Get user picture
+    url = 'https://graph.facebook.com/v2.5/me/picture?%s&redirect=0&height=200&width=200' % token
+    h = httplib2.Http()
+    result = h.request(url, 'GET')[1]
+    data = json.loads(result)
+    login_session['picture'] = data['data']['url']
+    # Check whether user exists in database.
+    user_id = getUserID(login_session['email'])
+    if not user_id:
+        user_id = createUser(login_session)
+    login_session['user_id'] = user_id
+    # Display welcome
+    output = ''
+    output += '<h1>Welcome, '
+    output += login_session['username']
+    output += '!</h1>'
+    output += '<img src="'
+    output += login_session['picture']
+    output += '" style="width: 300px; height: 300px; border-radius: 150px; -webkit-border-radius: 150px; -moz-border-radius: 150px;">'
+    flash("Logged in as %s" %login_session['username'])
+    print 'done!'
+    return output
+
+# Disconnect Facebook - Revoke token and reset session
+@app.route('/fbdisconnect')
+def fbdisconnect():
+    facebook_id = login_session['facebook_id']
+    access_token = login_session['access_token']
+    url = 'https://graph.facebook.com/%s/permission?access_token=%s' % (facebook_id, access_token)
+    h = httplib2.Http()
+    result = h.request(url, 'DELETE')[1]
+    return 'You have been logged out.'
+
+# Disconnect Login
+@app.route('/disconnect')
+def disconnect():
+    if 'provider' in login_session:
+        if login_session['provider'] == 'google':
+            gdisconnect()
+            del login_session['gplus_id']
+            del login_session['credentials']
+        if login_session['provider'] == 'facebook':
+            fbdisconnect()
+            del login_session['facebook_id']
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+        del login_session['user_id']
+        del login_session['provider']
+        flash('You have successfully logged out.')
+        return redirect(url_for('schools'))
+    else:
+        flash('You were not logged in!')
+        return redirect(url_for('schools'))
+
 # Show all schools
 @app.route('/')
 @app.route('/schools')
 def schools():
-    # return "All schools alphabetical"
     schools = session.query(Schools).order_by(Schools.name).all()
-#    if 'username' not in login_session:
-#        return render_template('publicschools.html',
-#                               schools=schools)
-#    else:
-    return render_template('schools.html',
+    if 'username' not in login_session:
+        return render_template('pubschools.html',
+                               schools=schools)
+    else:
+        return render_template('schools.html',
                            schools=schools)
 
 # Show a specific school.
@@ -42,36 +277,45 @@ def school(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
     students = (session.query(Students)
                 .filter_by(school_id=school_id)
-                .order_by(Students.name)
-    )
-    teachers = session.query(Teachers).filter_by(school_id=school_id).order_by(Teachers.name)
-    books = session.query(Books).join(Students).filter(Students.school_id==school_id).all()
-#    creator = getUserInfo(restaurant.user_id)
-#    if 'username' not in login_session or creator.id != login_session['user_id']:
-#        return render_template('publicmenu.html',
-#                               items = items,
-#                               restaurant = restaurant,
-#                               creator = creator)
-#    else:
-    return render_template('school.html',
-                           school = school,
-                           students = students,
-                           books = books,
-                           teachers = teachers,
-                           school_id = school_id)
+                .order_by(Students.name))
+    teachers = (session.query(Teachers)
+                .filter_by(school_id=school_id)
+                .order_by(Teachers.name))
+    books = (session.query(Books)
+             .join(Students)
+             .filter(Students.school_id==school_id)
+             .all())
+    creator = getadmininfo(school_id)
+    if 'username' not in login_session or creator.email != login_session['email']:
+        return render_template('pubschool.html',
+                               school = school,
+                               students = students,
+                               books = books,
+                               teachers = teachers,
+                               school_id = school_id)
+    else:
+        return render_template('school.html',
+                               school = school,
+                               students = students,
+                               books = books,
+                               teachers = teachers,
+                               school_id = school_id)
 
 # Create a new school
 @app.route('/school/new', methods=['GET', 'POST'])
 def newschool():
     # Check login.
-#    if 'username' not in login_session:
-#        return redirect('/login')
+    if 'username' not in login_session:
+        return redirect('/login')
     if request.method == 'POST':
+        admin = getuserID(login_session['email'])
         new = Schools(name=request.form['name'],
                       state=request.form['state'],
                       county=request.form['county'],
-                      district=request.form['district']
+                      district=request.form['district'],
+                      admin_id=login_session['user_id']
         )
+        print new
         session.add(new)
         session.commit()
         flash(new.name + " created!")
@@ -82,11 +326,12 @@ def newschool():
 # Edit a school
 @app.route('/school/<int:school_id>/edit', methods=['GET', 'POST'])
 def editschool(school_id):
-#    if 'username' not in login_session:
-#        return redirect('/login')
+    if 'username' not in login_session:
+        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
-#    if school.user_id != login_session['user_id']:
-#        return "<script>function myFunction() {alert('You are not authorized to edit this school.');}</script><body onload='myFunction()''>"
+    creator = getadmininfo(school_id)
+    if creator.email != login_session['email']:
+        return "<script>function myFunction() {alert('You are not authorized to edit this school.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         if request.form['name']:
             school.name = request.form['name']
@@ -108,11 +353,12 @@ def editschool(school_id):
 # Delete a school
 @app.route('/school/<int:school_id>/delete', methods=['GET', 'POST'])
 def deleteschool(school_id):
-#    if 'username' not in login_session:
-#        return redirect('/login')
+    if 'username' not in login_session:
+        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
-#    if school.user_id != login_session['user_id']:
-#        return "<script>function myFunction() {alert('You are not authorized to delete this restaurant.');}</script><body onload='myFunction()''>"
+    creator = getadmininfo(school_id)
+    if creator != login_session['email']:
+        return "<script>function myFunction() {alert('You are not authorized to delete this school.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         session.delete(school)
         session.commit()
@@ -128,22 +374,28 @@ def deleteschool(school_id):
 def schoolteachers(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id)
-#    creator = getUserInfo(restaurant.user_id)
-#    if 'username' not in login_session or creator.id != login_session['user_id']:
-#        return render_template('publicmenu.html',
-#                               items = items,
-#                               restaurant = restaurant,
-#                               creator = creator)
-#    else:
-    return render_template('teachers.html',
-                           school = school,
-                           teachers = teachers,
-                           school_id = school_id)
+    school = session.query(Schools).filter_by(id=school_id).one()
+    creator = getadmininfo(school_id)
+    if 'username' not in login_session or creator.email != login_session['email']:
+        return render_template('pubteachers.html',
+                               school = school,
+                               teachers = teachers,
+                               school_id = school_id)
+    else:
+        return render_template('teachers.html',
+                               school = school,
+                               teachers = teachers,
+                               school_id = school_id)
 
 # Add a teacher.
 @app.route('/school/<int:school_id>/teacher/new', methods=['GET', 'POST'])
 def newteacher(school_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
+    creator = getadmininfo(school_id)
+    if creator.email != login_session['email']:
+        return "<script>function myFunction() {alert('You are not authorized to add a teacher to this school.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         new = Teachers(name=request.form['name'],
                        email=request.form['email'],
@@ -163,8 +415,13 @@ def newteacher(school_id):
 @app.route('/school/<int:school_id>/teacher/<int:teacher_id>/edit',
            methods=['GET', 'POST'])
 def editteacher(school_id, teacher_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    creator = getadmininfo(school_id)
+    if creator.email != login_session['email']:
+        return "<script>function myFunction() {alert('You are not authorized to edit a teacher of this school.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         if request.form['name']:
             teacher.name = request.form['name']
@@ -187,12 +444,13 @@ def editteacher(school_id, teacher_id):
 @app.route('/school/<int:school_id>/teacher/<int:teacher_id>/delete',
            methods=['GET', 'POST'])
 def deleteteacher(school_id, teacher_id):
-#    if 'username' not in login_session:
-#        return redirect('/login')
+    if 'username' not in login_session:
+        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
-#    if school.user_id != login_session['user_id']:
-#        return "<script>function myFunction() {alert('You are not authorized to delete this restaurant.');}</script><body onload='myFunction()''>"
+    creator = getadmininfo(school_id)
+    if creator.email != login_session['email']:
+        return "<script>function myFunction() {alert('You are not authorized to delete a teacher of this school.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         session.delete(teacher)
         session.commit()
@@ -222,21 +480,28 @@ def classroom(teacher_id):
              .join(Students)
              .join(Classrooms)
              .filter_by(teacher_id=teacher_id).all())
-#    creator = getUserInfo(restaurant.user_id)
-#    if 'username' not in login_session or creator.id != login_session['user_id']:
-#        return render_template('publicmenu.html',
-#                               items = items,
-#                               restaurant = restaurant,
-#                               creator = creator)
-#    else:
-    print books
-    return render_template('classes.html',
-                           teacher = teacher,
-                           students = students,
-                           classroom = classroom,
-                           noclass = noclass,
-                           books = books,
-                           teacher_id = teacher_id)
+#    admin_id = getadmin(teacher.school_id)
+#    admin = getadmininfo(teacher.school_id)
+#    school = session.query(Schools).filter_by(id=teacher.school_id).one()
+#    trial = session.query(Admins).filter_by(id=school.admin_id).one()
+    creator = getadmininfo(teacher.school_id)
+    credcheck = credentials(creator.email, teacher.email, 0)
+    if 'username' not in login_session or credcheck != "true":
+        return render_template('pubclasses.html',
+                               teacher = teacher,
+                               students = students,
+                               classroom = classroom,
+                               noclass = noclass,
+                               books = books,
+                               teacher_id = teacher_id)
+    else:
+        return render_template('classes.html',
+                               teacher = teacher,
+                               students = students,
+                               classroom = classroom,
+                               noclass = noclass,
+                               books = books,
+                               teacher_id = teacher_id)
 
 # Show a specific room (for cases when more than one exist for a teacher).
 @app.route('/teacher/<int:teacher_id>/classroom/<int:room_id>')

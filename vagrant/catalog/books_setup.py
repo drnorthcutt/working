@@ -12,12 +12,13 @@ class Schools(Base):
     __tablename__ = 'schools'
     name = Column(String(80), nullable = False)
     id = Column(Integer, primary_key = True)
+    admin_id = Column(Integer, ForeignKey('admins.id'))
     state = Column(String(2), nullable = False)
     county = Column(String(80))
     district = Column(String(80))
     students = relationship("Students")
     teachers = relationship("Teachers")
-    admins = relationship("Admins")
+    admin = relationship("Admins")
 
     @property
     def serialize(self):
@@ -32,10 +33,8 @@ class Admins(Base):
     name = Column(String(80), nullable = False)
     id = Column(Integer, primary_key =True)
     email = Column(String(250), nullable = False)
-    password = Column(String(250), nullable = False)
     picture = Column(String(250))
-    school_id = Column(Integer, ForeignKey('schools.id'))
-    school = relationship("Schools")
+    school = relationship("Schools", backref="admins")
 
 class Teachers(Base):
     __tablename__ = 'teachers'

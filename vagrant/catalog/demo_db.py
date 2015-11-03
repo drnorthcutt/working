@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from books_setup import Schools, Base, Teachers, Classrooms, Students, Genres, Books
+from books_setup import Admins, Schools, Base, Teachers, Classrooms, Students, Genres, Books
 
 engine = create_engine('sqlite:///book.db')
 # Bind the engine to the metadata of the Base class so that the
@@ -18,10 +18,24 @@ DBSession = sessionmaker(bind=engine)
 # session.rollback()
 session = DBSession()
 
+# Create admin
+admin1 = Admins(name="Udacity Admin",
+                email="someemail@somewhere.com",
+                )
+session.add(admin1)
+session.commit()
+
+admin2 = Admins(name="Life Coach",
+                email="something@somewhere.com",
+                )
+session.add(admin2)
+session.commit()
+
 # Create dummy school
 School1 = Schools(name="Udacity",
                   state="CA",
                   district="Online",
+                  admin_id=1,
                  )
 session.add(School1)
 session.commit()
@@ -30,6 +44,7 @@ School2 = Schools(name="Life",
                   state="CA",
                   county="Orange",
                   district="Online",
+                  admin_id=2,
                  )
 session.add(School2)
 session.commit()
