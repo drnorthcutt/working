@@ -45,7 +45,7 @@ def newadmin(login_session):
                    picture = login_session['picture'])
     session.add(new)
     session.commit()
-    user = session.query(Admins).filter_by(email = login_session['email']).one()
+    user = session.query(Admins).filter_by(email=login_session['email']).one()
     return user.id
 
 # Check this
@@ -80,15 +80,15 @@ def credentials(admin, teacher, student):
 # Get login_session DB id, if exists
 def getuserID(email):
     try:
-        user = session.query(Admins).filter_by(email = email).one()
+        user = session.query(Admins).filter_by(email=email).one()
         return user.id
     except:
         try:
-            user = session.query(Teachers).filter_by(email = email).one()
+            user = session.query(Teachers).filter_by(email=email).one()
             return user.id
         except:
             try:
-                user = session.query(Students).filter_by(email = email).one()
+                user = session.query(Students).filter_by(email=email).one()
                 return user.id
             except:
                 return None
@@ -108,7 +108,8 @@ def gconnect():
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:
-        response = make_response(json.dumps('Failed to upgrade the auth code.'), 401)
+        response = make_response(
+            json.dumps('Failed to upgrade the auth code.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
     # Check access token.
@@ -124,12 +125,14 @@ def gconnect():
     # Verify the token is for the intended user.
     gplus_id = credentials.id_token['sub']
     if result['user_id'] != gplus_id:
-        response = make_response(json.dumps('Token user ID does not match given user ID'), 401)
+        response = make_response(
+            json.dumps('Token user ID does not match given user ID'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
     # Verify the access token is valid for app.
     if result['issued_to'] != CLIENT_ID:
-        response = make_response(json.dumps('Token client ID does not match given client ID'), 401)
+        response = make_response(
+            json.dumps('Token client ID does not match given client ID'), 401)
         print 'Token client ID does not match app ID.'
         response.headers['Content-type'] = 'application/json'
         return response
@@ -137,7 +140,8 @@ def gconnect():
     stored_credentials = login_session.get('gplus_id')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_credentials is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is already connected.'), 200)
+        response = make_response(
+            json.dumps('Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
     # Store access token for later use in the session.
@@ -164,7 +168,8 @@ def gconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += '" style="width: 300px; height: 300px; border-radius: 150px; -webkit-border-radius: 150px; -moz-border-radius: 150px;">'
+    output += '" style="width: 300px; height: 300px; border-radius: 150px;'
+    output += ' -webkit-border-radius: 150px; -moz-border-radius: 150px;">'
     flash("Logged in as %s" %login_session['username'])
     print 'done!'
     return output
@@ -238,7 +243,8 @@ def fbconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += '" style="width: 300px; height: 300px; border-radius: 150px; -webkit-border-radius: 150px; -moz-border-radius: 150px;">'
+    output += '" style="width: 300px; height: 300px; border-radius: 150px;'
+    output += ' -webkit-border-radius: 150px; -moz-border-radius: 150px;">'
     flash("Logged in as %s" %login_session['username'])
     print 'done!'
     return output
@@ -351,7 +357,14 @@ def editschool(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
     creator = getadmininfo(school_id)
     if creator.email != login_session['email']:
-        return "<script>function myFunction() {alert('You are not authorized to edit this school.');}</script><body onload='myFunction()''>"
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to edit this school.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
     if request.method == 'POST':
         if request.form['name']:
             school.name = request.form['name']
@@ -367,8 +380,8 @@ def editschool(school_id):
         return redirect(url_for('schoolstudents', school_id = school_id))
     else:
         return render_template('editschool.html',
-                               school_id=school_id,
-                               school=school)
+                               school_id = school_id,
+                               school = school)
 
 # Delete a school
 @app.route('/school/<int:school_id>/delete', methods=['GET', 'POST'])
@@ -378,7 +391,14 @@ def deleteschool(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
     creator = getadmininfo(school_id)
     if creator.email != login_session['email']:
-        return "<script>function myFunction() {alert('You are not authorized to delete this school.');}</script><body onload='myFunction()''>"
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to delete this school.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
     if request.method == 'POST':
         session.delete(school)
         session.commit()
@@ -416,7 +436,15 @@ def newteacher(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
     creator = getadmininfo(school_id)
     if creator.email != login_session['email']:
-        return "<script>function myFunction() {alert('You are not authorized to add a teacher to this school.');}</script><body onload='myFunction()''>"
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to add a teacher to this
+                          school.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
     if request.method == 'POST':
         new = Teachers(name=request.form['name'],
                        email=request.form['email'],
@@ -426,11 +454,11 @@ def newteacher(school_id):
         session.add(new)
         session.commit()
         flash(new.name + " added!")
-        return redirect(url_for('schoolteachers', school_id=school_id))
+        return redirect(url_for('schoolteachers', school_id = school_id))
     else:
         return render_template('newteacher.html',
-                               school_id=school_id,
-                               school=school)
+                               school_id = school_id,
+                               school = school)
 
 # Edit a teacher.
 @app.route('/school/<int:school_id>/teacher/<int:teacher_id>/edit',
@@ -444,7 +472,15 @@ def editteacher(school_id, teacher_id):
     check = credentials(creator.email, teacher.email, 0)
 #    if creator.email != login_session['email']:
     if check != "true":
-        return "<script>function myFunction() {alert('You are not authorized to edit a teacher of this school.');}</script><body onload='myFunction()''>"
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to edit a teacher of this
+                          school.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
     if request.method == 'POST':
         if request.form['name']:
             teacher.name = request.form['name']
@@ -455,7 +491,7 @@ def editteacher(school_id, teacher_id):
         session.add(teacher)
         session.commit()
         flash(teacher.name + " edited!")
-        return redirect(url_for('schoolteachers', school_id=school_id))
+        return redirect(url_for('schoolteachers', school_id = school_id))
     else:
         return render_template('editteacher.html',
                                school_id = school_id,
@@ -473,7 +509,15 @@ def deleteteacher(school_id, teacher_id):
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     creator = getadmininfo(school_id)
     if creator.email != login_session['email']:
-        return "<script>function myFunction() {alert('You are not authorized to delete a teacher of this school.');}</script><body onload='myFunction()''>"
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to delete a teacher of this
+                          school.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
     if request.method == 'POST':
         session.delete(teacher)
         session.commit()
@@ -537,7 +581,7 @@ def room(teacher_id, room_id):
                 .order_by(Students.name))
     books = (session.query(Books)
              .join(Students)
-             .filter(Students.classroom==room_id).all())
+             .filter(Students.classroom == room_id).all())
     creator = getadmininfo(teacher.school_id)
     credcheck = credentials(creator.email, teacher.email, 0)
     if 'username' not in login_session or credcheck != "true":
@@ -572,7 +616,15 @@ def newclass(teacher_id):
     creator = getadmininfo(teacher.school_id)
     credcheck = credentials(creator.email, teacher.email, 0)
     if 'username' not in login_session or credcheck != "true":
-        return "<script>function myFunction() {alert('You are not authorized to add a classroom to this school.');}</script><body onload='myFunction()''>"
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to add a classroom to this
+                          school.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
     if request.method == 'POST':
         new = Classrooms(name=request.form['name'],
                          grade=request.form['grade'],
@@ -607,7 +659,15 @@ def editclass(teacher_id, class_id):
     creator = getadmininfo(teacher.school_id)
     credcheck = credentials(creator.email, teacher.email, 0)
     if 'username' not in login_session or credcheck != "true":
-        return "<script>function myFunction() {alert('You are not authorized to edit a classroom of this school.');}</script><body onload='myFunction()''>"
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to edit a classroom of this
+                          school.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
     if request.method == 'POST':
         if request.form['name']:
             classroom.name = request.form['name']
@@ -631,7 +691,8 @@ def editclass(teacher_id, class_id):
                                class_id = class_id)
 
 # Delete a classroom.
-@app.route('/teacher/<int:teacher_id>/classroom/<int:class_id>/delete', methods=['GET', 'POST'])
+@app.route('/teacher/<int:teacher_id>/classroom/<int:class_id>/delete',
+           methods=['GET', 'POST'])
 def deleteclass(teacher_id, class_id):
     if 'username' not in login_session:
         return redirect('/login')
@@ -640,7 +701,15 @@ def deleteclass(teacher_id, class_id):
     creator = getadmininfo(teacher.school_id)
     credcheck = credentials(creator.email, teacher.email, 0)
     if 'username' not in login_session or credcheck != "true":
-        return "<script>function myFunction() {alert('You are not authorized to delete a classroom of this school.');}</script><body onload='myFunction()''>"
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to delete a classroom of this
+                          school.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
     if request.method == 'POST':
         session.delete(classroom)
         session.commit()
@@ -679,9 +748,23 @@ def schoolstudents(school_id):
 # Add a student.
 @app.route('/school/<int:school_id>/student/new', methods=['GET', 'POST'])
 def newstudent(school_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id).all()
     classes = session.query(Classrooms).filter_by(school_id=school_id)
+    creator = getadmininfo(school_id)
+    credcheck = credentials(creator.email, 0, 0)
+    if 'username' not in login_session or credcheck != "true":
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to add a student to this
+                           school..');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
     if request.method == 'POST':
         new = Students(name=request.form['name'],
                     email=request.form['email'],
@@ -699,13 +782,66 @@ def newstudent(school_id):
                                classes = classes,
                                school=school)
 
+# Add student by teacher
+@app.route('/school/<int:school_id>/teacher/<int:teacher_id>/student/new',
+           methods=['GET', 'POST'])
+def teachernewstudent(school_id, teacher_id):
+    if 'username' not in login_session:
+        return redirect('/login')
+    school = session.query(Schools).filter_by(id=school_id).one()
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+#    teachers = session.query(Teachers).filter_by(school_id=school_id).all()
+    classes = session.query(Classrooms).filter_by(school_id=school_id)
+    creator = getadmininfo(school_id)
+    credcheck = credentials(creator.email, teacher.email, 0)
+    if 'username' not in login_session or credcheck != "true":
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to add a student to this
+                           school..');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
+    if request.method == 'POST':
+        new = Students(name=request.form['name'],
+                    email=request.form['email'],
+                    picture=request.form['picture'],
+                    classroom=request.form['classroom'],
+                    school_id=school_id
+                    )
+        session.add(new)
+        session.commit()
+        flash(new.name + " added!")
+        return redirect(url_for('classroom', teacher_id=teacher_id))
+    else:
+        return render_template('newstudent.html',
+                               school_id=school_id,
+                               classes = classes,
+                               school=school)
+
 # Edit a student.
-@app.route('/school/<int:school_id>/student/<int:user_id>/edit', methods=['GET', 'POST'])
+@app.route('/school/<int:school_id>/student/<int:user_id>/edit',
+           methods=['GET', 'POST'])
 def editstudent(school_id, user_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id).all()
     classes = session.query(Classrooms).filter_by(school_id=school_id)
     student = session.query(Students).filter_by(id=user_id).one()
+    creator = getadmininfo(school_id)
+    credcheck = credentials(creator.email, 0, 0)
+    if 'username' not in login_session or credcheck != "true":
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to edit this student.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
     if request.method == 'POST':
         if request.form['name']:
             student.name = request.form['name']
@@ -728,15 +864,69 @@ def editstudent(school_id, user_id):
                                teachers = teachers,
                                school = school)
 
+# Edit a student by teacher.
+@app.route('/<int:school_id>/<int:teacher_id>/student/<int:user_id>/edit',
+           methods=['GET', 'POST'])
+def teachereditstudent(school_id, user_id, teacher_id):
+    if 'username' not in login_session:
+        return redirect('/login')
+    school = session.query(Schools).filter_by(id=school_id).one()
+    teachers = session.query(Teachers).filter_by(school_id=school_id).all()
+    classes = session.query(Classrooms).filter_by(school_id=school_id)
+    student = session.query(Students).filter_by(id=user_id).one()
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    creator = getadmininfo(school_id)
+    credcheck = credentials(creator.email, teacher.email, 0)
+    if 'username' not in login_session or credcheck != "true":
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to edit this student.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
+    if request.method == 'POST':
+        if request.form['name']:
+            student.name = request.form['name']
+        if request.form['email']:
+            student.email = request.form['email']
+        if request.form['picture']:
+            student.picture = request.form['picture']
+        if request.form['classroom']:
+            student.classroom = request.form['classroom']
+        session.add(student)
+        session.commit()
+        flash(student.name + " edited!")
+        return redirect(url_for('classroom', teacher_id=teacher_id))
+    else:
+        return render_template('editstudent.html',
+                               school_id = school_id,
+                               user_id = user_id,
+                               student = student,
+                               classes = classes,
+                               teachers = teachers,
+                               school = school)
+
 # Delete a student
-@app.route('/school/<int:school_id>/student/<int:user_id>/delete', methods=['GET', 'POST'])
+@app.route('/school/<int:school_id>/student/<int:user_id>/delete',
+           methods=['GET', 'POST'])
 def deletestudent(school_id, user_id):
-#    if 'username' not in login_session:
-#        return redirect('/login')
+    if 'username' not in login_session:
+        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     student = session.query(Students).filter_by(id=user_id).one()
-#    if school.user_id != login_session['user_id']:
-#        return "<script>function myFunction() {alert('You are not authorized to delete this restaurant.');}</script><body onload='myFunction()''>"
+    creator = getadmininfo(school_id)
+    credcheck = credentials(creator.email, 0, 0)
+    if 'username' not in login_session or credcheck != "true":
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to delete this student.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
     if request.method == 'POST':
         session.delete(student)
         session.commit()
@@ -749,19 +939,47 @@ def deletestudent(school_id, user_id):
                                user_id = user_id,
                                school_id = school_id)
 
+# Delete a student by teacher.
+@app.route('/<int:school_id>/<int:teacher_id>/student/<int:user_id>/delete',
+           methods=['GET', 'POST'])
+def teacherdeletestudent(school_id, user_id, teacher_id):
+    if 'username' not in login_session:
+        return redirect('/login')
+    school = session.query(Schools).filter_by(id=school_id).one()
+    student = session.query(Students).filter_by(id=user_id).one()
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    creator = getadmininfo(school_id)
+    credcheck = credentials(creator.email, teacher.email, 0)
+    if 'username' not in login_session or credcheck != "true":
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to delete this student.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
+    if request.method == 'POST':
+        session.delete(student)
+        session.commit()
+        flash(student.name + " deleted!")
+        return redirect(url_for('classroom', teacher_id = teacher_id))
+    else:
+        return render_template('deletestudent.html',
+                               school = school,
+                               student = student,
+                               user_id = user_id,
+                               school_id = school_id)
+
 # Show a student's books.
 @app.route('/<int:teacher_id>/student/<int:student_id>')
 def student(student_id, teacher_id):
     student = session.query(Students).filter_by(id=student_id).one()
-    genre = session.query(Genres).join(Classrooms).filter_by(teacher_id=teacher_id)
+    genre = (session.query(Genres)
+             .join(Classrooms)
+             .filter_by(teacher_id=teacher_id))
     books = session.query(Books).filter_by(student_id=student_id)
-#    creator = getUserInfo(restaurant.user_id)
-#    if 'username' not in login_session or creator.id != login_session['user_id']:
-#        return render_template('publicmenu.html',
-#                               items = items,
-#                               restaurant = restaurant,
-#                               creator = creator)
-#    else:
+
     return render_template('student.html',
                            student = student,
                            books = books,
@@ -784,14 +1002,17 @@ def newbook(student_id):
         session.add(new)
         session.commit()
         flash(new.title + " added!")
-        return redirect(url_for('student', student_id=student.id, teacher_id=student.classes.teacher_id))
+        return redirect(url_for('student',
+                                student_id = student.id,
+                                teacher_id = student.classes.teacher_id))
     else:
         return render_template('newbook.html',
                                student_id = student_id,
                                student = student)
 
 # Edit a student book
-@app.route('/student/<int:student_id>/book/<int:book_id>/edit', methods=['GET', 'POST'])
+@app.route('/student/<int:student_id>/book/<int:book_id>/edit',
+           methods=['GET', 'POST'])
 def editbook(student_id, book_id):
     student = session.query(Students).filter_by(id=student_id).one()
     book = session.query(Books).filter_by(id=book_id).one()
