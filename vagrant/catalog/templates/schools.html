@@ -1,63 +1,50 @@
-{% extends "main.html" %}
-{% block content %}
-{% include "header.html" %}
-	<div class="row top-menu">
-		<div class="col-md-10"></div>
-		<div class="col-md-2 text-right">
-					</div>
-	</div>
-
-
-	<div class="row banner main">
-		<div class="col-md-1"></div>
-		<div class="col-md-11 padding-none">
-			<h1 style="color: white " >Schools</h1>
-		</div>
-	</div>
-	<div class="row divider blue">
-		<div class="col-md-12"></div>
-	</div>
-
-<div class = 'flash'>
-		      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-
-        <ul>
-        {% for message in messages %}
-            <li> <strong> {{ message }} </strong> </li>
-        {% endfor %}
-        </ul>
+{% extends "main.html" %} {% block content %} {% include "header.html" %}
+<div class="row banner main">
+    <div class="col-md-1"></div>
+    <div class="col-md-11 padding-none">
+        <h1>Schools</h1>
+    </div>
+</div>
+<div class="row divider blue">
+    <div class="col-md-12"></div>
+</div>
+<div class='flash'>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li> <strong> {{ message }} </strong> </li>
+                {% endfor %}
+            </ul>
         {% endif %}
     {% endwith %}
-
 </div>
-
-	<div class="row padding-top padding-bottom">
-		<div class="col-md-1"></div>
-		<div class="col-md-10 padding-none">
-			<a href="{{url_for('newschool')}}">
-				<button class="btn-sm btn-success" id="new-school">
-					<span class="glyphicon glyphicon-education" aria-hidden="true"></span>Add School
-				</button>
-			</a>
-		</div>
-		<div class="col-md-1"></div>
-	</div>
-	{% for school in schools %}
-        <a href="{{url_for('school', school_id = school.id)}}">
-			<div class="row">
-				<div class="col-md-1"></div>
-					<div class="col-md-10 restaurant-list">
-						<h3>{{school.name}}
-						    <small>
-						        {{school.state}}<br/>
-						        County: {{school.county}}
-				                District: {{school.district}}
-				            </small>
-				        </h3>
-					</div>
-				<div class="col-md-1"></div>
-			</div>
+<div class="row padding-top padding-bottom">
+    <div class="col-md-1"></div>
+    <div class="col-md-10 padding-none">
+        <a href="{{url_for('newschool')}}">
+            <button class="btn-sm btn-success" id="new-school">
+                <span class="glyphicon glyphicon-education" aria-hidden="true"></span>Add School
+            </button>
         </a>
-	{% endfor %}
+    </div>
+    <div class="col-md-1"></div>
+</div>
+{% for school in schools %}
+    <a href="{{url_for('school', school_id = school.id)}}">
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-10 restaurant-list">
+                <h3>{{school.name}}
+                    <small>
+                        {{school.state}}<br />
+                        County: {{school.county}}
+                        District: {{school.district}}
+                    </small>
+                </h3>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+    </a>
+{% endfor %}
 {% endblock %}

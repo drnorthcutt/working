@@ -113,8 +113,16 @@ h3 {
 	height: 150px;
 	background-color: #A6E8EB;
 }
+.banner.school {
+	height: 150px;
+	background: url("/static/banner2.jpg");
+	background-position: right;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
 .banner h1 {
 	margin: 45px 0;
+    color: #f0f0f0;
 }
  .restaurant-list {
  	background-color: #F0F0F0;
