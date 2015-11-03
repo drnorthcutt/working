@@ -1,6 +1,6 @@
 {% extends "main.html" %}
 {% block content %}
-{% include "classheader.html" %}
+{% include "class/header.html" %}
 <div class="row divider green">
     <div class="col-md-12"></div>
 </div>
@@ -11,6 +11,18 @@
 				<img src="{{teacher.picture}}">
 				<figcaption>Teacher</figcaption>
 			</figure>
+			<br />
+			<a href="{{url_for('teachernewstudent', school_id=teacher.school_id, teacher_id=teacher.id)}}">
+				<button class="btn-xs btn-success" id="new-student">
+					<span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+					    Add New Student
+				</button></a>
+            <a href="{{url_for('newclass', teacher_id=teacher.id)}}">
+				<button class="btn-xs btn-success" id="new-class">
+					<span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+					    Add New Class
+				</button>
+			</a>
         </h1>
     </div>
 </div>
@@ -36,6 +48,17 @@
                     <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
                         Name: {{ row.name }}<br />
                         Grade: {{ row.grade }}
+                </button></a>
+            <br />
+            <a href="{{url_for('editclass', teacher_id = teacher.id, class_id = row.id)}}">
+                <button class="btn-xs btn-warning" id="edit">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                        edit
+                </button></a>
+            <a href="{{url_for('deleteclass', teacher_id = teacher.id, class_id = row.id)}}">
+                <button class="btn-xs btn-danger" id="delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                        delete
                 </button></a>
         </div>
     {% endfor %}
@@ -69,6 +92,17 @@
                                     <span class="badge">
                                         {{student.books|count}} read
                                     </span>
+                                    <br/>
+                                    <a href="{{url_for('teachereditstudent', school_id=student.school_id, user_id=student.id, teacher_id=teacher.id)}}">
+                                        <button class="btn-xs btn-warning" id="edit">
+                                           <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                                            edit
+                                        </button></a>
+                                    <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, user_id = student.id, teacher_id=teacher.id)}}">
+                                        <button class="btn-xs btn-danger" id="delete">
+                                           <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                            delete
+                                        </button></a>
                                 </div>
                             </a>
                         {% endif %}
@@ -79,7 +113,7 @@
             <!--  End once loop  -->
         {% endfor %}
         <!--  End full for loop, Skip if none exists  -->
-<!--  4th Grade  -->
+    <!--  4th Grade  -->
         {% for student in students if student.classes.grade == 4 %}
             {% if loop.index == 1 %}
                 <div class="col-md-3">
@@ -88,10 +122,18 @@
                         {% if student.classes.grade == 4 %}
                         <a href="{{url_for('student', student_id = student.id, teacher_id = student.classes.teacher_id)}}">
                             <div class="menu-item">
-                                {{student.name}}
-                                <span class="badge">
-                                    {{student.books|count}} read
-                                </span>
+                                    {{student.name}}
+                                    <span class="badge">
+                                        {{student.books|count}} read
+                                    </span>
+                                    <br/>
+                                    <a href="{{url_for('teachereditstudent', school_id=student.school_id, user_id=student.id, teacher_id=teacher.id)}}">
+                                        <button class="btn-xs btn-warning" id="edit">
+                                            edit
+                                        </button></a>
+                                    <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, user_id = student.id, teacher_id=teacher.id)}}">
+                                        <button class="btn-xs btn-danger" id="delete">
+                                            delete</button></a>
                             </div>
                         </a>
                         {% endif %}
@@ -99,7 +141,7 @@
                 </div>
             {% endif %}
         {% endfor %}
-<!--  5th Grade  -->
+    <!--  5th Grade  -->
         {% for student in students if student.classes.grade == 5 and student.classes.teacher_id == teacher.id %}
             {% if loop.index == 1 %}
                 <div class="col-md-3">
@@ -112,6 +154,14 @@
                                     <span class="badge">
                                         {{student.books|count}} read
                                     </span>
+                                    <br/>
+                                    <a href="{{url_for('teachereditstudent', school_id=student.school_id, user_id=student.id, teacher_id=teacher.id)}}">
+                                        <button class="btn-xs btn-warning" id="edit">
+                                            edit
+                                        </button></a>
+                                    <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, user_id = student.id, teacher_id=teacher.id)}}">
+                                        <button class="btn-xs btn-danger" id="delete">
+                                            delete</button></a>
                                 </div>
                             </a>
                         {% endif %}
@@ -119,7 +169,7 @@
                 </div>
             {% endif %}
         {% endfor %}
-<!--  6th Grade  -->
+    <!--  6th Grade  -->
         {% for student in students if student.classes.grade == 6 %}
             {% if loop.index == 1 %}
                 <div class="col-md-3">
@@ -132,6 +182,14 @@
                                     <span class="badge">
                                         {{student.books|count}} read
                                     </span>
+                                    <br/>
+                                    <a href="{{url_for('teachereditstudent', school_id=student.school_id, user_id=student.id, teacher_id=teacher.id)}}">
+                                        <button class="btn-xs btn-warning" id="edit">
+                                            edit
+                                        </button></a>
+                                    <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, user_id = student.id, teacher_id=teacher.id)}}">
+                                        <button class="btn-xs btn-danger" id="delete">
+                                            delete</button></a>
                                 </div>
                             </a>
                         {% endif %}
@@ -139,7 +197,7 @@
                 </div>
             {% endif %}
         {% endfor %}
-<!--  7th Grade  -->
+    <!--  7th Grade  -->
         {% for student in students if student.grade == 7 %}
             {% if loop.index == 1 %}
                 <div class="col-md-3">
@@ -152,6 +210,14 @@
                                     <span class="badge">
                                         {{student.books|count}} read
                                     </span>
+                                    <br/>
+                                    <a href="{{url_for('teachereditstudent', school_id=student.school_id, user_id=student.id, teacher_id=teacher.id)}}">
+                                        <button class="btn-xs btn-warning" id="edit">
+                                            edit
+                                        </button></a>
+                                    <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, user_id = student.id, teacher_id=teacher.id)}}">
+                                        <button class="btn-xs btn-danger" id="delete">
+                                            delete</button></a>
                                 </div>
                             </a>
                         {% endif %}
@@ -159,7 +225,7 @@
                 </div>
             {% endif %}
         {% endfor %}
-<!--  8th Grade  -->
+    <!--  8th Grade  -->
         {% for student in students if student.classes.grade == 8 %}
             {% if loop.index == 1 %}
                 <div class="col-md-3">
@@ -172,6 +238,14 @@
                                     <span class="badge">
                                         {{student.books|count}} read
                                     </span>
+                                    <br/>
+                                    <a href="{{url_for('teachereditstudent', school_id=student.school_id, user_id=student.id, teacher_id=teacher.id)}}">
+                                        <button class="btn-xs btn-warning" id="edit">
+                                            edit
+                                        </button></a>
+                                    <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, user_id = student.id, teacher_id=teacher.id)}}">
+                                        <button class="btn-xs btn-danger" id="delete">
+                                            delete</button></a>
                                 </div>
                             </a>
                         {% endif %}
@@ -179,7 +253,7 @@
                 </div>
             {% endif %}
         {% endfor %}
-<!--  Other Grade  -->
+    <!--  Other Grade  -->
         {% for student in students if student.classes.grade == 13 %}
             {% if loop.index == 1 %}
                 <div class="col-md-3">
@@ -192,6 +266,14 @@
                                     <span class="badge">
                                         {{student.books|count}} read
                                     </span>
+                                    <br/>
+                                    <a href="{{url_for('teachereditstudent', school_id=student.school_id, user_id=student.id, teacher_id=teacher.id)}}">
+                                        <button class="btn-xs btn-warning" id="edit">
+                                            edit
+                                        </button></a>
+                                    <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, user_id = student.id, teacher_id=teacher.id)}}">
+                                        <button class="btn-xs btn-danger" id="delete">
+                                            delete</button></a>
                                 </div>
                             </a>
                         {% endif %}
@@ -199,7 +281,7 @@
                 </div>
             {% endif %}
         {% endfor %}
-<!--  Unclassified  -->
+    <!--  Unclassified  -->
         {% for row in noclass %}
             {% if loop.index == 1 %}
                 <div class="col-md-3">
@@ -210,6 +292,13 @@
                             <span class="badge">
                                 {{each.books|count}} read
                             </span>
+                            <br/>
+                            <a href="{{url_for('teachereditstudent', school_id=each.school_id, user_id=each.id, teacher_id=teacher.id)}}">
+                                <button class="btn-xs btn-warning" id="edit">edit</button>
+                            </a>
+                            <a href="{{url_for('teacherdeletestudent', school_id = each.school_id, user_id = each.id, teacher_id = teacher.id)}}">
+                                <button class="btn-xs btn-danger" id="delete">delete</button>
+                            </a>
                         </div>
                     {% endfor %}
                 </div>

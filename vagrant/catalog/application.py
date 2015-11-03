@@ -292,7 +292,7 @@ def schools():
     student = session.query(Students).filter_by(email=login_session['email'])
     # Do not show add school function if user is a registered student.
     if student ==[]:
-            return render_template('pubschools.html',
+            return render_template('public/schools.html',
                                schools=schools)
     else:
         return render_template('schools.html',
@@ -315,14 +315,14 @@ def school(school_id):
     creator = getadmininfo(school_id)
     if ('username' not in login_session or
         creator.email != login_session['email']):
-        return render_template('pubschool.html',
+        return render_template('public/school.html',
                                school = school,
                                students = students,
                                books = books,
                                teachers = teachers,
                                school_id = school_id)
     else:
-        return render_template('school.html',
+        return render_template('school/school.html',
                                school = school,
                                students = students,
                                books = books,
@@ -347,7 +347,7 @@ def newschool():
         flash(new.name + " created!")
         return redirect(url_for('schools'))
     else:
-        return render_template('newschool.html')
+        return render_template('school/new.html')
 
 # Edit a school
 @app.route('/school/<int:school_id>/edit', methods=['GET', 'POST'])
@@ -379,7 +379,7 @@ def editschool(school_id):
         flash(school.name + " edited!")
         return redirect(url_for('schoolstudents', school_id = school_id))
     else:
-        return render_template('editschool.html',
+        return render_template('school/edit.html',
                                school_id = school_id,
                                school = school)
 
@@ -405,7 +405,7 @@ def deleteschool(school_id):
         flash(school.name + " deleted!")
         return redirect(url_for('schools'))
     else:
-        return render_template('deleteschool.html',
+        return render_template('school/delete.html',
                                school = school,
                                school_id = school_id)
 
@@ -418,12 +418,12 @@ def schoolteachers(school_id):
     creator = getadmininfo(school_id)
     if ('username' not in login_session or
         creator.email != login_session['email']):
-        return render_template('pubteachers.html',
+        return render_template('public/teachers.html',
                                school = school,
                                teachers = teachers,
                                school_id = school_id)
     else:
-        return render_template('teachers.html',
+        return render_template('school/teachers.html',
                                school = school,
                                teachers = teachers,
                                school_id = school_id)
@@ -456,7 +456,7 @@ def newteacher(school_id):
         flash(new.name + " added!")
         return redirect(url_for('schoolteachers', school_id = school_id))
     else:
-        return render_template('newteacher.html',
+        return render_template('teacher/new.html',
                                school_id = school_id,
                                school = school)
 
@@ -493,7 +493,7 @@ def editteacher(school_id, teacher_id):
         flash(teacher.name + " edited!")
         return redirect(url_for('schoolteachers', school_id = school_id))
     else:
-        return render_template('editteacher.html',
+        return render_template('teacher/edit.html',
                                school_id = school_id,
                                teacher_id = teacher_id,
                                teacher = teacher,
@@ -524,7 +524,7 @@ def deleteteacher(school_id, teacher_id):
         flash(teacher.name + " deleted!")
         return redirect(url_for('schoolteachers', school_id = school_id))
     else:
-        return render_template('deleteteacher.html',
+        return render_template('teacher/delete.html',
                                school = school,
                                teacher = teacher,
                                teacher_id = teacher_id,
@@ -550,7 +550,7 @@ def classroom(teacher_id):
     creator = getadmininfo(teacher.school_id)
     credcheck = credentials(creator.email, teacher.email, 0)
     if 'username' not in login_session or credcheck != "true":
-        return render_template('pubclasses.html',
+        return render_template('public/classes.html',
                                teacher = teacher,
                                students = students,
                                classroom = classroom,
@@ -558,7 +558,7 @@ def classroom(teacher_id):
                                books = books,
                                teacher_id = teacher_id)
     else:
-        return render_template('classes.html',
+        return render_template('class/classes.html',
                                teacher = teacher,
                                students = students,
                                classroom = classroom,
@@ -585,7 +585,7 @@ def room(teacher_id, room_id):
     creator = getadmininfo(teacher.school_id)
     credcheck = credentials(creator.email, teacher.email, 0)
     if 'username' not in login_session or credcheck != "true":
-        return render_template('pubclassroom.html',
+        return render_template('public/classroom.html',
                            teacher = teacher,
                            students = students,
                            books = books,
@@ -594,7 +594,7 @@ def room(teacher_id, room_id):
                            teacher_id = teacher_id,
                            room_id = room_id)
     else:
-        return render_template('classroom.html',
+        return render_template('class/classroom.html',
                                teacher = teacher,
                                students = students,
                                books = books,
@@ -637,7 +637,7 @@ def newclass(teacher_id):
         flash(new.name + " added!")
         return redirect(url_for('classroom', teacher_id=teacher_id))
     else:
-        return render_template('newclass.html',
+        return render_template('class/new.html',
                                teacher = teacher,
                                classes = classes,
                                sets = sets,
@@ -682,7 +682,7 @@ def editclass(teacher_id, class_id):
         flash(classroom.name + " edited!")
         return redirect(url_for('classroom', teacher_id=teacher_id))
     else:
-        return render_template('editclass.html',
+        return render_template('class/edit.html',
                                teacher = teacher,
                                grades = grades,
                                classroom = classroom,
@@ -716,7 +716,7 @@ def deleteclass(teacher_id, class_id):
         flash(classroom.name + " deleted!")
         return redirect(url_for('classroom', teacher_id = teacher_id))
     else:
-        return render_template('deleteclass.html',
+        return render_template('class/delete.html',
                                teacher = teacher,
                                classroom = classroom,
                                teacher_id = teacher_id,
@@ -735,12 +735,12 @@ def schoolstudents(school_id):
     creator = getadmininfo(school_id)
     credcheck = credentials(creator.email, 0, 0)
     if 'username' not in login_session or credcheck != "true":
-        return render_template('pubstudents.html',
+        return render_template('public/students.html',
                                school = school,
                                students = students,
                                school_id = school_id)
     else:
-        return render_template('students.html',
+        return render_template('school/students.html',
                                school = school,
                                students = students,
                                school_id = school_id)
@@ -777,7 +777,7 @@ def newstudent(school_id):
         flash(new.name + " added!")
         return redirect(url_for('schoolstudents', school_id=school_id))
     else:
-        return render_template('newstudent.html',
+        return render_template('student/new.html',
                                school_id=school_id,
                                classes = classes,
                                school=school)
@@ -816,7 +816,7 @@ def teachernewstudent(school_id, teacher_id):
         flash(new.name + " added!")
         return redirect(url_for('classroom', teacher_id=teacher_id))
     else:
-        return render_template('newstudent.html',
+        return render_template('student/new.html',
                                school_id=school_id,
                                classes = classes,
                                school=school)
@@ -856,7 +856,7 @@ def editstudent(school_id, user_id):
         flash(student.name + " edited!")
         return redirect(url_for('schoolstudents', school_id=school_id))
     else:
-        return render_template('editstudent.html',
+        return render_template('student/edit.html',
                                school_id = school_id,
                                user_id = user_id,
                                student = student,
@@ -900,7 +900,7 @@ def teachereditstudent(school_id, user_id, teacher_id):
         flash(student.name + " edited!")
         return redirect(url_for('classroom', teacher_id=teacher_id))
     else:
-        return render_template('editstudent.html',
+        return render_template('student/edit.html',
                                school_id = school_id,
                                user_id = user_id,
                                student = student,
@@ -933,7 +933,7 @@ def deletestudent(school_id, user_id):
         flash(student.name + " deleted!")
         return redirect(url_for('schoolstudents', school_id = school_id))
     else:
-        return render_template('deletestudent.html',
+        return render_template('student/delete.html',
                                school = school,
                                student = student,
                                user_id = user_id,
@@ -965,7 +965,7 @@ def teacherdeletestudent(school_id, user_id, teacher_id):
         flash(student.name + " deleted!")
         return redirect(url_for('classroom', teacher_id = teacher_id))
     else:
-        return render_template('deletestudent.html',
+        return render_template('student/delete.html',
                                school = school,
                                student = student,
                                user_id = user_id,
@@ -980,7 +980,7 @@ def student(student_id, teacher_id):
              .filter_by(teacher_id=teacher_id))
     books = session.query(Books).filter_by(student_id=student_id)
 
-    return render_template('student.html',
+    return render_template('student/student.html',
                            student = student,
                            books = books,
                            genre = genre,
@@ -1006,7 +1006,7 @@ def newbook(student_id):
                                 student_id = student.id,
                                 teacher_id = student.classes.teacher_id))
     else:
-        return render_template('newbook.html',
+        return render_template('book/new.html',
                                student_id = student_id,
                                student = student)
 
@@ -1033,7 +1033,7 @@ def editbook(student_id, book_id):
         flash(book.title + " edited!")
         return redirect(url_for('student', student_id=student.id, teacher_id=student.classes.teacher_id))
     else:
-        return render_template('editbook.html',
+        return render_template('book/edit.html',
                                student_id = student_id,
                                book_id = book_id,
                                student = student,
@@ -1056,7 +1056,7 @@ def deletebook(student_id, book_id):
                                 student_id = student.id,
                                 teacher_id = student.classes.teacher_id))
     else:
-        return render_template('deletebook.html',
+        return render_template('book/delete.html',
                                student = student,
                                student_id = student_id,
                                book = book,

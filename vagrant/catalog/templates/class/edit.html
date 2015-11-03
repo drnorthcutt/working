@@ -1,32 +1,32 @@
 {% extends "main.html" %}
 {% block content %}
-{% include "header.html" %}
+{% include "class/header.html" %}
 	<div class="row divider green">
 		<div class="col-md-12"></div>
 	</div>
 	<div class="row banner menu">
 		<div class="col-md-11 col-md-offset-1 padding-none">
-			<h1>New Class for {{ teacher.name }}</h1>
+			<h1>Edit {{ classroom.num }} - {{classroom.name}} for {{ teacher.name }}</h1>
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-md-10 col-md-offset-1 padding-top">
-		<div class="col-md-10 col-md-offset-1">
-		    <div class="col-md-10">Current Classes:
-		    {% for row in classes %}
-		    <br />{{ row.grade }} - {{ row.name }}
+		<div class="col-md-6 col-md-offset-1 padding-top">
+		<div class="col-md-6 col-md-offset-1">
+		    <div class="col-md-6">Current Classes:
+		    {% for grade in grades %}
+		    {{ grade.grade }} - {{ grade.name }}
 		    {% endfor %}
 		    </div>
 		</div>
 		<div class="col-md-6 col-md-offset-1">
-			<form action="{{url_for('newclass', teacher_id=teacher.id)}}" method = "post">
+			<form action="{{url_for('editclass', teacher_id=teacher.id, class_id=class_id)}}" method = "post">
 				<div class="form-group">
 					<label for="name">Name:</label>
-					<input type ="text" class="form-control" maxlength="80" name="name" placeholder="Optional" autofocus>
+					<input type ="text" class="form-control" maxlength="80" name="name" placeholder="{{ classroom.name }}" autofocus>
                 <br/>
 				<label for="grade">Grade:</label>
 				<select name='grade'>
-                   <option>SELECT</option>
+                   <option value="{{ classroom.grade }}" selected>{{ classroom.grade }}</option>
                     <option value="3">3rd</option>
 	                <option value="4">4th</option>
 	                <option value="5">5th</option>
@@ -37,12 +37,23 @@
                 </select>
                 <label for="setlist">Challenge List</label>
                 <select name="set">
-                    <option value=""></option>
+                    <option value="{{ classroom.set_id }}">
+                        {% for set in sets if set.id == classroom.set_id %}
+                            {{ set.name }}
+                        {% endfor %}
+                    </option>
                 {% if sets !=[] %}
                 {% for set in sets %}
                     <option value="{{set.id}}">{{ set.name }}</option>
                 {% endfor %}
                 {% endif %}
+                </select>
+                <label for="teacher">Teachr</label>
+                <select name="teacher">
+                <option value="{{ teacher.id }}" selected>{{ teacher.name }}</option>
+                   {% for row in allteach %}
+                    <option value="{{ row.id }}">{{ row.name }}</option>
+	               {% endfor %}
                 </select>
 					<div class="padding-bottom"></div>
 					<button type="submit" class="btn btn-default" id="submit" type="submit">
