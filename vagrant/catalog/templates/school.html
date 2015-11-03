@@ -6,7 +6,7 @@
     <div class="col-md-11 col-md-offset-1 padding-none">
         <h1>{{ school.name }}
 			<a href="{{url_for('editschool', school_id=school_id)}}">
-				<button class="btn-xs btn-warning" id="new-student">
+				<button class="btn-xs btn-warning" id="edit-school">
 					<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
 					Edit School
 				</button>
@@ -69,9 +69,15 @@
                     {{student.books|count}} read
                  </span><br />
                 <a href="{{url_for('editstudent', school_id=school.id, user_id=student.id)}}">
-                    <button class="btn-xs btn-warning" id="edit">edit</button></a>
+                    <button class="btn-xs btn-warning" id="edit">
+                        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                            edit
+                    </button></a>
                 <a href="{{url_for('deletestudent', school_id = school.id, user_id = student.id)}}">
-                    <button class="btn-xs btn-danger" id="delete">delete</button></a>
+                    <button class="btn-xs btn-danger" id="delete">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                            delete
+                    </button></a>
             </div>
             </a>
         {% endfor %}
@@ -93,9 +99,15 @@
                         <div class="menu-item">
                             {{ teacher.name }}
                             <a href="{{url_for('editteacher', school_id=school.id, teacher_id=teacher.id)}}">
-                                <button class="btn-xs btn-warning" id="edit">edit</button></a>
+                                <button class="btn-xs btn-warning" id="edit">
+                                    <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                                        edit
+                                </button></a>
                             <a href="{{url_for('deleteteacher', school_id=school.id, teacher_id=teacher.id)}}">
-                                <button class="btn-xs btn-danger" id="delete">delete</button></a>
+                                <button class="btn-xs btn-danger" id="delete">
+                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                        delete
+                                </button></a>
                         </div>
                     </a>
                 </div>
