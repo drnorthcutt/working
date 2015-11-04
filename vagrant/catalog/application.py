@@ -543,6 +543,7 @@ def classroom(teacher_id):
                .filter(Students.classroom == '0')
                .filter(Students.school_id == teacher.school_id)
                .order_by(Students.name).all())
+    lists = session.query(Genres).filter_by(teacher_id=teacher_id).all()
     books = (session.query(Books)
              .join(Students)
              .join(Classrooms)
@@ -555,6 +556,7 @@ def classroom(teacher_id):
                                students = students,
                                classroom = classroom,
                                noclass = noclass,
+                               lists = lists,
                                books = books,
                                teacher_id = teacher_id)
     else:
@@ -563,6 +565,7 @@ def classroom(teacher_id):
                                students = students,
                                classroom = classroom,
                                noclass = noclass,
+                               lists = lists,
                                books = books,
                                teacher_id = teacher_id)
 
@@ -722,6 +725,72 @@ def deleteclass(teacher_id, class_id):
                                teacher_id = teacher_id,
                                class_id = class_id)
 
+# Show a teacher's genre lists
+@app.route('/teacher/<int:teacher_id>/genrelists')
+def genre(teacher_id):
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    school = session.query(Schools).filter_by(id=teacher.school_id).one()
+    lists = session.query(Genres).filter_by(teacher_id=teacher_id).all()
+    classes = session.query(Classrooms).filter_by(teacher_id=teacher_id).all()
+    creator = getadmininfo(teacher.school_id)
+    credcheck = credentials(creator.email, teacher.email, 0)
+    if 'username' not in login_session or credcheck != "true":
+        return render_template('public/lists.html',
+                               school = school,
+                               teacher = teacher,
+                               lists = lists,
+                               classes = classes,
+                               teacher_id = teacher_id)
+    else:
+        return render_template('genre/lists.html',
+                               school = school,
+                               teacher = teacher,
+                               lists = lists,
+                               classes = classes,
+                               teacher_id = teacher_id)
+
+# Add a student.
+@app.route('/teacher/<int:teacher_id>/genrelist/new', methods=['GET', 'POST'])
+def newlist(teacher_id):
+    if 'username' not in login_session:
+        return redirect('/login')
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    creator = getadmininfo(teacher.school_id)
+    credcheck = credentials(creator.email, teacher.email, 0)
+#    if 'username' not in login_session or credcheck != "true":
+#        return ('''
+#                    <script>
+#                    function myFunction() {
+#                    alert('You are not authorized to add a list to this
+#                           school.');
+#                    }
+#                    </script>
+#                    <body onload='myFunction()''>
+#                ''')
+    if request.method == 'POST':
+        new = Genres(name=request.form['name'],
+                     teacher_id=teacher_id,
+                     poetry=request.form['poetry'],
+                     graphic=request.form['graphic'],
+                     realistic=request.form['realistic'],
+                     historical=request.form['historical'],
+                     fantasy=request.form['fantasy'],
+                     scifi=request.form['scifi'],
+                     mystery=request.form['mystery'],
+                     info=request.form['info'],
+                     bio=request.form['bio'],
+                     pages=request.form['pages']
+                    )
+        session.add(new)
+        session.commit()
+        flash(new.name + " added!")
+        return redirect(url_for('genre',
+                                teacher = teacher,
+                                teacher_id=teacher.id))
+    else:
+        return render_template('genre/new.html',
+                               teacher = teacher,
+                               teacher_id=teacher.id)
 
 # Show a specific school's students.
 @app.route('/school/<int:school_id>/students')
