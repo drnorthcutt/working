@@ -789,16 +789,16 @@ def newlist(teacher_id):
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     creator = getadmininfo(teacher.school_id)
     credcheck = credentials(creator.email, teacher.email, 0)
-#    if 'username' not in login_session or credcheck != "true":
-#        return ('''
-#                    <script>
-#                    function myFunction() {
-#                    alert('You are not authorized to add a list to this
-#                           school.');
-#                    }
-#                    </script>
-#                    <body onload='myFunction()''>
-#                ''')
+    if 'username' not in login_session or credcheck != "true":
+        return ('''
+                   <script>
+                    function myFunction() {
+                    alert('You are not authorized to add a list to this
+                           school.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>
+                ''')
     if request.method == 'POST':
         new = Genres(name=request.form['name'],
                      teacher_id=teacher.id,
@@ -967,7 +967,7 @@ def teachernewstudent(school_id, teacher_id):
                     "<script>
                     function myFunction() {
                     alert('You are not authorized to add a student to this
-                           school..');
+                           school.');
                     }
                     </script>
                     <body onload='myFunction()''>"
