@@ -38,11 +38,12 @@
                 <br />
                 <label for="setlist">Challenge List</label>
                 <select name="set">
-                    <option value="{{ classroom.set_id }}">
+                    <option value="{{ classroom.set_id }}" selected>
                         {% for set in sets if set.id == classroom.set_id %}
                             {{ set.name }}
                         {% endfor %}
                     </option>
+                    <option value="clear">Clear List</option>
                 {% if sets !=[] %}
                 {% for set in sets %}
                     <option value="{{set.id}}">{{ set.name }}</option>
