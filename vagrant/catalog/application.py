@@ -717,6 +717,7 @@ def editclass(teacher_id, class_id):
                                teacher = teacher,
                                grades = grades,
                                classroom = classroom,
+                               sets = sets,
                                allteach = allteach,
                                teacher_id = teacher_id,
                                class_id = class_id)
@@ -800,7 +801,7 @@ def newlist(teacher_id):
 #                ''')
     if request.method == 'POST':
         new = Genres(name=request.form['name'],
-                     teacher_id=teacher_id,
+                     teacher_id=teacher.id,
                      poetry=request.form['poetry'],
                      graphic=request.form['graphic'],
                      realistic=request.form['realistic'],
