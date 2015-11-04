@@ -93,7 +93,7 @@ def getuserID(email):
             except:
                 return None
 
-# Google Plus OAuth
+# Google Plus and Google Education OAuth
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     if request.args.get('state') != login_session['state']:
@@ -428,6 +428,31 @@ def schoolteachers(school_id):
                                teachers = teachers,
                                school_id = school_id)
 
+# Show a specific school's students.
+@app.route('/school/<int:school_id>/students')
+def schoolstudents(school_id):
+    school = session.query(Schools).filter_by(id=school_id).one()
+#    grades = (session.query(Students)
+#                .filter_by(school_id=school_id)
+#                .order_by(Students.name)
+#                .all())
+    students = session.query(Students).filter_by(school_id=school_id).all()
+    creator = getadmininfo(school_id)
+    credcheck = credentials(creator.email, 0, 0)
+    if 'username' not in login_session or credcheck != "true":
+        return render_template('public/students.html',
+                               school = school,
+                               students = students,
+                               school_id = school_id)
+    else:
+        return render_template('school/students.html',
+                               school = school,
+                               students = students,
+                               school_id = school_id)
+
+'''
+Teacher Block
+'''
 # Add a teacher.
 @app.route('/school/<int:school_id>/teacher/new', methods=['GET', 'POST'])
 def newteacher(school_id):
@@ -530,6 +555,9 @@ def deleteteacher(school_id, teacher_id):
                                teacher_id = teacher_id,
                                school_id = school_id)
 
+'''
+Class(es) Block
+'''
 # Show a teacher's classroom(s).
 @app.route('/teacher/<int:teacher_id>/classroom')
 def classroom(teacher_id):
@@ -725,6 +753,9 @@ def deleteclass(teacher_id, class_id):
                                teacher_id = teacher_id,
                                class_id = class_id)
 
+'''
+Genre Lists Block
+'''
 # Show a teacher's genre lists
 @app.route('/teacher/<int:teacher_id>/genrelists')
 def genre(teacher_id):
@@ -749,7 +780,7 @@ def genre(teacher_id):
                                classes = classes,
                                teacher_id = teacher_id)
 
-# Add a student.
+# Add a genre list.
 @app.route('/teacher/<int:teacher_id>/genrelist/new', methods=['GET', 'POST'])
 def newlist(teacher_id):
     if 'username' not in login_session:
@@ -784,7 +815,7 @@ def newlist(teacher_id):
         session.add(new)
         session.commit()
         flash(new.name + " added!")
-        return redirect(url_for('genre',
+        return redirect(url_for('classroom',
                                 teacher = teacher,
                                 teacher_id=teacher.id))
     else:
@@ -792,28 +823,95 @@ def newlist(teacher_id):
                                teacher = teacher,
                                teacher_id=teacher.id)
 
-# Show a specific school's students.
-@app.route('/school/<int:school_id>/students')
-def schoolstudents(school_id):
-    school = session.query(Schools).filter_by(id=school_id).one()
-#    grades = (session.query(Students)
-#                .filter_by(school_id=school_id)
-#                .order_by(Students.name)
-#                .all())
-    students = session.query(Students).filter_by(school_id=school_id).all()
-    creator = getadmininfo(school_id)
-    credcheck = credentials(creator.email, 0, 0)
+# Edit a genre list.
+@app.route('/teacher/<int:teacher_id>/genrelist/<int:list_id>/edit',
+           methods=['GET', 'POST'])
+def editlist(teacher_id, list_id):
+    if 'username' not in login_session:
+        return redirect('/login')
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    alist = session.query(Genres).filter_by(id=list_id).one()
+    creator = getadmininfo(teacher.school_id)
+    credcheck = credentials(creator.email, teacher.email, 0)
     if 'username' not in login_session or credcheck != "true":
-        return render_template('public/students.html',
-                               school = school,
-                               students = students,
-                               school_id = school_id)
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to edit a list of this
+                          school.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
+    if request.method == 'POST':
+        if request.form['name']:
+            alist.name=request.form['name']
+        if request.form['poetry']:
+            alist.poetry=request.form['poetry']
+        if request.form['graphic']:
+            alist.graphic=request.form['graphic']
+        if request.form['realistic']:
+            alist.realistic=request.form['realistic']
+        if request.form['historical']:
+            alist.historical=request.form['historical']
+        if request.form['fantasy']:
+            alist.fantasy=request.form['fantasy']
+        if request.form['scifi']:
+            alist.scifi=request.form['scifi']
+        if request.form['mystery']:
+            alist.mystery=request.form['mystery']
+        if request.form['info']:
+            alist.info=request.form['info']
+        if request.form['bio']:
+            alist.bio=request.form['bio']
+        if request.form['pages']:
+            alist.pages=request.form['pages']
+        session.add(alist)
+        session.commit()
+        flash(alist.name + " edited!")
+        return redirect(url_for('classroom', teacher_id = teacher.id))
     else:
-        return render_template('school/students.html',
-                               school = school,
-                               students = students,
-                               school_id = school_id)
+        return render_template('genre/edit.html',
+                               alist = alist,
+                               teacher = teacher,
+                               teacher_id = teacher.id,
+                               list_id = alist.id)
 
+# Delete a genre list.
+@app.route('/teacher/<int:teacher_id>/genrelist/<int:list_id>/delete',
+           methods=['GET', 'POST'])
+def deletelist(teacher_id, list_id):
+    if 'username' not in login_session:
+        return redirect('/login')
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    alist = session.query(Genres).filter_by(id=list_id).one()
+    creator = getadmininfo(teacher.school_id)
+    credcheck = credentials(creator.email, teacher.email, 0)
+    if 'username' not in login_session or credcheck != "true":
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to delete a list of this
+                          school.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
+    if request.method == 'POST':
+        session.delete(alist)
+        session.commit()
+        flash(alist.name + " deleted!")
+        return redirect(url_for('classroom', teacher_id = teacher.id))
+    else:
+        return render_template('genre/delete.html',
+                               alist = alist,
+                               teacher = teacher,
+                               teacher_id = teacher.id,
+                               list_id = alist.id)
+
+'''
+Student Block
+'''
 # Add a student.
 @app.route('/school/<int:school_id>/student/new', methods=['GET', 'POST'])
 def newstudent(school_id):
@@ -1040,6 +1138,9 @@ def teacherdeletestudent(school_id, user_id, teacher_id):
                                user_id = user_id,
                                school_id = school_id)
 
+'''
+Books Block
+'''
 # Show a student's books.
 @app.route('/<int:teacher_id>/student/<int:student_id>')
 def student(student_id, teacher_id):
