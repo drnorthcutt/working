@@ -23,6 +23,12 @@
 					    Add New Class
 				</button>
 			</a>
+            <a href="{{url_for('newlist', teacher_id=teacher.id)}}">
+				<button class="btn-xs btn-success" id="new-list">
+					<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+					    Add New List
+				</button>
+			</a>
         </h1>
     </div>
 </div>
@@ -39,7 +45,7 @@
 </div>
 <div class="row">
     <div class="col-md-6">
-        <div class="col-md-6">
+        <div class="col-md-3">
             <h3>Current Classes:</h3>
         </div>
         {% for row in classroom %}
@@ -65,12 +71,18 @@
         {% endfor %}
     </div>
     <div class="col-md-6">
-        <div class="col-md-6">
+        <div class="col-md-3">
             <h3>Genre Requirements</h3>
         </div>
         <div class="col-md-3">
             {% for list in lists %}
-                {{list.name}}
+                <div class="col-md-3">
+                    <a href="{{url_for('genre', list_id = list.id, teacher_id = list.teacher_id)}}">
+                        <button class="btn-sm btn-primary" id="classroom">
+                            <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+                                {{list.name}}
+                        </button></a>
+                </div>
             {% endfor %}
         </div>
     </div>
