@@ -66,29 +66,50 @@ def getadmininfo(user_id):
 
 # Check whether a user belongs to a school.
 def credentials(admin, teacher, student):
-    if admin != login_session['email']:
-        if teacher != login_session['email']:
-            if student != login_session['email']:
-                return "false"
-            else:
-                return "true"
-        else:
-            return "true"
-    else:
+    if 'username' not in login_session:
+        return "false"
+    admin = admin
+    teacher = teacher
+    student = student
+    if admin == login_session['email']:
         return "true"
+    if teacher == login_session['email']:
+        return "true"
+    if student == login_session['email']:
+        return "true"
+    else:
+        return "false"
 
 # Get login_session DB id, if exists
 def getuserID(email):
     try:
         user = session.query(Admins).filter_by(email=email).one()
+        if user !=[]:
+            if user.picture != login_session['picture']:
+                user.picture = login_session['picture']
+                session.add(user)
+                session.commit()
+                user = session.query(Admins).filter_by(email=email).one()
         return user.id
     except:
         try:
             user = session.query(Teachers).filter_by(email=email).one()
+            if user !=[]:
+                if user.picture != login_session['picture']:
+                    user.picture = login_session['picture']
+                    session.add(user)
+                    session.commit()
+                    user = session.query(Teachers).filter_by(email=email).one()
             return user.id
         except:
             try:
                 user = session.query(Students).filter_by(email=email).one()
+                if user !=[]:
+                    if user.picture != login_session['picture']:
+                        user.picture = login_session['picture']
+                        session.add(user)
+                        session.commit()
+                        user = session.query(Students).filter_by(email=email).one()
                 return user.id
             except:
                 return None
@@ -287,7 +308,7 @@ def disconnect():
 def schools():
     schools = session.query(Schools).order_by(Schools.name).all()
     if 'username' not in login_session:
-        return render_template('pubschools.html',
+        return render_template('public/schools.html',
                                schools=schools)
     student = session.query(Students).filter_by(email=login_session['email'])
     # Do not show add school function if user is a registered student.
@@ -578,7 +599,7 @@ def classroom(teacher_id):
              .filter_by(teacher_id=teacher_id).all())
     creator = getadmininfo(teacher.school_id)
     credcheck = credentials(creator.email, teacher.email, 0)
-    if 'username' not in login_session or credcheck != "true":
+    if credcheck != "true":
         return render_template('public/classes.html',
                                teacher = teacher,
                                students = students,
@@ -705,7 +726,10 @@ def editclass(teacher_id, class_id):
         if request.form['grade']:
             classroom.grade = request.form['grade']
         if request.form['set']:
-            classroom.set_id = request.form['set']
+            if request.form['set'] == "clear":
+                classroom.set_id = ""
+            else:
+                classroom.set_id = request.form['set']
         if request.form['teacher']:
             classroom.teacher_id = request.form['teacher']
         session.add(classroom)
