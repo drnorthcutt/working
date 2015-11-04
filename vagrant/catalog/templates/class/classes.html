@@ -51,8 +51,13 @@
         {% for row in classroom %}
             <div class="col-md-3">
                 <a href="{{url_for('room', teacher_id = teacher.id, room_id = row.id)}}">
-                    <button class="btn-sm btn-primary" id="classroom">
-                        <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+                    {% if row.set_id == "" %}
+                        <button class="btn-sm btn-warning" id="classroom">
+                            <span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span>
+                    {% else %}
+                        <button class="btn-sm btn-primary" id="classroom">
+                            <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+                    {% endif %}
                             Name: {{ row.name }}<br />
                             Grade: {{ row.grade }}
                     </button></a>
@@ -64,7 +69,7 @@
                     </button></a>
                 <a href="{{url_for('deleteclass', teacher_id = teacher.id, class_id = row.id)}}">
                     <button class="btn-xs btn-danger" id="delete">
-                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                             delete
                     </button></a>
             </div>
@@ -72,7 +77,7 @@
     </div>
     <div class="col-md-6">
         <div class="col-md-3">
-            <h3>Genre Requirements</h3>
+            <h3>Genre Requirements:</h3>
         </div>
         <div class="col-md-3">
             {% for list in lists %}
@@ -153,11 +158,14 @@
                                     <br/>
                                     <a href="{{url_for('teachereditstudent', school_id=student.school_id, user_id=student.id, teacher_id=teacher.id)}}">
                                         <button class="btn-xs btn-warning" id="edit">
+                                           <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                                             edit
                                         </button></a>
                                     <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, user_id = student.id, teacher_id=teacher.id)}}">
                                         <button class="btn-xs btn-danger" id="delete">
-                                            delete</button></a>
+                                           <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                            delete
+                                        </button></a>
                             </div>
                         </a>
                         {% endif %}
@@ -181,11 +189,14 @@
                                     <br/>
                                     <a href="{{url_for('teachereditstudent', school_id=student.school_id, user_id=student.id, teacher_id=teacher.id)}}">
                                         <button class="btn-xs btn-warning" id="edit">
+                                           <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                                             edit
                                         </button></a>
                                     <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, user_id = student.id, teacher_id=teacher.id)}}">
                                         <button class="btn-xs btn-danger" id="delete">
-                                            delete</button></a>
+                                           <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                            delete
+                                        </button></a>
                                 </div>
                             </a>
                         {% endif %}
@@ -209,11 +220,14 @@
                                     <br/>
                                     <a href="{{url_for('teachereditstudent', school_id=student.school_id, user_id=student.id, teacher_id=teacher.id)}}">
                                         <button class="btn-xs btn-warning" id="edit">
+                                           <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                                             edit
                                         </button></a>
                                     <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, user_id = student.id, teacher_id=teacher.id)}}">
                                         <button class="btn-xs btn-danger" id="delete">
-                                            delete</button></a>
+                                           <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                            delete
+                                        </button></a>
                                 </div>
                             </a>
                         {% endif %}
@@ -237,11 +251,14 @@
                                     <br/>
                                     <a href="{{url_for('teachereditstudent', school_id=student.school_id, user_id=student.id, teacher_id=teacher.id)}}">
                                         <button class="btn-xs btn-warning" id="edit">
+                                           <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                                             edit
                                         </button></a>
                                     <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, user_id = student.id, teacher_id=teacher.id)}}">
                                         <button class="btn-xs btn-danger" id="delete">
-                                            delete</button></a>
+                                           <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                            delete
+                                        </button></a>
                                 </div>
                             </a>
                         {% endif %}
@@ -265,11 +282,14 @@
                                     <br/>
                                     <a href="{{url_for('teachereditstudent', school_id=student.school_id, user_id=student.id, teacher_id=teacher.id)}}">
                                         <button class="btn-xs btn-warning" id="edit">
+                                           <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                                             edit
                                         </button></a>
                                     <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, user_id = student.id, teacher_id=teacher.id)}}">
                                         <button class="btn-xs btn-danger" id="delete">
-                                            delete</button></a>
+                                           <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                            delete
+                                        </button></a>
                                 </div>
                             </a>
                         {% endif %}
@@ -293,11 +313,14 @@
                                     <br/>
                                     <a href="{{url_for('teachereditstudent', school_id=student.school_id, user_id=student.id, teacher_id=teacher.id)}}">
                                         <button class="btn-xs btn-warning" id="edit">
+                                           <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                                             edit
                                         </button></a>
                                     <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, user_id = student.id, teacher_id=teacher.id)}}">
                                         <button class="btn-xs btn-danger" id="delete">
-                                            delete</button></a>
+                                           <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                            delete
+                                        </button></a>
                                 </div>
                             </a>
                         {% endif %}
@@ -318,11 +341,15 @@
                             </span>
                             <br/>
                             <a href="{{url_for('teachereditstudent', school_id=each.school_id, user_id=each.id, teacher_id=teacher.id)}}">
-                                <button class="btn-xs btn-warning" id="edit">edit</button>
-                            </a>
+                                <button class="btn-xs btn-warning" id="edit">
+                                    <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                                    edit
+                                </button></a>
                             <a href="{{url_for('teacherdeletestudent', school_id = each.school_id, user_id = each.id, teacher_id = teacher.id)}}">
-                                <button class="btn-xs btn-danger" id="delete">delete</button>
-                            </a>
+                                <button class="btn-xs btn-danger" id="delete">
+                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                    delete
+                                </button></a>
                         </div>
                     {% endfor %}
                 </div>
