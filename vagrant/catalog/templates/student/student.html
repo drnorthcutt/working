@@ -7,7 +7,7 @@
         <h1>{{ student.name }} <small style="color: #f0f0f0;">{{books.count()}} of 40 read so far</small>
 			<figure class="creator">
 				<img src="{{student.picture}}">
-				<figcaption>Student</figcaption>
+				<figcaption style="color: white">Student</figcaption>
 			</figure>
            <br />
            <a href="{{url_for('room', teacher_id = teacher_id, room_id = student.classroom)}}">

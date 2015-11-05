@@ -2,12 +2,12 @@
 <div class="row divider green">
     <div class="col-md-12"></div>
 </div>
-<div class="row banner menu">
+<div class="row banner student">
     <div class="col-md-11 col-md-offset-1 padding-bottom">
-        <h1>{{ student.name }} <small>{{books.count()}} of 40 read so far</small>
+        <h1>{{ student.name }} <small style="color: white">{{books.count()}} of 40 read so far</small>
 			<figure class="creator">
 				<img src="{{student.picture}}">
-				<figcaption>Student</figcaption>
+				<figcaption style="color: white">Student</figcaption>
 			</figure>
            <br />
            <a href="{{url_for('room', teacher_id = teacher_id, room_id = student.classroom)}}">
