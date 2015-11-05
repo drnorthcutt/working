@@ -6,14 +6,14 @@
 h1 {
 	font-family: "Helvetica Neue Light", Roboto, Helvetica, Arial, sans-serif;
 	font-size: 50px;
-	color: #51453B;
+	color: white;
 	line-height: 60px;
 	font-weight: 300;
 }
 
 h2 {
 	font-size: 24px;
-	color: #42C3C9;
+	color: #7B7573;
 	line-height: 29px;
 }
 
@@ -90,13 +90,13 @@ h3 {
 	font-weight: 400;
 }
 .divider {
-	height: 15px;
+	height: 10px;
 }
 .divider.blue {
 	background-color: #42C3C9;
 }
 .divider.green {
-	background-color: #9FB80A;
+	background-color: rgba(123, 117, 115, 0.22);
 }
 .banner.main {
 	height: 150px;
@@ -116,6 +116,13 @@ h3 {
 .banner.school {
 	height: 150px;
 	background: url("/static/banner2.jpg");
+	background-position: right;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+.banner.student {
+	height: 150px;
+	background: url("/static/studentbanner.jpg");
 	background-position: right;
 	background-repeat: no-repeat;
 	background-size: cover;
