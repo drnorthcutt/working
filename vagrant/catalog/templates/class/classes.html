@@ -4,12 +4,12 @@
 <div class="row divider green">
     <div class="col-md-12"></div>
 </div>
-<div class="row banner menu">
+<div class="row banner classroom">
     <div class="col-md-11 col-md-offset-1 padding-none">
-        <h1>{{ teacher.name }} <small>All Classes</small>
+        <h1>{{ teacher.name }} <small style="color: white">All Classes</small>
 			<figure class="creator">
 				<img src="{{teacher.picture}}">
-				<figcaption>Teacher</figcaption>
+				<figcaption style="color: white">Teacher</figcaption>
 			</figure>
 			<br />
 			<a href="{{url_for('teachernewstudent', school_id=teacher.school_id, teacher_id=teacher.id)}}">
