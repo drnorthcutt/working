@@ -35,12 +35,9 @@
     {% endwith %}
 </div>
 <div class="row">
-    <div class="col-md-1 padding-none"></div>
+    <div class="col-md-1 padding-none">&nbsp;</div>
     <div class="col-md-10 padding-none">
-        <h4>Genre List:
-           <br />
-            <small>A negative number means you still need to select and read something from this genre.  A positive number means you have read more of that genre than required.
-            </small></h4>
+        <h4>Genre List:<a href="#" data-toggle="tooltip" title="A negative number means you still need to read select something from this genre.  A positive number means you have read more of that genre than required." data-content="A negative number means you still need to read select something from this genre.  A positive number means you have read more of that genre than required."><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a><br /></h4>
     </div>
     <div class="col-md-12">
        {% for g in genre %}
