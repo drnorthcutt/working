@@ -127,6 +127,13 @@ h3 {
 	background-repeat: no-repeat;
 	background-size: cover;
 }
+.banner.classroom {
+	height: 150px;
+	background: url("/static/classbanner.jpg");
+	background-position: right;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
 .banner h1 {
 	margin: 45px 0;
     color: #f0f0f0;
