@@ -1174,13 +1174,58 @@ def student(student_id, teacher_id):
              .join(Classrooms)
              .filter_by(teacher_id=teacher_id))
     books = session.query(Books).filter_by(student_id=student_id)
-
-    return render_template('student/student.html',
-                           student = student,
-                           books = books,
-                           genre = genre,
-                           student_id = student_id,
-                           teacher_id = teacher_id)
+    num = books.count()
+    percent = (num*100)/40
+    print percent
+    poetry = books.filter_by(genre='poetry').count()
+    graph = books.filter_by(genre='graphic').count()
+    real = books.filter_by(genre='realistic').count()
+    hist = books.filter_by(genre='historical').count()
+    fan = books.filter_by(genre='fantasy').count()
+    sci = books.filter_by(genre='scifi').count()
+    myst = books.filter_by(genre='mystery').count()
+    info = books.filter_by(genre='info').count()
+    bio = books.filter_by(genre='bio').count()
+    school = session.query(Schools).filter_by(id=student.school_id).one()
+    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    creator = getadmininfo(student.school_id)
+    credcheck = credentials(creator.email, teacher.email, student.email)
+    if credcheck != "true":
+        return render_template('public/student.html',
+                               student = student,
+                               books = books,
+                               percent = percent,
+                               genre = genre,
+                               poetry = poetry,
+                               graph = graph,
+                               real = real,
+                               hist = hist,
+                               fan = fan,
+                               sci = sci,
+                               myst = myst,
+                               info = info,
+                               bio = bio,
+                               school = school,
+                               student_id = student_id,
+                               teacher_id = teacher_id)
+    else:
+        return render_template('student/student.html',
+                               student = student,
+                               books = books,
+                               genre = genre,
+                               percent = percent,
+                               poetry = poetry,
+                               graph = graph,
+                               real = real,
+                               hist = hist,
+                               fan = fan,
+                               sci = sci,
+                               myst = myst,
+                               info = info,
+                               bio = bio,
+                               school = school,
+                               student_id = student_id,
+                               teacher_id = teacher_id)
 
 # Add a student book.
 @app.route('/student/<int:student_id>/book/add', methods=['GET', 'POST'])
