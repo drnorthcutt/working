@@ -89,10 +89,11 @@ def credentials(admin, teacher, student):
         return "false"
 
 # Get login_session DB id, if exists
+# Check picture and add new one if different
 def getuserID(email):
     try:
         user = session.query(Admins).filter_by(email=email).one()
-        if user !=[]:
+        if user is not None:
             if user.picture != login_session['picture']:
                 user.picture = login_session['picture']
                 session.add(user)
@@ -102,7 +103,7 @@ def getuserID(email):
     except:
         try:
             user = session.query(Teachers).filter_by(email=email).one()
-            if user !=[]:
+            if user is not None:
                 if user.picture != login_session['picture']:
                     user.picture = login_session['picture']
                     session.add(user)
@@ -112,7 +113,7 @@ def getuserID(email):
         except:
             try:
                 user = session.query(Students).filter_by(email=email).one()
-                if user !=[]:
+                if user is not None:
                     if user.picture != login_session['picture']:
                         user.picture = login_session['picture']
                         session.add(user)
