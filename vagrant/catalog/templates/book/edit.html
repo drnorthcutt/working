@@ -14,9 +14,9 @@
 			<form action="{{url_for('editbook', book_id = book.id, student_id = student.id)}}" method = "post">
 				<div class="form-group">
 					<label for="title">Title:</label>
-					<input type ="text" class="form-control" maxlength="250" name="title" placeholder="{{book.title}}" autofocus required>
+					<input type ="text" class="form-control" maxlength="250" name="title" placeholder="{{book.title}}" autofocus>
                 <br/><label for="author">Author:</label>
-				<input type ="text" class="form-control" maxlength="80" name="author" placeholder="{{book.author}}" required>
+				<input type ="text" class="form-control" maxlength="80" name="author" placeholder="{{book.author}}">
 				<br/><label for="genre">Genre:</label>
 				<select name='genre'>
                    <option value="{{book.genre}}">{{book.genre}}</option>
@@ -33,7 +33,7 @@
 				<br/><label for="image">Picture:</label>
 				<input type ="text" class="form-control" maxlength="250" name="image" placeholder="{{book.image}}">
 				<br/><label for="review">Review:</label>
-				<textarea class="form-control" cols="50" rows="5" name="review" placeholder="{{book.review}}" maxlength="250" required></textarea>
+				<textarea class="form-control" cols="50" rows="5" name="review" placeholder="{{book.review}}" maxlength="250"></textarea>
 				<h6 class="pull-right" id="count_message"></h6>
 				<div class="padding-bottom"></div>
 					<button type="submit" class="btn-success" id="submit">
