@@ -24,10 +24,13 @@ class Schools(Base):
     def serialize(self):
         # Return data serializeable
         return {
-            'id' : self.id,
+            'ID' : self.id,
             'name' : self.name,
-            'state': self.state,
+            'State' : self.state,
+            'County' : self.county,
+            'District' : self.district,
         }
+
 class Admins(Base):
     __tablename__ = 'admins'
     name = Column(String(80), nullable = False)
@@ -44,6 +47,14 @@ class Teachers(Base):
     picture = Column(String(250))
     school_id = Column(Integer, ForeignKey('schools.id'))
     school = relationship("Schools")
+
+    @property
+    def serialize(self):
+        # Return data serializeable
+        return {
+            'ID' : self.id,
+            'name' : self.name,
+        }
 
 class Genres(Base):
     __tablename__ = 'genres'
@@ -62,6 +73,7 @@ class Genres(Base):
     pages = Column(Integer)
     teacher = relationship("Teachers", backref="genres")
 
+
 class Classrooms(Base):
     __tablename__ = 'classrooms'
     id = Column(Integer, primary_key = True)
@@ -74,6 +86,7 @@ class Classrooms(Base):
     teacher = relationship("Teachers", backref="classroom")
     genres = relationship("Genres", backref="classrooms")
     studs = relationship("Students")
+
 
 class Students(Base):
     __tablename__ = 'students'
@@ -88,6 +101,7 @@ class Students(Base):
     book = relationship("Books")
 
 
+
 class Books(Base):
     __tablename__ = 'books'
     id = Column(Integer, primary_key = True)
@@ -98,6 +112,18 @@ class Books(Base):
     review = Column(String(250), nullable = False)
     genre = Column(String(50), nullable = False)
     students = relationship("Students", backref="books")
+
+    @property
+    def serialize(self):
+        # Return data serializeable
+        return {
+            'ID' : self.id,
+            'Genre' : self.genre,
+            'Title' : self.title,
+            'Author' : self.author,
+            'Review' : self.review,
+        }
+
 
 engine = create_engine('sqlite:///book.db')
 Base.metadata.create_all(engine)
