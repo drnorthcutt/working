@@ -5,8 +5,8 @@
 
 h1 {
 	font-family: "Helvetica Neue Light", Roboto, Helvetica, Arial, sans-serif;
-	font-size: 50px;
-	color: white;
+	font-size: 55px;
+	color: #fcd775;
 	line-height: 60px;
 	font-weight: 300;
 }
@@ -100,7 +100,7 @@ h3 {
 }
 .banner.main {
 	height: 150px;
-	background: url("/static/banner.jpg");
+	background: url("/static/schools.jpg");
 	background-position: right;
 	background-repeat: no-repeat;
 	background-size: cover;
@@ -115,7 +115,7 @@ h3 {
 }
 .banner.school {
 	height: 150px;
-	background: url("/static/banner2.jpg");
+	background: url("/static/school.jpg");
 	background-position: right;
 	background-repeat: no-repeat;
 	background-size: cover;
@@ -129,14 +129,28 @@ h3 {
 }
 .banner.classroom {
 	height: 150px;
-	background: url("/static/classbanner.jpg");
+	background: url("/static/classes.jpg");
+	background-position: right;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+.banner.class {
+	height: 150px;
+	background: url("/static/class.jpg");
+	background-position: right;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+.banner.genre {
+	height: 150px;
+	background: url("/static/genre.jpg");
 	background-position: right;
 	background-repeat: no-repeat;
 	background-size: cover;
 }
 .banner h1 {
 	margin: 45px 0;
-    color: #f0f0f0;
+    color: #f7e3af;
 }
  .restaurant-list {
  	background-color: #F0F0F0;
@@ -167,7 +181,7 @@ u }
 }
 .creator figcaption {
 	font-size: 14px;
-	color: #7B7573;
+	color: white;
 	font-weight: 400;
 	margin-top: -20px;
 }
