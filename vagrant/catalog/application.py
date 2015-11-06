@@ -10,9 +10,13 @@ import random, string
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import httplib2
-import json
 from flask import make_response
 import requests
+
+# For API endpoints
+import json
+from xml.etree.ElementTree import Element, SubElement, tostring
+
 
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
@@ -27,6 +31,10 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+
+'''
+Login and OAuth Block
+'''
 # Create a state token to prevent request forgery
 # Store the token in session for validation
 @app.route('/login')
@@ -109,7 +117,8 @@ def getuserID(email):
                         user.picture = login_session['picture']
                         session.add(user)
                         session.commit()
-                        user = session.query(Students).filter_by(email=email).one()
+                        user = (session.query(Students)
+                                .filter_by(email=email).one())
                 return user.id
             except:
                 return None
@@ -302,6 +311,77 @@ def disconnect():
         flash('You were not logged in!')
         return redirect(url_for('schools'))
 
+'''
+JSON Endpoint Block
+'''
+# Make JSON API Endpoint for all schools (GET)
+@app.route('/schools/JSON')
+def schoolsJSON():
+    schools = session.query(Schools).order_by(Schools.name).all()
+    return jsonify(Schools=[i.serialize for i in schools])
+
+# Make JSON API Endpoint for a specific school's teachers (GET)
+@app.route('/school/<int:school_id>/JSON')
+def schoolJSON(school_id):
+    teachers = (session.query(Teachers)
+                .filter_by(school_id=school_id)
+                .order_by(Teachers.name).all())
+    return jsonify(Teachers=[i.serialize for i in teachers])
+
+# Make JSON API Endpoint for a specific student's book list (GET)
+@app.route('/student/<int:student_id>/JSON')
+def studentlistJSON(student_id):
+    books = (session.query(Books)
+                .filter_by(student_id=student_id)
+                .order_by(Books.genre, Books.title).all())
+    return jsonify(Books=[i.serialize for i in books])
+
+# Make JSON API Endpoint for a specific school's student book lists (GET)
+@app.route('/school/<int:school_id>/students/lists/JSON')
+def schoollistsJSON(school_id):
+    books = (session.query(Books).join(Students)
+                 .filter_by(school_id=school_id)
+                 .order_by(Books.genre, Books.title))
+    return jsonify(Books=[i.serialize for i in books])
+
+'''
+XML Endpoint Block
+'''
+# Make XML API Endpoint for all schools (GET)
+@app.route('/schools/XML')
+def schoolsXML():
+    schools = session.query(Schools).order_by(Schools.name).all()
+    root = Element('Schools')
+    for school in schools:
+        number = SubElement(root, "School")
+        child = SubElement(number, 'id')
+        child.text = str(school.id)
+        child = SubElement(number, 'name')
+        child.text = school.name
+    return app.response_class(tostring(root), mimetype='application/xml')
+
+# Make XML API Endpoint for a specific school's teachers (GET)
+@app.route('/school/<int:school_id>/XML')
+def schoolXML(school_id):
+    teachers = (session.query(Teachers)
+                .filter_by(school_id=school_id)
+                .order_by(Teachers.name).all())
+    school = session.query(Schools).filter_by(id=school_id).one()
+    root = Element('School')
+    comment = Comment('XML Response with all cities and events')
+    top.append(comment)
+    for teacher in teachers:
+        teach = SubElement(root, 'teacher')
+        child = SubElement(teach, 'id')
+        child.text = str(teacher.id)
+        child = SubElement(teach, 'name')
+        child.text = teacher.name
+    return app.response_class(tostring(root), mimetype='application/xml')
+
+
+'''
+School Block
+'''
 # Show all schools
 @app.route('/')
 @app.route('/schools')
@@ -1172,11 +1252,10 @@ def student(student_id, teacher_id):
     student = session.query(Students).filter_by(id=student_id).one()
     genre = (session.query(Genres)
              .join(Classrooms)
-             .filter_by(teacher_id=teacher_id))
+             .filter(Classrooms.id==student.classroom))
     books = session.query(Books).filter_by(student_id=student_id)
     num = books.count()
     percent = (num*100)/40
-    print percent
     poetry = books.filter_by(genre='poetry').count()
     graph = books.filter_by(genre='graphic').count()
     real = books.filter_by(genre='realistic').count()
@@ -1230,7 +1309,23 @@ def student(student_id, teacher_id):
 # Add a student book.
 @app.route('/student/<int:student_id>/book/add', methods=['GET', 'POST'])
 def newbook(student_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     student = session.query(Students).filter_by(id=student_id).one()
+    teacher = (session.query(Teachers)
+               .filter_by(id=student.classes.teacher_id).one())
+    creator = getadmininfo(student.school_id)
+    credcheck = credentials(creator.email, teacher.email, student.email)
+    if credcheck != "true":
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to add a book for this
+                          student.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
     if request.method == 'POST':
         new = Books(title = request.form['title'],
                     author = request.form['author'],
@@ -1254,8 +1349,24 @@ def newbook(student_id):
 @app.route('/student/<int:student_id>/book/<int:book_id>/edit',
            methods=['GET', 'POST'])
 def editbook(student_id, book_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     student = session.query(Students).filter_by(id=student_id).one()
     book = session.query(Books).filter_by(id=book_id).one()
+    teacher = (session.query(Teachers)
+               .filter_by(id=student.classes.teacher_id).one())
+    creator = getadmininfo(student.school_id)
+    credcheck = credentials(creator.email, teacher.email, student.email)
+    if credcheck != "true":
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to edit a book for this
+                          student.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
     if request.method == 'POST':
         if request.form['title']:
             book.title = request.form['title']
@@ -1271,7 +1382,9 @@ def editbook(student_id, book_id):
         session.add(book)
         session.commit()
         flash(book.title + " edited!")
-        return redirect(url_for('student', student_id=student.id, teacher_id=student.classes.teacher_id))
+        return redirect(url_for('student',
+                                student_id=student.id,
+                                teacher_id=student.classes.teacher_id))
     else:
         return render_template('book/edit.html',
                                student_id = student_id,
@@ -1280,14 +1393,27 @@ def editbook(student_id, book_id):
                                book = book)
 
 # Delete a student book.
-@app.route('/student/<int:student_id>/book/<int:book_id>/delete', methods=['GET', 'POST'])
+@app.route('/student/<int:student_id>/book/<int:book_id>/delete',
+           methods=['GET', 'POST'])
 def deletebook(student_id, book_id):
-#    if 'username' not in login_session:
-#        return redirect('/login')
+    if 'username' not in login_session:
+        return redirect('/login')
     book = session.query(Books).filter_by(id=book_id).one()
     student = session.query(Students).filter_by(id=student_id).one()
-#    if school.user_id != login_session['user_id']:
-#        return "<script>function myFunction() {alert('You are not authorized to delete this restaurant.');}</script><body onload='myFunction()''>"
+    teacher = (session.query(Teachers)
+               .filter_by(id=student.classes.teacher_id).one())
+    creator = getadmininfo(student.school_id)
+    credcheck = credentials(creator.email, teacher.email, student.email)
+    if credcheck != "true":
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to delete a book for this
+                          student.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
     if request.method == 'POST':
         session.delete(book)
         session.commit()
