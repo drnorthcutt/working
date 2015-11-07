@@ -1,0 +1,41 @@
+{% extends "main.html" %} {% block content %} {% include "school/header.html" %}
+<div class="row divider green">
+    <div class="col-md-12"></div>
+</div>
+<div class="row banner school">
+    <div class="col-md-11 col-md-offset-1 padding-none">
+        <h1>{{ school.name }}
+        </h1>
+    </div>
+</div>
+<div class='flash'>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li> <strong> {{ message }} </strong> </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+</div>
+<div class="row  padding-top">
+    <div class="col-md-1"></div>
+</div>
+{% if teachers !=[] %}
+    <h2>Teachers ({{ teachers.count() }})</h2>
+    {% for teacher in teachers %}
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-10">
+                <a href="{{url_for('classroom', teacher_id=teacher.id)}}">
+                    <div class="menu-item">
+                        {{teacher.name}}
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}

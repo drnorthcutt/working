@@ -1,0 +1,203 @@
+{% extends "main.html" %} {% block content %} {% include "school/header.html" %}
+<div class="row divider green">
+    <div class="col-md-12"></div>
+</div>
+<div class="row banner school">
+    <div class="col-md-11 col-md-offset-1 padding-none">
+        <h1>{{ school.name }}</h1>
+    </div>
+</div>
+<div class='flash'>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li> <strong> {{ message }} </strong> </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+</div>
+<div class="row  padding-top">
+    <div class="col-md-1"></div>
+</div>
+{% if students !=[] %}
+    <div class="row">
+<!--  Students not put into a grade or classroom  -->
+        {% for student in students if student.classroom == 0 %}
+            {% if loop.index == 1 %}
+                <div class="col-md-10">
+                    <h2>Unclassified</h2>
+                    {% for student in students %}
+                        {% if student.classroom == 0 %}
+                            <div class="col-md-1"></div>
+                            <div class="col-md-3 menu-item">
+                                {{student.name}}
+                                <span class="badge">
+                                    {{student.books|count}} read
+                                </span>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
+<!--  3rd grade  -->
+        <!--  Check whether any student exists in a particular grade  -->
+        {% for student in students if student.classes.grade == 3 %}
+        <!--  Run the loop only once to display the heading once  -->
+            {% if loop.index == 1 %}
+                <div class="col-md-10">
+                    <h2>3rd Grade</h2>
+                    <!--  Display each student with the parameter given. Loop until none remain  -->
+                    {% for student in students %}
+                        {% if student.classes.grade == 3 %}
+                            <div class="col-md-1"></div>
+                            <a href="{{url_for('student', student_id = student.id, teacher_id = student.classes.teacher_id)}}">
+                                <div class="col-md-3 menu-item">
+                                    {{student.name}}
+                                    <span class="badge">
+                                        {{student.books|count}} read
+                                    </span>
+                                </div>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                    <!--  End student loop  -->
+                </div>
+            {% endif %}
+        <!--  End once loop  -->
+        {% endfor %}
+        <!--  End full for loop, Skip if none exists  -->
+<!--  4th Grade  -->
+        {% for student in students if student.classes.grade == 4 %}
+            {% if loop.index == 1 %}
+                <div class="col-md-10">
+                    <h2>4th Grade</h2>
+                    {% for student in students %}
+                        {% if student.classes.grade == 4 %}
+                        <div class="col-md-1"></div>
+                            <a href="{{url_for('student', student_id = student.id, teacher_id = student.classes.teacher_id)}}">
+                                <div class="col-md-3 menu-item">
+                                    {{student.name}}
+                                    <span class="badge">
+                                        {{student.books|count}} read
+                                    </span>
+                                </div>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
+<!--  5th Grade  -->
+        {% for student in students if student.classes.grade == 5 %}
+            {% if loop.index == 1 %}
+                <div class="col-md-10">
+                    <h2>5th Grade</h2>
+                    {% for student in students %}
+                        {% if student.classes.grade == 5 %}
+                            <div class="col-md-1"></div>
+                            <a href="{{url_for('student', student_id = student.id, teacher_id = student.classes.teacher_id)}}">
+                                <div class="col-md-3 menu-item">
+                                    {{student.name}}
+                                    <span class="badge">
+                                        {{student.books|count}} read
+                                    </span>
+                                </div>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
+<!--  6th Grade  -->
+        {% for student in students if student.classes.grade == 6 %}
+            {% if loop.index == 1 %}
+                <div class="col-md-10">
+                    <h2>6th Grade</h2>
+                    {% for student in students %}
+                        {% if student.classes.grade == 6 %}
+                            <div class="col-md-1"></div>
+                            <a href="{{url_for('student', student_id = student.id, teacher_id = student.classes.teacher_id)}}">
+                                <div class="col-md-3 menu-item">
+                                    {{student.name}}
+                                    <span class="badge">
+                                        {{student.books|count}} read
+                                    </span>
+                                </div>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
+<!--  7th Grade  -->
+        {% for student in students if student.grade == 7 %}
+            {% if loop.index == 1 %}
+                <div class="col-md-10">
+                    <h2>7th Grade</h2>
+                    {% for student in students %}
+                        {% if student.classes.grade == 7 %}
+                            <div class="col-md-1"></div>
+                            <a href="{{url_for('student', student_id = student.id, teacher_id = student.classes.teacher_id)}}">
+                                <div class="col-md-3 menu-item">
+                                    {{student.name}}
+                                    <span class="badge">
+                                        {{student.books|count}} read
+                                    </span>
+                                </div>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
+<!--  8th Grade -->
+        {% for student in students if student.classes.grade == 8 %}
+            {% if loop.index == 1 %}
+                <div class="col-md-10">
+                    <h2>8th Grade</h2>
+                    {% for student in students %}
+                        {% if student.classes.grade == 8 %}
+                            <div class="col-md-1"></div>
+                            <a href="{{url_for('student', student_id = student.id, teacher_id = student.classes.teacher_id)}}">
+                                <div class="col-md-3 menu-item">
+                                    {{student.name}}
+                                    <span class="badge">
+                                        {{student.books|count}} read
+                                    </span>
+                                </div>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
+<!--  Other Grade  -->
+        {% for student in students if student.classes.grade == 13 %}
+            {% if loop.index == 1 %}
+                <div class="row col-md-10">
+                    <h2>Other</h2>
+                    {% for student in students %}
+                        {% if student.classes.grade == 13 %}
+                            <div class="col-md-1"></div>
+                            <a href="{{url_for('student', student_id = student.id, teacher_id = student.classes.teacher_id)}}">
+                                <div class="col-md-3 menu-item">
+                                    {{student.name}}
+                                    <span class="badge">
+                                        {{student.books|count}} read
+                                    </span>
+                                </div>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endif %}
+<div class="row  padding-top">
+    <div class="col-md-1"></div>
+</div>
+{% endblock %}

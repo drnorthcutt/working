@@ -1,0 +1,179 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "class/header.html" %}
+	<div class="row divider green">
+		<div class="col-md-12"></div>
+	</div>
+	<div class="row banner genre">
+		<div class="col-md-11 col-md-offset-1 padding-none">
+			<h1>Edit Genre List</h1>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6 col-md-offset-1 padding-top">
+			<form action="#" method = "post">
+				<div class="form-group">
+					<label for="name">Name:</label>
+					<input type ="text" class="form-control" maxlength="80" name="name" placeholder="{{alist.name}}" autofocus required>
+                    <br/>
+                    <label for="graphic">Graphic Novel:</label>
+                        <select name='graphic'>
+                            <option value="{{alist.graphic}}">{{alist.graphic}}</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    <br/>
+                    <label for="historical">Historical Fiction:</label>
+                        <select name='historical'>
+                            <option value="{{alist.historical}}">{{alist.historical}}</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    <br/>
+                    <label for="fantasy">Fantasy Novel:</label>
+                        <select name='fantasy'>
+                           <option value="{{alist.fantasy}}">{{alist.fantasy}}</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    <br/>
+                    <label for="poetry">Poetry/ Verse Novel:</label>
+                        <select name='poetry'>
+                           <option value="{{alist.poetry}}">{{alist.poetry}}</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    <br/>
+                    <label for="realistic">Realistic Novel:</label>
+                        <select name='realistic'>
+                           <option value="{{alist.realistic}}">{{alist.realistic}}</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    <br/>
+                    <label for="scifi">Science Fiction:</label>
+                        <select name='scifi'>
+                           <option value="{{alist.scifi}}">{{alist.scifi}}</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    <br/>
+                    <label for="mystery">Mystery Fiction:</label>
+                        <select name='mystery'>
+                           <option value="{{alist.mystery}}">{{alist.mystery}}</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    <br/>
+                    <label for="info">Informational Non-fiction:</label>
+                        <select name='info'>
+                           <option value="{{alist.info}}">{{alist.info}}</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    <br/>
+                    <label for="bio">Biography/ Autobiography:</label>
+                        <select name='bio'>
+                           <option value="{{alist.bio}}">{{alist.bio}}</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    <br />
+                    <label for="pages">Pages to count as double book:</label>
+				        <input type ="text" class="form-control" maxlength="5" name="pages" placeholder="{{alist.pages}}">
+					<div class="padding-bottom"></div>
+					<button type="submit" class="btn-success" id="submit" type="submit">
+					    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+					        Save
+				    </button>
+					<a href = "{{url_for('genre', teacher_id=teacher.id)}}">
+                        <button type="button" class="btn-default" id="cancel">
+						    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>         Cancel
+                        </button>
+					</a>
+				</div>
+			</form>
+		</div>
+	</div>
+{% endblock %}

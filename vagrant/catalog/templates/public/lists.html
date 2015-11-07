@@ -1,0 +1,74 @@
+{% extends "main.html" %} {% block content %} {% include "class/header.html" %}
+<div class="row divider green">
+    <div class="col-md-12"></div>
+</div>
+<div class="row banner genre">
+    <div class="col-md-11 col-md-offset-1 padding-none">
+        <h1>{{ teacher.name }}
+            <small>
+                Genre Lists
+            </small>
+			<figure class="creator">
+				<img src="{{teacher.picture}}">
+				<figcaption>Teacher</figcaption>
+			</figure>
+           <br />
+            <a href="{{url_for('classroom', teacher_id=teacher.id)}}">
+				<button class="btn-xs btn-primary" id="back">
+					<span class="glyphicon glyphicon-step-backward" aria-hidden="true"></span>
+					    Back to Classes
+				</button>
+			</a>
+        </h1>
+    </div>
+</div>
+<div class='flash'>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                <li> <strong> {{ message }} </strong> </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+</div>
+{% if lists !=[] %}
+    <h2 id="genre-lists">
+        Lists
+        <span class="badge">
+            {{ lists|count }}
+        </span>
+    </h2>
+    <div class="row">
+        {% for list in lists %}
+            <div class="col-md-1"></div>
+            <h3>
+                {{ list.name }}
+            </h3>
+            <p>Graphic Novel:  {{list.graphic}}</p>
+            <p>Historical Fiction:  {{list.historical}}</p>
+            <p>Fantasy:  {{list.fantasy}}</p>
+            <p>Poetry/ Verse Novel:  {{list.poetry}}</p>
+            <p>Realistic Fiction:  {{list.realistic}}</p>
+            <p>Science Fiction:  {{list.scifi}}</p>
+            <p>Mystery Fiction:  {{list.mystery}}</p>
+            <p>Informational Non-fiction:  {{list.info}}</p>
+            <p>Biography/ Autobiography:  {{list.bio}}</p>
+            <p>Pages to count double:  {{list.pages}}</p>
+            <h4>Classes that use this list:
+                <br />
+                {% for class in classes %}
+                    {% if class.set_id==list.id %}
+                        <small>
+                           <a href="{{url_for('room', teacher_id=class.teacher_id, room_id=class.id)}}">
+                            ( {{class.name}} )
+                            </a>
+                        </small>
+                    {% endif %}
+                {% endfor %}
+            </h4>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}

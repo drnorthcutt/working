@@ -1,0 +1,40 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "school/header.html" %}
+	<div class="row divider green">
+		<div class="col-md-12"></div>
+	</div>
+	<div class="row banner school">
+		<div class="col-md-11 col-md-offset-1 padding-none">
+			<h1>New Student</h1>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6 col-md-offset-1 padding-top">
+			<form action="#" method = "post">
+				<div class="form-group">
+					<label for="name">Name:</label>
+					<input type ="text" class="form-control" maxlength="80" name="name" placeholder="Required" autofocus required>
+                <br/><label for="email">email:</label>
+				<input type ="text" class="form-control" maxlength="250" name="email" placeholder="Required" required>
+				<label for="picture">Picture:</label>
+				<input type ="text" class="form-control" maxlength="250" name="picture" placeholder="Optional">
+				<label for="grade">Classroom:</label>
+				<select name='classroom'>
+                  <option value="0">Unclassified</option>
+                   {% for row in classes %}
+                    <option value="{{ row.id }}">{{ row.name }}</option>
+	               {% endfor %}
+                </select>
+					<div class="padding-bottom"></div>
+					<button type="submit" class="btn-success" id="submit">
+					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Save</button>
+					<a href = "{{url_for('schoolstudents', school_id=school.id)}}">
+                         <button type="button" class="btn-default" id="cancel">
+                             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel</button>
+					</a>
+				</div>
+			</form>
+		</div>
+	</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "student/header.html" %}
+	<div class="row divider green">
+		<div class="col-md-12"></div>
+	</div>
+	<div class="row banner student">
+		<div class="col-md-11 col-md-offset-1 padding-none">
+			<h1>Edit {{student.name}}</h1>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6 col-md-offset-1 padding-top">
+			<form action="#" method = "post">
+				<div class="form-group">
+					<label for="name">Name:</label>
+					<input type ="text" class="form-control" name="name" value="{{student.name}}">
+
+                <br/><label for="email">email:</label>
+				<input type ="text" class="form-control" maxlength="80" name="email" placeholder="{{student.email}}">
+				<br/><label for="picture">Picture:</label>
+				<input type ="text" class="form-control" maxlength="80" name="picture" placeholder="{{student.picture}}">
+				<br/><label for="classroom">Classroom:</label>
+				<select name='classroom'>
+                  <option value="{{student.classroom}}">{{student.classes.name}}</option>
+                  <option value="clear">Clear Classroom</option>
+                   {% for row in classes %}
+                    <option value="{{ row.id }}">{{row.grade}}{{ row.name }}</option>
+	               {% endfor %}
+                </select>
+					<div class="padding-bottom"></div>
+					<button type="submit" class="btn-success" id="submit" type="submit">
+					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Save</button>
+					<a href = "{{url_for('schoolstudents', school_id=school.id)}}">
+                         <button type="button" class="btn-default" id="cancel">
+                             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel</button>
+					</a>
+				</div>
+			</form>
+		</div>
+	</div>
+{% endblock %}
