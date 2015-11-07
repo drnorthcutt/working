@@ -154,12 +154,12 @@
                     <label for="pages">Pages to count as double book:</label>
 				        <input type ="text" class="form-control" maxlength="5" name="pages" placeholder="250">
 					<div class="padding-bottom"></div>
-					<button type="submit" class="btn-success" id="submit" type="submit">
+					<button type="submit" class="btn-success" id="submit">
 					    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
 					        Save
 				    </button>
 					<a href = "{{url_for('genre', teacher_id=teacher.id)}}">
-                        <button type="button" class="btn-warning" id="cancel">
+                        <button type="button" class="btn-default" id="cancel">
 						    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>         Cancel
                         </button>
 					</a>
