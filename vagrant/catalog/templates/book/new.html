@@ -29,35 +29,23 @@
 	                <option value="realistic">Realistic Fiction</option>
 	                <option value="scifi">Science Fiction</option>
                 </select>
-				<br/><label for="image">Picture:<a href="#" data-toggle="tooltip" title="This section is for you to place a link to a picture of the cover of your book. Try http://goodreads.com or wikipedia, or try a google search. If you don't know how to copy the best link, ask your teacher or librarian for help."><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a></label>
+				<br/><label for="image">Picture:<a href="#" data-toggle="tooltip" title="This section is for you to place a link to a picture of the cover of your book. Try goodreads.com or wikipedia, or try a google search. If you don't know how to copy the best link, ask your teacher or librarian for help."><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a></label>
 				<input type ="text" class="form-control" maxlength="250" name="image" placeholder="Type or copy the full URL of the book cover here">
 				<br/><label for="review">Review:<a href="#" data-toggle="tooltip" title="While this section is typically for your thoughts about this book, your teacher or librarian may wish for you to give a short summary instead. Ask them for help if you are unsure."><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a></label>
-				<textarea class="form-control" rows="5" name="review" placeholder="Maximum Length 250 characters" maxlength="250" id="textarea" required></textarea>
+				<textarea class="form-control" rows="5"  cols="50" name="review" placeholder="Maximum Length 250 characters" maxlength="250" id="textarea" required></textarea>
 				<small id="char_count"></small></div>
-					<div class="padding-bottom">
+				<div class="padding-bottom">
 					<button type="submit" class="btn-success" id="submit">
 					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Save</button>
 					<a href = "{{url_for('student', student_id = student.id, teacher_id = student.classes.teacher_id)}}">
                         <button type="button" class="btn-default" id="cancel">
 						<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Cancel
-                        </button>
-					</a>
+                        </button></a>
 				</div>
 			</form>
 		</div>
         <!--  Script for character count of Review Section -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-        <script type="text/javascript">
-            $('textarea').on('input propertychange', function() {
-                var ctrl =$(this),
-                    max_len = 250,
-                    len = $(ctrl).val().trim().length;
-                    var c = $(ctrl).parent().find('#char_count');
-                    len = max_len -len;
-                    c.text(len > 0 ? (len + ' character' + (len == 1 ? '' : 's')  + ' remaining.') : '');
-                    $(ctrl).val($(ctrl).val().substring(0, max_len));
-
-            });
-        </script>
+         <script type="text/javascript" src="{{ url_for('static', filename='charcount.js') }}"></script>
 	</div>
 {% endblock %}

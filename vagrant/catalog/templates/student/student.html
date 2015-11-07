@@ -88,7 +88,7 @@
                                     {% if book.image is none %}
                                         <div class="col-md-2"></div>
                                     {% else %}
-                                        <div class="col-md-2"><img src={{book.image}} height="150"></div>
+                                        <div class="col-md-2"><img src={{book.image}} height="150 px"></div>
                                     {% endif %}
                                     <div class="col-md-10">
                                         <a href="{{url_for('editbook', student_id = student.id, book_id = book.id)}}">
