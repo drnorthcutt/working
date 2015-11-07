@@ -258,6 +258,7 @@ def fbconnect():
     login_session['username'] = data['name']
     login_session['email'] = data['email']
     login_session['facebook_id'] = data['id']
+    login_session['access_token'] = token
     # Get user picture
     url = 'https://graph.facebook.com/v2.5/me/picture?%s&redirect=0&height=200&width=200' % token
     h = httplib2.Http()
