@@ -1,6 +1,7 @@
 from flask import Flask, render_template, url_for, request, redirect, flash
 from flask import jsonify
-from books_setup import Schools, Admins, Teachers, Classrooms, Students, Books, Genres, Base
+from books_setup import (Schools, Admins, Teachers, Classrooms, Students,
+                         Books, Genres, Base)
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -23,6 +24,7 @@ CLIENT_ID = json.loads(
 APPLICATION_NAME = '40 Books'
 
 app = Flask(__name__)
+
 
 # Connect to Database and create database session
 engine = create_engine('sqlite:///book.db')
@@ -199,7 +201,7 @@ def gconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += '" style="width: 300px; height: 300px; border-radius: 150px;'
+    output += '" style="width: 200px; height: 200px; border-radius: 150px;'
     output += ' -webkit-border-radius: 150px; -moz-border-radius: 150px;">'
     flash("Logged in as %s" %login_session['username'])
     print 'done!'
@@ -263,9 +265,9 @@ def fbconnect():
     data = json.loads(result)
     login_session['picture'] = data['data']['url']
     # Check whether user exists in database.
-    user_id = getUserID(login_session['email'])
+    user_id = getuserID(login_session['email'])
     if not user_id:
-        user_id = createUser(login_session)
+        user_id = newadmin(login_session)
     login_session['user_id'] = user_id
     # Display welcome
     output = ''
@@ -274,7 +276,7 @@ def fbconnect():
     output += '!</h1>'
     output += '<img src="'
     output += login_session['picture']
-    output += '" style="width: 300px; height: 300px; border-radius: 150px;'
+    output += '" style="width: 200px; height: 200px; border-radius: 150px;'
     output += ' -webkit-border-radius: 150px; -moz-border-radius: 150px;">'
     flash("Logged in as %s" %login_session['username'])
     print 'done!'
@@ -312,6 +314,7 @@ def disconnect():
         flash('You were not logged in!')
         return redirect(url_for('schools'))
 
+
 '''
 JSON Endpoint Block
 '''
@@ -344,6 +347,7 @@ def schoollistsJSON(school_id):
                  .filter_by(school_id=school_id)
                  .order_by(Books.genre, Books.title))
     return jsonify(Books=[i.serialize for i in books])
+
 
 '''
 XML Endpoint Block
@@ -552,6 +556,7 @@ def schoolstudents(school_id):
                                students = students,
                                school_id = school_id)
 
+
 '''
 Teacher Block
 '''
@@ -656,6 +661,7 @@ def deleteteacher(school_id, teacher_id):
                                teacher = teacher,
                                teacher_id = teacher_id,
                                school_id = school_id)
+
 
 '''
 Class(es) Block
@@ -859,6 +865,7 @@ def deleteclass(teacher_id, class_id):
                                teacher_id = teacher_id,
                                class_id = class_id)
 
+
 '''
 Genre Lists Block
 '''
@@ -1014,6 +1021,7 @@ def deletelist(teacher_id, list_id):
                                teacher = teacher,
                                teacher_id = teacher.id,
                                list_id = alist.id)
+
 
 '''
 Student Block
@@ -1243,6 +1251,7 @@ def teacherdeletestudent(school_id, user_id, teacher_id):
                                student = student,
                                user_id = user_id,
                                school_id = school_id)
+
 
 '''
 Books Block
