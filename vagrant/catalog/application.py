@@ -1132,7 +1132,10 @@ def editstudent(school_id, user_id):
         if request.form['picture']:
             student.picture = request.form['picture']
         if request.form['classroom']:
-            student.classroom = request.form['classroom']
+            if request.form['classroom'] == "clear":
+                student.classroom = "0"
+            else:
+                student.classroom = request.form['classroom']
         session.add(student)
         session.commit()
         flash(student.name + " edited!")
@@ -1176,7 +1179,10 @@ def teachereditstudent(school_id, user_id, teacher_id):
         if request.form['picture']:
             student.picture = request.form['picture']
         if request.form['classroom']:
-            student.classroom = request.form['classroom']
+            if request.form['classroom'] == "clear":
+                student.classroom = "0"
+            else:
+                student.classroom = request.form['classroom']
         session.add(student)
         session.commit()
         flash(student.name + " edited!")
