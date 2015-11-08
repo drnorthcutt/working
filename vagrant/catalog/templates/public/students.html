@@ -42,38 +42,44 @@
                 </div>
             {% endif %}
         {% endfor %}
+<!--  End Students not in grade or classroom  -->
 <!--  Student Macro  -->
         {% macro grade_display(grade_num, ord) -%}
             {% for student in students if student.classes.grade == grade_num %}
                 {% if loop.index == 1 %}
-                    <div class="col-md-10">
+                    <div class="col-md-12">
+                       <div class="col-md-12">
                         <h2>{{ord}} Grade</h2>
+                        </div>
                         {% for student in students %}
                             {% if student.classes.grade == grade_num %}
-                            <div class="col-md-1"></div>
+                            <div>
+                            <div class="col-sm-1"></div>
                                 <a href="{{url_for('student', student_id = student.id, teacher_id = student.classes.teacher_id)}}">
-                                    <div class="col-md-3 menu-item">
+                                    <div class="col-md-2 menu-item">
                                         {{student.name}}
                                         <span class="badge">
                                             {{student.books|count}} read
                                         </span>
                                     </div>
                                 </a>
+                            </div>
                             {% endif %}
                         {% endfor %}
                     </div>
                 {% endif %}
             {% endfor %}
         {%- endmacro %}
-
-        {{ grade_display(3, '3rd') }}
-        {{ grade_display(4, '4th') }}
-        {{ grade_display(5, '5th') }}
-        {{ grade_display(6, '6th') }}
-        {{ grade_display(7, '7th') }}
-        {{ grade_display(8, '8th') }}
-        {{ grade_display(13, 'Other') }}
-
+<!--  End Student Macro  -->
+<!--  Macro Run Block  -->
+       {{ grade_display(3, '3rd') }}
+       {{ grade_display(4, '4th') }}
+       {{ grade_display(5, '5th') }}
+       {{ grade_display(6, '6th') }}
+       {{ grade_display(7, '7th') }}
+       {{ grade_display(8, '8th') }}
+       {{ grade_display(13, 'Other') }}
+<!--  End Macro Run Block  -->
     </div>
 {% endif %}
 <div class="row  padding-top">
