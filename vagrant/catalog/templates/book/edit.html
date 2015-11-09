@@ -11,7 +11,8 @@
 	</div>
 	<div class="row">
 		<div class="col-md-6 col-md-offset-1 padding-top">
-			<form action="{{url_for('editbook', book_id = book.id, student_id = student.id)}}" method = "post">
+			<form action="#" method = "post">
+			    <input name=_csrf_token type=hidden value="{{ gentoken() }}">
 				<div class="form-group">
 					<label for="title">Title:<a href="#" data-toggle="tooltip" title="The full name of your book goes here.  If you are unsure what to type, ask your teacher or librarian for help."><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a></label>
 					<input type ="text" class="form-control" maxlength="250" name="title" placeholder="{{book.title}}" autofocus>

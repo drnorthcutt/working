@@ -6,6 +6,7 @@
     {{student.name}}? <br />
     <small>Warning!  This cannot be undone.</small></h1>
     <form action="#" method = 'post'>
+       <input name=_csrf_token type=hidden value="{{ gentoken() }}">
         <button type="submit" class="btn-danger" id="submit">
             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                 Delete </button>
