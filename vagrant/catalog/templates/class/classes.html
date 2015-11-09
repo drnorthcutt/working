@@ -106,35 +106,35 @@
 {% if students !=[] %}
     <div class="row">
 <!--  Students not put into a grade or classroom  -->
-        {% for student in students if student.classroom == 0 %}
+       {% if noclass !=[] %}
+        {% for each in noclass %}
             {% if loop.index == 1 %}
-                <div class="col-md-10">
+                <div class="col-md-12">
                     <h2>Unclassified</h2>
-                    {% for student in students %}
-                        {% if student.classroom == 0 %}
-                            <div class="col-md-1"></div>
-                            <div class="col-md-3 menu-item">
-                                {{student.name}}
+                    {% for each in noclass %}
+                            <div class="col-sm-1"></div>
+                            <div class="col-md-2 menu-item">
+                                {{each.name}}
                                 <span class="badge">
-                                    {{student.books|count}} read
+                                    {{each.books|count}} read
                                 </span>
                                 <br/>
-                                <a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">
+                                <a href="{{url_for('editstudent', school_id=each.school_id, user_id=each.id)}}">
                                     <button class="btn-xs btn-warning" id="edit">
                                         <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                                             edit
                                     </button></a>
-                                <a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">
+                                <a href="{{url_for('deletestudent', school_id = each.school_id, user_id = each.id)}}">
                                     <button class="btn-xs btn-danger" id="delete">
                                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                             delete
                                     </button></a>
                             </div>
-                        {% endif %}
                     {% endfor %}
                 </div>
             {% endif %}
         {% endfor %}
+        {% endif %}
 <!--  End Students not in grade or classroom  -->
 <!--  Student Macro  -->
         {% macro grade_display(grade_num, ord) -%}
