@@ -17,6 +17,8 @@ import requests
 # For API endpoints
 import json
 from xml.etree.ElementTree import Element, SubElement, tostring
+from urlparse import urljoin
+from werkzeug.contrib.atom import AtomFeed
 
 
 CLIENT_ID = json.loads(
@@ -41,11 +43,10 @@ Login and OAuth Block
 # Store the token in session for validation
 @app.route('/login')
 def login():
-    state = (
-        ''.join(random.choice(string.ascii_uppercase + string.digits)
-                for x in xrange(32))
-        )
+    login_session['pass'] = 'initial'
+    state = randomcsrf()
     login_session['state'] = state
+    print login_session['pass']
     return render_template('login.html', STATE=state)
 
 # Add admin if does not exist.
@@ -194,6 +195,8 @@ def gconnect():
     if not user_id:
         user_id = newadmin(login_session)
     login_session['user_id'] = user_id
+    login_session['pass'] = '1'
+    print login_session['pass']
     # Display welcome
     output = ''
     output += '<h1>Welcome, '
@@ -259,6 +262,7 @@ def fbconnect():
     login_session['email'] = data['email']
     login_session['facebook_id'] = data['id']
     login_session['access_token'] = token
+    login_session['pass'] = '1'
     # Get user picture
     url = 'https://graph.facebook.com/v2.5/me/picture?%s&redirect=0&height=200&width=200' % token
     h = httplib2.Http()
@@ -309,11 +313,42 @@ def disconnect():
         del login_session['picture']
         del login_session['user_id']
         del login_session['provider']
+        del login_session['pass']
+        del login_session['_csrf_token']
         flash('You have successfully logged out.')
         return redirect(url_for('schools'))
     else:
         flash('You were not logged in!')
         return redirect(url_for('schools'))
+
+
+'''
+CSRF Protect Block
+'''
+def randomcsrf():
+    rstring = (
+        ''.join(random.choice(string.ascii_uppercase + string.digits)
+                for x in xrange(32))
+        )
+    print rstring
+    return rstring
+
+@app.before_request
+def csrf_protect():
+    if request.method == "POST":
+        if login_session['pass'] != 'initial':
+            token = login_session.pop('_csrf_token', None)
+            if not token or token != request.form.get('_csrf_token'):
+                response = make_response(json.dumps('Invalid token.'), 403)
+                response.headers['Content-Type'] = 'application/json'
+                return response
+
+def gentoken():
+    if '_csrf_token' not in login_session:
+        login_session['_csrf_token'] = randomcsrf()
+    return login_session['_csrf_token']
+
+app.jinja_env.globals['gentoken'] = gentoken
 
 
 '''
@@ -326,15 +361,25 @@ def schoolsJSON():
     return jsonify(Schools=[i.serialize for i in schools])
 
 # Make JSON API Endpoint for a specific school's teachers (GET)
-@app.route('/school/<int:school_id>/JSON')
-def schoolJSON(school_id):
+@app.route('/school/teachers/<int:school_id>/JSON')
+def teachersJSON(school_id):
     teachers = (session.query(Teachers)
                 .filter_by(school_id=school_id)
+                .outerjoin(Classrooms)
                 .order_by(Teachers.name).all())
     return jsonify(Teachers=[i.serialize for i in teachers])
 
+# Make JSON API Endpoint for a specific school's students (GET)
+# Special exception made in case a student has not yet been placed in a class
+@app.route('/school/students/<int:school_id>/JSON')
+def studentsJSON(school_id):
+    students = (session.query(Students)
+                .filter_by(school_id=school_id)
+                .order_by(Students.name).all())
+    return jsonify(Students=[i.serialize for i in students])
+
 # Make JSON API Endpoint for a specific student's book list (GET)
-@app.route('/student/<int:student_id>/JSON')
+@app.route('/student/books/<int:student_id>/JSON')
 def studentlistJSON(student_id):
     books = (session.query(Books)
                 .filter_by(student_id=student_id)
@@ -342,11 +387,11 @@ def studentlistJSON(student_id):
     return jsonify(Books=[i.serialize for i in books])
 
 # Make JSON API Endpoint for a specific school's student book lists (GET)
-@app.route('/school/<int:school_id>/students/lists/JSON')
-def schoollistsJSON(school_id):
-    books = (session.query(Books).join(Students)
+@app.route('/school/student/books/<int:school_id>/JSON')
+def schoolbooksJSON(school_id):
+    books = (session.query(Books).outerjoin(Students)
                  .filter_by(school_id=school_id)
-                 .order_by(Books.genre, Books.title))
+                 .order_by(Students.name, Books.genre, Books.title))
     return jsonify(Books=[i.serialize for i in books])
 
 
@@ -368,14 +413,12 @@ def schoolsXML():
 
 # Make XML API Endpoint for a specific school's teachers (GET)
 @app.route('/school/<int:school_id>/XML')
-def schoolXML(school_id):
+def teachersXML(school_id):
     teachers = (session.query(Teachers)
                 .filter_by(school_id=school_id)
                 .order_by(Teachers.name).all())
     school = session.query(Schools).filter_by(id=school_id).one()
     root = Element('School')
-    comment = Comment('XML Response with all cities and events')
-    top.append(comment)
     for teacher in teachers:
         teach = SubElement(root, 'teacher')
         child = SubElement(teach, 'id')
@@ -383,6 +426,100 @@ def schoolXML(school_id):
         child = SubElement(teach, 'name')
         child.text = teacher.name
     return app.response_class(tostring(root), mimetype='application/xml')
+
+# Make XML API Endpoint for a specific school's students (GET)
+# Special exception made in case a student has not yet been placed in a class
+@app.route('/school/students/<int:school_id>/XML')
+def studentsXML(school_id):
+    students = (session.query(Students)
+                .filter_by(school_id=school_id)
+                .order_by(Students.classroom, Students.name).all())
+    school = session.query(Schools).filter_by(id=school_id).one()
+    root = Element('School')
+    root.text = school.name
+    for student in students:
+        each = SubElement(root, "Student")
+        child = SubElement(each, 'Grade')
+        try:
+            child.text = str(student.classes.grade)
+        except:
+            child.text = 'Unclassified'
+        child = SubElement(each, 'Class')
+        try:
+            child.text = student.classes.name
+        except:
+            child.text = 'No Class Listed'
+        child = SubElement(each, 'ID')
+        child.text = str(student.id)
+        child = SubElement(each, 'Name')
+        child.text = student.name
+    return app.response_class(tostring(root), mimetype='application/xml')
+
+# Make XML API Endpoint for a specific student's book list (GET)
+@app.route('/student/books/<int:student_id>/XML')
+def studentbooksXML(student_id):
+    books = (session.query(Books)
+                .filter_by(student_id=student_id)
+                .order_by(Books.genre, Books.title).all())
+    student = session.query(Students).filter_by(id=student_id).one()
+    root = Element('Student')
+    root.text = student.name
+    for book in books:
+        each = SubElement(root, 'Book')
+        child = SubElement(each, 'Genre')
+        child.text = book.genre
+        child = SubElement(each, 'Title')
+        child.text = book.title
+        child = SubElement(each, 'Author')
+        child.text = book.author
+        child = SubElement(each, 'Review')
+        child.text = book.review
+    return app.response_class(tostring(root), mimetype='application/xml')
+
+# Make XML API Endpoint for a specific school's student book lists (GET)
+@app.route('/school/student/books/<int:school_id>/XML')
+def schoolbooksXML(school_id):
+    books = (session.query(Books).outerjoin(Students)
+                 .filter_by(school_id=school_id)
+                 .order_by(Students.name, Books.genre, Books.title))
+    students = session.query(Students).filter_by(school_id=school_id).all()
+    school = session.query(Schools).filter_by(id=school_id).one()
+    root = Element('School')
+    root.text = school.name
+    for student in students:
+        each = SubElement(root, 'Student')
+        each.text = student.name
+        for book in books:
+            if book.student_id == student.id:
+                sub = SubElement(each, 'Book')
+                child = SubElement(sub, 'Genre')
+                child.text = book.genre
+                child = SubElement(sub, 'Title')
+                child.text = book.title
+                child = SubElement(sub, 'Author')
+                child.text = book.author
+                child = SubElement(sub, 'Review')
+                child.text = book.review
+    return app.response_class(tostring(root), mimetype='application/xml')
+
+def make_external(url):
+    return urljoin(request.url_root, url)
+
+
+@app.route('/recent.atom')
+def recent_feed():
+    feed = AtomFeed('Recent Books',
+                    feed_url=request.url, url=request.url_root)
+    books = session.query(Books).order_by(Books.id.desc()).limit(10).all()
+    for book in books:
+        student = session.query(Students).filter_by(id=book.student_id).one()
+        feed.add(book.title, book.author,
+                 content_type='html',
+                 author=student.name,
+                 id=book.id,
+                 updated=book.date,
+                 published=book.date)
+    return feed.get_response()
 
 
 '''
@@ -539,10 +676,6 @@ def schoolteachers(school_id):
 @app.route('/school/<int:school_id>/students')
 def schoolstudents(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
-#    grades = (session.query(Students)
-#                .filter_by(school_id=school_id)
-#                .order_by(Students.name)
-#                .all())
     students = session.query(Students).filter_by(school_id=school_id).all()
     creator = getadmininfo(school_id)
     credcheck = credentials(creator.email, 0, 0)
@@ -603,7 +736,6 @@ def editteacher(school_id, teacher_id):
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     creator = getadmininfo(school_id)
     check = credentials(creator.email, teacher.email, 0)
-#    if creator.email != login_session['email']:
     if check != "true":
         return ('''
                     "<script>
@@ -692,7 +824,6 @@ def classroom(teacher_id):
                                teacher = teacher,
                                students = students,
                                classroom = classroom,
-                               noclass = noclass,
                                lists = lists,
                                books = books,
                                teacher_id = teacher_id)
@@ -1048,10 +1179,14 @@ def newstudent(school_id):
                     <body onload='myFunction()''>"
                 ''')
     if request.method == 'POST':
+        if request.form['classroom'] != "clear":
+            room = request.form['classroom']
+        else:
+            room = "0"
         new = Students(name=request.form['name'],
                     email=request.form['email'],
                     picture=request.form['picture'],
-                    classroom=request.form['classroom'],
+                    classroom=room,
                     school_id=school_id
                     )
         session.add(new)
@@ -1072,7 +1207,6 @@ def teachernewstudent(school_id, teacher_id):
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
-#    teachers = session.query(Teachers).filter_by(school_id=school_id).all()
     classes = session.query(Classrooms).filter_by(school_id=school_id)
     creator = getadmininfo(school_id)
     credcheck = credentials(creator.email, teacher.email, 0)
@@ -1087,10 +1221,14 @@ def teachernewstudent(school_id, teacher_id):
                     <body onload='myFunction()''>"
                 ''')
     if request.method == 'POST':
+        if request.form['classroom'] != "clear":
+            room = request.form['classroom']
+        else:
+            room = "0"
         new = Students(name=request.form['name'],
                     email=request.form['email'],
                     picture=request.form['picture'],
-                    classroom=request.form['classroom'],
+                    classroom=room,
                     school_id=school_id
                     )
         session.add(new)
