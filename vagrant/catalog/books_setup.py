@@ -1,6 +1,7 @@
 import os
 import sys
-from sqlalchemy import Column, ForeignKey, Integer, String
+from datetime import datetime
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -31,6 +32,7 @@ class Schools(Base):
             'District' : self.district,
         }
 
+
 class Admins(Base):
     __tablename__ = 'admins'
     name = Column(String(80), nullable = False)
@@ -38,6 +40,7 @@ class Admins(Base):
     email = Column(String(250), nullable = False)
     picture = Column(String(250))
     school = relationship("Schools", backref="admins")
+
 
 class Teachers(Base):
     __tablename__ = 'teachers'
@@ -47,6 +50,7 @@ class Teachers(Base):
     picture = Column(String(250))
     school_id = Column(Integer, ForeignKey('schools.id'))
     school = relationship("Schools")
+    classes = relationship("Classrooms")
 
     @property
     def serialize(self):
@@ -55,6 +59,7 @@ class Teachers(Base):
             'ID' : self.id,
             'name' : self.name,
         }
+
 
 class Genres(Base):
     __tablename__ = 'genres'
@@ -87,6 +92,17 @@ class Classrooms(Base):
     genres = relationship("Genres", backref="classrooms")
     studs = relationship("Students")
 
+    @property
+    def serialize(self):
+        # Return data serializeable
+        return {
+            'ID' : self.id,
+            'Grade' : self.grade,
+            'Name' : self.name,
+            'Teacher' : self.teacher.name,
+            'Genre List' : self.genres.name,
+        }
+
 
 class Students(Base):
     __tablename__ = 'students'
@@ -100,6 +116,22 @@ class Students(Base):
     classes = relationship("Classrooms", backref="students")
     book = relationship("Books")
 
+    # Except in case a student has not been placed in a class
+    @property
+    def serialize(self):
+        # Return data serializeable
+        try:
+            return {
+                'ID' : self.id,
+                'name' : self.name,
+                'Grade' : self.classes.grade,
+                'Class Name' : self.classes.name,
+            }
+        except:
+            return {
+                'ID' : self.id,
+                'name' : self.name,
+            }
 
 
 class Books(Base):
@@ -111,6 +143,7 @@ class Books(Base):
     image = Column(String(250))
     review = Column(String(250), nullable = False)
     genre = Column(String(50), nullable = False)
+    date = Column(DateTime, default=datetime.utcnow)
     students = relationship("Students", backref="books")
 
     @property
@@ -122,6 +155,8 @@ class Books(Base):
             'Title' : self.title,
             'Author' : self.author,
             'Review' : self.review,
+            'Student' : self.students.name,
+            'Student ID' : self.students.id,
         }
 
 
