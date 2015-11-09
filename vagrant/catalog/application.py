@@ -196,7 +196,6 @@ def gconnect():
         user_id = newadmin(login_session)
     login_session['user_id'] = user_id
     login_session['pass'] = '1'
-    print login_session['pass']
     # Display welcome
     output = ''
     output += '<h1>Welcome, '
@@ -314,7 +313,6 @@ def disconnect():
         del login_session['user_id']
         del login_session['provider']
         del login_session['pass']
-        del login_session['_csrf_token']
         flash('You have successfully logged out.')
         return redirect(url_for('schools'))
     else:
@@ -393,7 +391,6 @@ def schoolbooksJSON(school_id):
                  .filter_by(school_id=school_id)
                  .order_by(Students.name, Books.genre, Books.title))
     return jsonify(Books=[i.serialize for i in books])
-
 
 '''
 XML Endpoint Block
@@ -502,10 +499,38 @@ def schoolbooksXML(school_id):
                 child.text = book.review
     return app.response_class(tostring(root), mimetype='application/xml')
 
-def make_external(url):
-    return urljoin(request.url_root, url)
+# Make XML API Endpoint for most recent student book lists (GET)
+@app.route('/student/books/XML')
+def recentbooksXML():
+    books = session.query(Books).order_by(Books.id.desc()).limit(10).all()
+    root = Element('Forty_Books_App')
+    for book in books:
+        student = (session.query(Students)
+                   .filter_by(id=book.student_id)
+                   .one())
+        each = SubElement(root, 'School')
+        each.text = student.school.name
+        each = SubElement(root, 'Student')
+        each.text = student.name
+        sub = SubElement(each, 'Book')
+        child = SubElement(sub, 'ID')
+        child.text = str(book.id)
+        child = SubElement(sub, 'Genre')
+        child.text = book.genre
+        child = SubElement(sub, 'Title')
+        child.text = book.title
+        child = SubElement(sub, 'Author')
+        child.text = book.author
+        child = SubElement(sub, 'Review')
+        child.text = book.review
+        child = SubElement(sub, 'Date')
+        child.text = str(book.date)
+    return app.response_class(tostring(root), mimetype='application/xml')
 
-
+'''
+Atom/RSS
+'''
+# Make Atom/RSS feed for most recent student book lists (GET)
 @app.route('/recent.atom')
 def recent_feed():
     feed = AtomFeed('Recent Books',
@@ -513,13 +538,19 @@ def recent_feed():
     books = session.query(Books).order_by(Books.id.desc()).limit(10).all()
     for book in books:
         student = session.query(Students).filter_by(id=book.student_id).one()
-        feed.add(book.title, book.author,
+        feed.add(book.title,
+                 book.review,
                  content_type='html',
                  author=student.name,
+                 url=('/' +str(student.classes.teacher_id)
+                      +'/student/' + str(student.id)),
                  id=book.id,
                  updated=book.date,
                  published=book.date)
     return feed.get_response()
+
+def make_external(url):
+    return urljoin(request.url_root, url)
 
 
 '''
