@@ -1,6 +1,6 @@
-#ud197
-Project: Catalog
-===============================
+#FSND
+Project 3: Catalog
+==================
 ###- Daniel R. Northcutt
 ###- November 2015
 Overview
@@ -29,10 +29,16 @@ It evolved into a system that would allow an entire school to organize the chall
 
 [Documentation](#documentation)
 
+[Structure](#structure)
+
 [Extra Credit](#extra-credit-description)
+* Auth/ OAuth
+* Additional API Implementation
+* Image Field Usage
+* CSRF Protection
 
 [Miscellaneous](#miscellaneous)
-* [Image](#miscellaneous)
+* Application Images
 
 #Objectives
 
@@ -114,6 +120,50 @@ It may be helpful to view a brief (if nearly 10 minutes may be called brief) You
 [YouTube Demo](https://youtu.be/kyd9KMVF-8w)
 
 <iframe width="420" height="315" src="https://www.youtube.com/embed/kyd9KMVF-8w" frameborder="0" allowfullscreen></iframe>
+
+#Structure
+
+This application utilizes numerous directories primarily for the organization and separation of publicly viewable and login viewable templates.
+
+catalog
+    |application files
+    |configuration files
+    |
+    |-static
+    |   |images
+    |   |js files
+    |   |css file
+    |
+    |-templates
+        |main views html
+        |
+        |-book
+        |   |new, edit, delete html
+        |
+        |-class
+        |   |new, edit, delete html
+        |   |classes view html
+        |   |classroom view html
+        |
+        |-genre
+        |   |new, edit, delete html
+        |   |list view html
+        |
+        |-public
+        |   |all public views html
+        |
+        |-school
+        |   |new, edit, delete html
+        |   |school views html
+        |
+        |-student
+        |   |new, edit, delete html
+        |   |student view html
+        |
+        |-teacher
+            |new, edit, delete html
+
+
 
 #Documentation
 
