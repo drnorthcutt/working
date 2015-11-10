@@ -39,44 +39,44 @@ session = DBSession()
 '''
 Login and OAuth Block
 '''
-# Create a state token to prevent request forgery
-# Store the token in session for validation
+
 @app.route('/login')
 def login():
+    """Create token to prevent forgery and Store in session."""
     login_session['pass'] = 'initial'
     state = randomcsrf()
     login_session['state'] = state
     print login_session['pass']
     return render_template('login.html', STATE=state)
 
-# Add admin if does not exist.
 def newadmin(login_session):
+    """Add admin for new login."""
     new = Admins(name = login_session['username'],
                    email = login_session['email'],
                    picture = login_session['picture'])
     session.add(new)
     session.commit()
-    user = session.query(Admins).filter_by(email=login_session['email']).one()
+    user = session.query(Admins).filter_by(email = login_session['email']).one()
     return user.id
-
+'''
 # Check this
 def getuserinfo(user_id):
-    user = session.query(Schools).filter_by(id=user_id).one()
+    user = session.query(Schools).filter_by(id = user_id).one()
     return user
 
 # Check this
 def getadmin(school_id):
-    user = session.query(Schools).filter_by(id=school_id).one()
+    user = session.query(Schools).filter_by(id = school_id).one()
     return user.admin_id
-
-# Return school admin.
+'''
 def getadmininfo(user_id):
-    school = session.query(Schools).filter_by(id=user_id).one()
-    user = session.query(Admins).filter_by(id=school.admin_id).one()
+    """Return school admin."""
+    school = session.query(Schools).filter_by(id = user_id).one()
+    user = session.query(Admins).filter_by(id = school.admin_id).one()
     return user
 
-# Check whether a user belongs to a school.
 def credentials(admin, teacher, student):
+    """Check whether login user belongs to school via email."""
     if 'username' not in login_session:
         return "false"
     admin = admin
@@ -91,9 +91,8 @@ def credentials(admin, teacher, student):
     else:
         return "false"
 
-# Get login_session DB id, if exists
-# Check picture and add new one if different
 def getuserID(email):
+    """Get id if exists and add picture if different in session."""
     try:
         user = session.query(Admins).filter_by(email=email).one()
         if user is not None:
@@ -127,9 +126,9 @@ def getuserID(email):
             except:
                 return None
 
-# Google Plus and Google Education OAuth
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """Login via Google Plus or Google Education OAuth."""
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -209,9 +208,9 @@ def gconnect():
     print 'done!'
     return output
 
-# Disconnect Google Plus - Revoke token and reset session.
 @app.route('/gdisconnect')
 def gdisconnect():
+    """Disconnect Google Plus or Google Education login."""
     # Disconnect a connected user.
     credentials = login_session.get('credentials')
     # If not connected, say so.
@@ -229,9 +228,9 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
 
-# Facebook OAuth
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
+    """Login via Facebook OAuth."""
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -286,9 +285,9 @@ def fbconnect():
     print 'done!'
     return output
 
-# Disconnect Facebook - Revoke token and reset session
 @app.route('/fbdisconnect')
 def fbdisconnect():
+    """Disconnect Facebook OAuth Login."""
     facebook_id = login_session['facebook_id']
     access_token = login_session['access_token']
     url = 'https://graph.facebook.com/%s/permission?access_token=%s' % (facebook_id, access_token)
@@ -299,6 +298,7 @@ def fbdisconnect():
 # Disconnect Login
 @app.route('/disconnect')
 def disconnect():
+    """Disconnect Login Session Generic Variables."""
     if 'provider' in login_session:
         if login_session['provider'] == 'google':
             gdisconnect()
@@ -324,6 +324,7 @@ def disconnect():
 CSRF Protect Block
 '''
 def randomcsrf():
+    """Create random string for tokens."""
     rstring = (
         ''.join(random.choice(string.ascii_uppercase + string.digits)
                 for x in xrange(32))
@@ -333,6 +334,7 @@ def randomcsrf():
 
 @app.before_request
 def csrf_protect():
+    """Check tokens for Posts to prevent CSRF, ignore login post."""
     if request.method == "POST":
         if login_session['pass'] != 'initial':
             token = login_session.pop('_csrf_token', None)
@@ -342,6 +344,7 @@ def csrf_protect():
                 return response
 
 def gentoken():
+    """Create CSRF prevention token per post request."""
     if '_csrf_token' not in login_session:
         login_session['_csrf_token'] = randomcsrf()
     return login_session['_csrf_token']
@@ -352,41 +355,40 @@ app.jinja_env.globals['gentoken'] = gentoken
 '''
 JSON Endpoint Block
 '''
-# Make JSON API Endpoint for all schools (GET)
 @app.route('/schools/JSON')
 def schoolsJSON():
+    """Make JSON API Endpoint for all schools (GET)."""
     schools = session.query(Schools).order_by(Schools.name).all()
     return jsonify(Schools=[i.serialize for i in schools])
 
-# Make JSON API Endpoint for a specific school's teachers (GET)
 @app.route('/school/teachers/<int:school_id>/JSON')
 def teachersJSON(school_id):
+    """Make JSON API Endpoint for a specific school's teachers (GET)."""
     teachers = (session.query(Teachers)
                 .filter_by(school_id=school_id)
                 .outerjoin(Classrooms)
                 .order_by(Teachers.name).all())
     return jsonify(Teachers=[i.serialize for i in teachers])
 
-# Make JSON API Endpoint for a specific school's students (GET)
-# Special exception made in case a student has not yet been placed in a class
 @app.route('/school/students/<int:school_id>/JSON')
 def studentsJSON(school_id):
+    """Make JSON API Endpoint for a specific school's students (GET)."""
     students = (session.query(Students)
                 .filter_by(school_id=school_id)
                 .order_by(Students.name).all())
     return jsonify(Students=[i.serialize for i in students])
 
-# Make JSON API Endpoint for a specific student's book list (GET)
 @app.route('/student/books/<int:student_id>/JSON')
 def studentlistJSON(student_id):
+    """Make JSON API Endpoint for a specific student's book list (GET)."""
     books = (session.query(Books)
                 .filter_by(student_id=student_id)
                 .order_by(Books.genre, Books.title).all())
     return jsonify(Books=[i.serialize for i in books])
 
-# Make JSON API Endpoint for a specific school's student book lists (GET)
 @app.route('/school/student/books/<int:school_id>/JSON')
 def schoolbooksJSON(school_id):
+    """Make JSON API Endpoint for a school's student book lists (GET)"""
     books = (session.query(Books).outerjoin(Students)
                  .filter_by(school_id=school_id)
                  .order_by(Students.name, Books.genre, Books.title))
@@ -395,9 +397,9 @@ def schoolbooksJSON(school_id):
 '''
 XML Endpoint Block
 '''
-# Make XML API Endpoint for all schools (GET)
 @app.route('/schools/XML')
 def schoolsXML():
+    """Make XML API Endpoint for all schools (GET)"""
     schools = session.query(Schools).order_by(Schools.name).all()
     root = Element('Schools')
     for school in schools:
@@ -408,9 +410,9 @@ def schoolsXML():
         child.text = school.name
     return app.response_class(tostring(root), mimetype='application/xml')
 
-# Make XML API Endpoint for a specific school's teachers (GET)
 @app.route('/school/<int:school_id>/XML')
 def teachersXML(school_id):
+    """Make XML API Endpoint for a specific school's teachers (GET)."""
     teachers = (session.query(Teachers)
                 .filter_by(school_id=school_id)
                 .order_by(Teachers.name).all())
@@ -424,10 +426,9 @@ def teachersXML(school_id):
         child.text = teacher.name
     return app.response_class(tostring(root), mimetype='application/xml')
 
-# Make XML API Endpoint for a specific school's students (GET)
-# Special exception made in case a student has not yet been placed in a class
 @app.route('/school/students/<int:school_id>/XML')
 def studentsXML(school_id):
+    """Make XML API Endpoint for a specific school's students (GET)."""
     students = (session.query(Students)
                 .filter_by(school_id=school_id)
                 .order_by(Students.classroom, Students.name).all())
@@ -436,6 +437,7 @@ def studentsXML(school_id):
     root.text = school.name
     for student in students:
         each = SubElement(root, "Student")
+        # Except for student not yet placed in a class.
         child = SubElement(each, 'Grade')
         try:
             child.text = str(student.classes.grade)
@@ -452,9 +454,9 @@ def studentsXML(school_id):
         child.text = student.name
     return app.response_class(tostring(root), mimetype='application/xml')
 
-# Make XML API Endpoint for a specific student's book list (GET)
 @app.route('/student/books/<int:student_id>/XML')
 def studentbooksXML(student_id):
+    """Make XML API Endpoint for a specific student's book list (GET)."""
     books = (session.query(Books)
                 .filter_by(student_id=student_id)
                 .order_by(Books.genre, Books.title).all())
@@ -473,9 +475,9 @@ def studentbooksXML(student_id):
         child.text = book.review
     return app.response_class(tostring(root), mimetype='application/xml')
 
-# Make XML API Endpoint for a specific school's student book lists (GET)
 @app.route('/school/student/books/<int:school_id>/XML')
 def schoolbooksXML(school_id):
+    """Make XML API Endpoint for specific school's student book lists (GET)."""
     books = (session.query(Books).outerjoin(Students)
                  .filter_by(school_id=school_id)
                  .order_by(Students.name, Books.genre, Books.title))
@@ -499,9 +501,9 @@ def schoolbooksXML(school_id):
                 child.text = book.review
     return app.response_class(tostring(root), mimetype='application/xml')
 
-# Make XML API Endpoint for most recent student book lists (GET)
 @app.route('/student/books/XML')
 def recentbooksXML():
+    """Make XML API Endpoint for most recent student book lists (GET)."""
     books = session.query(Books).order_by(Books.id.desc()).limit(10).all()
     root = Element('Forty_Books_App')
     for book in books:
@@ -530,9 +532,9 @@ def recentbooksXML():
 '''
 Atom/RSS
 '''
-# Make Atom/RSS feed for most recent student book lists (GET)
 @app.route('/recent.atom')
 def recent_feed():
+    """Make Atom/RSS feed for most recent student book lists (GET)."""
     feed = AtomFeed('Recent Books',
                     feed_url=request.url, url=request.url_root)
     books = session.query(Books).order_by(Books.id.desc()).limit(10).all()
@@ -556,10 +558,10 @@ def make_external(url):
 '''
 School Block
 '''
-# Show all schools
 @app.route('/')
 @app.route('/schools')
 def schools():
+    """Return all schools in DB."""
     schools = session.query(Schools).order_by(Schools.name).all()
     if 'username' not in login_session:
         return render_template('public/schools.html',
@@ -573,9 +575,9 @@ def schools():
         return render_template('schools.html',
                            schools=schools)
 
-# Show a specific school.
 @app.route('/school/<int:school_id>')
 def school(school_id):
+    """Return a specific school with students and teachers."""
     school = session.query(Schools).filter_by(id=school_id).one()
     students = (session.query(Students)
                 .filter_by(school_id=school_id)
@@ -604,10 +606,9 @@ def school(school_id):
                                teachers = teachers,
                                school_id = school_id)
 
-# Create a new school
 @app.route('/school/new', methods=['GET', 'POST'])
 def newschool():
-    # Check login.
+    """Create a new school."""
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
@@ -624,9 +625,9 @@ def newschool():
     else:
         return render_template('school/new.html')
 
-# Edit a school
 @app.route('/school/<int:school_id>/edit', methods=['GET', 'POST'])
 def editschool(school_id):
+    """Edit an existing school (admin only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -658,9 +659,9 @@ def editschool(school_id):
                                school_id = school_id,
                                school = school)
 
-# Delete a school
 @app.route('/school/<int:school_id>/delete', methods=['GET', 'POST'])
 def deleteschool(school_id):
+    """Delete an existing school (admin only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -684,9 +685,9 @@ def deleteschool(school_id):
                                school = school,
                                school_id = school_id)
 
-# Show a specific school's teachers
 @app.route('/school/<int:school_id>/teachers')
 def schoolteachers(school_id):
+    """Return a specific school's teachers."""
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id)
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -703,9 +704,9 @@ def schoolteachers(school_id):
                                teachers = teachers,
                                school_id = school_id)
 
-# Show a specific school's students.
 @app.route('/school/<int:school_id>/students')
 def schoolstudents(school_id):
+    """Return a specific school's students."""
     school = session.query(Schools).filter_by(id=school_id).one()
     students = session.query(Students).filter_by(school_id=school_id).all()
     creator = getadmininfo(school_id)
@@ -725,9 +726,9 @@ def schoolstudents(school_id):
 '''
 Teacher Block
 '''
-# Add a teacher.
 @app.route('/school/<int:school_id>/teacher/new', methods=['GET', 'POST'])
 def newteacher(school_id):
+    """Create a new teacher (admin only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -757,10 +758,10 @@ def newteacher(school_id):
                                school_id = school_id,
                                school = school)
 
-# Edit a teacher.
 @app.route('/school/<int:school_id>/teacher/<int:teacher_id>/edit',
            methods=['GET', 'POST'])
 def editteacher(school_id, teacher_id):
+    """Edit an existing teacher (admin and edited teacher only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -795,10 +796,10 @@ def editteacher(school_id, teacher_id):
                                teacher = teacher,
                                school = school)
 
-# Delete a teacher.
 @app.route('/school/<int:school_id>/teacher/<int:teacher_id>/delete',
            methods=['GET', 'POST'])
 def deleteteacher(school_id, teacher_id):
+    """Delete an existing teacher (admin only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -830,9 +831,9 @@ def deleteteacher(school_id, teacher_id):
 '''
 Class(es) Block
 '''
-# Show a teacher's classroom(s).
 @app.route('/teacher/<int:teacher_id>/classroom')
 def classroom(teacher_id):
+    """Return a teacher's classrooms."""
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     classroom = session.query(Classrooms).filter_by(teacher_id=teacher_id)
     students = (session.query(Students)
@@ -868,9 +869,9 @@ def classroom(teacher_id):
                                books = books,
                                teacher_id = teacher_id)
 
-# Show a specific room (for cases when more than one exist for a teacher).
 @app.route('/teacher/<int:teacher_id>/classroom/<int:room_id>')
 def room(teacher_id, room_id):
+    """Return a specific classroom."""
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     classroom = session.query(Classrooms).filter_by(id=room_id).one()
     classother = session.query(Classrooms).filter_by(teacher_id=teacher_id)
@@ -905,9 +906,9 @@ def room(teacher_id, room_id):
                                teacher_id = teacher_id,
                                room_id = room_id)
 
-# Add a classroom by teacher.
 @app.route('/teacher/<int:teacher_id>/classroom/new', methods=['GET', 'POST'])
 def newclass(teacher_id):
+    """Create a classroom (admin and teacher only)."""
     if 'username' not in login_session:
         return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
@@ -945,10 +946,10 @@ def newclass(teacher_id):
                                sets = sets,
                                teacher_id = teacher_id)
 
-# Edit a classroom.
 @app.route('/teacher/<int:teacher_id>/classroom/<int:class_id>/edit',
            methods=['GET', 'POST'])
 def editclass(teacher_id, class_id):
+    """Edit an existing classroom (admin and teacher only)."""
     if 'username' not in login_session:
         return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
@@ -996,10 +997,10 @@ def editclass(teacher_id, class_id):
                                teacher_id = teacher_id,
                                class_id = class_id)
 
-# Delete a classroom.
 @app.route('/teacher/<int:teacher_id>/classroom/<int:class_id>/delete',
            methods=['GET', 'POST'])
 def deleteclass(teacher_id, class_id):
+    """Delete an existing classroom (admin and teacher only)."""
     if 'username' not in login_session:
         return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
@@ -1032,9 +1033,9 @@ def deleteclass(teacher_id, class_id):
 '''
 Genre Lists Block
 '''
-# Show a teacher's genre lists
 @app.route('/teacher/<int:teacher_id>/genrelists')
 def genre(teacher_id):
+    """Return a teacher's genre lists."""
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     school = session.query(Schools).filter_by(id=teacher.school_id).one()
     lists = session.query(Genres).filter_by(teacher_id=teacher_id).all()
@@ -1056,9 +1057,9 @@ def genre(teacher_id):
                                classes = classes,
                                teacher_id = teacher_id)
 
-# Add a genre list.
 @app.route('/teacher/<int:teacher_id>/genrelist/new', methods=['GET', 'POST'])
 def newlist(teacher_id):
+    """Create a new genre list (admin and teacher only)."""
     if 'username' not in login_session:
         return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
@@ -1099,10 +1100,10 @@ def newlist(teacher_id):
                                teacher = teacher,
                                teacher_id=teacher.id)
 
-# Edit a genre list.
 @app.route('/teacher/<int:teacher_id>/genrelist/<int:list_id>/edit',
            methods=['GET', 'POST'])
 def editlist(teacher_id, list_id):
+    """Edit an existing genre list (admin and teacher only)."""
     if 'username' not in login_session:
         return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
@@ -1153,10 +1154,10 @@ def editlist(teacher_id, list_id):
                                teacher_id = teacher.id,
                                list_id = alist.id)
 
-# Delete a genre list.
 @app.route('/teacher/<int:teacher_id>/genrelist/<int:list_id>/delete',
            methods=['GET', 'POST'])
 def deletelist(teacher_id, list_id):
+    """Delete an existing genre list (admin and teacher only)."""
     if 'username' not in login_session:
         return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
@@ -1189,9 +1190,9 @@ def deletelist(teacher_id, list_id):
 '''
 Student Block
 '''
-# Add a student.
 @app.route('/school/<int:school_id>/student/new', methods=['GET', 'POST'])
 def newstudent(school_id):
+    """Create a new student from school list (admin only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -1230,10 +1231,11 @@ def newstudent(school_id):
                                classes = classes,
                                school=school)
 
-# Add student by teacher
+# Allow student creation from within a classroom.
 @app.route('/school/<int:school_id>/teacher/<int:teacher_id>/student/new',
            methods=['GET', 'POST'])
 def teachernewstudent(school_id, teacher_id):
+    """Create a new student (admin and teacher only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -1272,10 +1274,10 @@ def teachernewstudent(school_id, teacher_id):
                                classes = classes,
                                school=school)
 
-# Edit a student.
 @app.route('/school/<int:school_id>/student/<int:user_id>/edit',
            methods=['GET', 'POST'])
 def editstudent(school_id, user_id):
+    """Edit an existing student from school list (admin only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -1318,10 +1320,11 @@ def editstudent(school_id, user_id):
                                teachers = teachers,
                                school = school)
 
-# Edit a student by teacher.
+# Allow student edit from within a classroom.
 @app.route('/<int:school_id>/<int:teacher_id>/student/<int:user_id>/edit',
            methods=['GET', 'POST'])
 def teachereditstudent(school_id, user_id, teacher_id):
+    """Edit an existing student from classroom (admin and teacher only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -1365,10 +1368,10 @@ def teachereditstudent(school_id, user_id, teacher_id):
                                teachers = teachers,
                                school = school)
 
-# Delete a student
 @app.route('/school/<int:school_id>/student/<int:user_id>/delete',
            methods=['GET', 'POST'])
 def deletestudent(school_id, user_id):
+    """Delete an existing student from school list (admin only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -1396,10 +1399,11 @@ def deletestudent(school_id, user_id):
                                user_id = user_id,
                                school_id = school_id)
 
-# Delete a student by teacher.
+# Allow student deletion from within classroom.
 @app.route('/<int:school_id>/<int:teacher_id>/student/<int:user_id>/delete',
            methods=['GET', 'POST'])
 def teacherdeletestudent(school_id, user_id, teacher_id):
+    """Delete an existing student from classroom (admin and teacher only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
@@ -1432,9 +1436,9 @@ def teacherdeletestudent(school_id, user_id, teacher_id):
 '''
 Books Block
 '''
-# Show a student's books.
 @app.route('/<int:teacher_id>/student/<int:student_id>')
 def student(student_id, teacher_id):
+    """Return a student's books"""
     student = session.query(Students).filter_by(id=student_id).one()
     genre = (session.query(Genres)
              .join(Classrooms)
@@ -1442,6 +1446,7 @@ def student(student_id, teacher_id):
     books = session.query(Books).filter_by(student_id=student_id)
     num = books.count()
     percent = (num*100)/40
+    # Count each genre listing of books.
     poetry = books.filter_by(genre='poetry').count()
     graph = books.filter_by(genre='graphic').count()
     real = books.filter_by(genre='realistic').count()
@@ -1492,9 +1497,9 @@ def student(student_id, teacher_id):
                                student_id = student_id,
                                teacher_id = teacher_id)
 
-# Add a student book.
 @app.route('/student/<int:student_id>/book/add', methods=['GET', 'POST'])
 def newbook(student_id):
+    """Create a book entry (admin, teacher, student)."""
     if 'username' not in login_session:
         return redirect('/login')
     student = session.query(Students).filter_by(id=student_id).one()
@@ -1531,10 +1536,10 @@ def newbook(student_id):
                                student_id = student_id,
                                student = student)
 
-# Edit a student book
 @app.route('/student/<int:student_id>/book/<int:book_id>/edit',
            methods=['GET', 'POST'])
 def editbook(student_id, book_id):
+    """Edit an existing book entry (admin, teacher, student)."""
     if 'username' not in login_session:
         return redirect('/login')
     student = session.query(Students).filter_by(id=student_id).one()
@@ -1578,10 +1583,10 @@ def editbook(student_id, book_id):
                                student = student,
                                book = book)
 
-# Delete a student book.
 @app.route('/student/<int:student_id>/book/<int:book_id>/delete',
            methods=['GET', 'POST'])
 def deletebook(student_id, book_id):
+    """Delete an existing book entry (admin, teacher, student)."""
     if 'username' not in login_session:
         return redirect('/login')
     book = session.query(Books).filter_by(id=book_id).one()
