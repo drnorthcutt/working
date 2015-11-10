@@ -124,7 +124,7 @@ It may be helpful to view a brief (if nearly 10 minutes may be called brief) You
 #Structure
 
 This application utilizes numerous directories primarily for the organization and separation of publicly viewable and login viewable templates.
-
+```
 catalog
     |application files
     |configuration files
@@ -162,7 +162,7 @@ catalog
         |
         |-teacher
             |new, edit, delete html
-
+```
 
 
 #Documentation
