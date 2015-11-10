@@ -94,8 +94,6 @@ cd /vagrant
 ```
 
 Create the databases and run the database setup files with demo content:
-(This will delete any other instance of a database called tournament and create
-the schema.)
 ```
 python demo_db.py
 ```
@@ -149,7 +147,7 @@ Image Fields:
 
 CSRF Protection:
 
-    A temporary token system is used on all post pages, ignoring the initial login post which uses state and a permanent session token.
+A temporary token system is used on all post pages, ignoring the initial login post which uses state and a permanent session token.
 
  #Miscellaneous
 
