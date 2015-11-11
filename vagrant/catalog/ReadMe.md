@@ -1,8 +1,9 @@
 #FSND
 Project 3: Catalog
 ==================
-###- Daniel R. Northcutt
-###- November 2015
+###40 Books Challenge App
+###Author: Daniel R. Northcutt
+###Date: November 2015
 Overview
 --------
 Requirements:
