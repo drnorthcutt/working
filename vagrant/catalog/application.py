@@ -64,17 +64,8 @@ def newadmin(login_session):
     session.commit()
     user = session.query(Admins).filter_by(email=login_session['email']).one()
     return user.id
-'''
-# Check this
-def getuserinfo(user_id):
-    user = session.query(Schools).filter_by(id = user_id).one()
-    return user
 
-# Check this
-def getadmin(school_id):
-    user = session.query(Schools).filter_by(id = school_id).one()
-    return user.admin_id
-'''
+
 def getadmininfo(user_id):
     """Return school admin."""
     school = session.query(Schools).filter_by(id=user_id).one()
@@ -347,7 +338,7 @@ def randomcsrf():
         ''.join(random.choice(string.ascii_uppercase + string.digits)
                 for x in xrange(32))
         )
-    print rstring
+    # print rstring
     return rstring
 
 
@@ -585,6 +576,7 @@ def recent_feed():
 
 
 def make_external(url):
+    """Return external url for proper atom feed subscription."""
     return urljoin(request.url_root, url)
 
 
