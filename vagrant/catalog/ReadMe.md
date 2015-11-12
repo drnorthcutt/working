@@ -209,23 +209,29 @@ A temporary token system is used on all post pages, ignoring the initial login p
 
  Images:
 
-<img src="https://github.com/drnorthcutt/working/blob/catalog/vagrant/catalog/img/schools.png" alt="schools" style="width:80%">
 ####Main Schools View
+<img src="https://github.com/drnorthcutt/working/blob/catalog/vagrant/catalog/img/schools.png" alt="schools" style="width:80%">
 
-<img src="https://github.com/drnorthcutt/working/blob/catalog/vagrant/catalog/img/school.png" alt="school" style="width:80%">
+
 ####Single School View
+<img src="https://github.com/drnorthcutt/working/blob/catalog/vagrant/catalog/img/school.png" alt="school" style="width:80%">
 
-<img src="https://github.com/drnorthcutt/working/blob/catalog/vagrant/catalog/img/classes.png" alt="classes" style="width:80%">
+
 ####Teacher Classes View
+<img src="https://github.com/drnorthcutt/working/blob/catalog/vagrant/catalog/img/classes.png" alt="classes" style="width:80%">
 
-<img src="https://github.com/drnorthcutt/working/blob/catalog/vagrant/catalog/img/adminedit.png" alt="admin edit" style="width:80%">
+
 ####Admin Edit View
+<img src="https://github.com/drnorthcutt/working/blob/catalog/vagrant/catalog/img/adminedit.png" alt="admin edit" style="width:80%">
 
-<img src="https://github.com/drnorthcutt/working/blob/catalog/vagrant/catalog/img/teacheredit.png" alt="teacher edit" style="width:80%">
+
 ####Teacher Edit View
+<img src="https://github.com/drnorthcutt/working/blob/catalog/vagrant/catalog/img/teacheredit.png" alt="teacher edit" style="width:80%">
 
-<img src="https://github.com/drnorthcutt/working/blob/catalog/vagrant/catalog/img/studentedit.png" alt="student edit" style="width:80%">
+
 ####Student Book Edit View
+<img src="https://github.com/drnorthcutt/working/blob/catalog/vagrant/catalog/img/studentedit.png" alt="student edit" style="width:80%">
+
 
 
 
