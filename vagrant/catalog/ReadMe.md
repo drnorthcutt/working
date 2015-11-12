@@ -85,6 +85,11 @@ Vagrant files have been provided in the Catalog Directory which should install a
 Clone this repository and ensure the files are all in the same directory.
 (if already cloned from the original repository, only this directory and its subdirectories are required.)
 
+**If testing demo functionality with supplied demo data, edit demo_db.py in the
+"Demo Edit Section".**  This section will only need your gmail, google education,
+or Facebook email address to function properly as a student, teacher or admin.
+Supplying your name in the space provided will make finding yourself easier.
+
 From the command line, or terminal, navigate to the Catalog folder from this repository, type:
 
 ```
