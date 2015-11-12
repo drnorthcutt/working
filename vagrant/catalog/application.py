@@ -54,6 +54,7 @@ def login():
     print login_session['pass']
     return render_template('login.html', STATE=state)
 
+
 def newadmin(login_session):
     """Add admin for new login."""
     new = Admins(name=login_session['username'],
@@ -80,6 +81,7 @@ def getadmininfo(user_id):
     user = session.query(Admins).filter_by(id=school.admin_id).one()
     return user
 
+
 def credentials(admin, teacher, student):
     """Check whether login user belongs to school via email."""
     if 'username' not in login_session:
@@ -95,6 +97,7 @@ def credentials(admin, teacher, student):
         return "true"
     else:
         return "false"
+
 
 def getuserID(email):
     """Get id if exists and add picture if different in session."""
@@ -132,12 +135,13 @@ def getuserID(email):
             except:
                 return None
 
+
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     """Login via Google Plus or Google Education OAuth."""
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
-        response.headers['Content-Type']='application/json'
+        response.headers['Content-Type'] = 'application/json'
         return response
     # Obtain Auth code.
     code = request.data
@@ -149,7 +153,7 @@ def gconnect():
     except FlowExchangeError:
         response = make_response(
             json.dumps('Failed to upgrade the auth code.'), 401)
-        response.headers['Content-Type']='application/json'
+        response.headers['Content-Type'] = 'application/json'
         return response
     # Check access token.
     access_token = credentials.access_token
@@ -160,20 +164,20 @@ def gconnect():
     # If any error in token info, abort.
     if result.get('error') is not None:
         response = make_response(json.dumps(result.get('error')), 500)
-        response.headers['Content-Type']='application/json'
+        response.headers['Content-Type'] = 'application/json'
     # Verify the token is for the intended user.
     gplus_id = credentials.id_token['sub']
     if result['user_id'] != gplus_id:
         response = make_response(
             json.dumps('Token user ID does not match given user ID'), 401)
-        response.headers['Content-Type']='application/json'
+        response.headers['Content-Type'] = 'application/json'
         return response
     # Verify the access token is valid for app.
     if result['issued_to'] != CLIENT_ID:
         response = make_response(
             json.dumps('Token client ID does not match given client ID'), 401)
         print 'Token client ID does not match app ID.'
-        response.headers['Content-type']='application/json'
+        response.headers['Content-type'] = 'application/json'
         return response
     # Check whether user is already logged in.
     stored_credentials = login_session.get('gplus_id')
@@ -181,7 +185,7 @@ def gconnect():
     if stored_credentials is not None and gplus_id == stored_gplus_id:
         response = make_response(
             json.dumps('Current user is already connected.'), 200)
-        response.headers['Content-Type']='application/json'
+        response.headers['Content-Type'] = 'application/json'
         return response
     # Store access token for later use in the session.
     login_session['provider'] = 'google'
@@ -210,9 +214,10 @@ def gconnect():
     output += login_session['picture']
     output += '" style="width: 200px; height: 200px; border-radius: 150px;'
     output += ' -webkit-border-radius: 150px; -moz-border-radius: 150px;">'
-    flash("Logged in as %s" %login_session['username'])
+    flash("Logged in as %s" % login_session['username'])
     print 'done!'
     return output
+
 
 @app.route('/gdisconnect')
 def gdisconnect():
@@ -223,7 +228,7 @@ def gdisconnect():
     if credentials is None:
         response = make_response(json.dumps('Current user not connected.'),
                                  401)
-        response.headers['Content-Type']='application/json'
+        response.headers['Content-Type'] = 'application/json'
         return response
     # Revoke token if connected.
     access_token = credentials.access_token
@@ -232,8 +237,9 @@ def gdisconnect():
     result = h.request(url, 'GET')[0]
     if result['status'] != '200':
         response = make_response(json.dumps('Failed to revoke token.'), 400)
-        response.headers['Content-Type']='application/json'
+        response.headers['Content-Type'] = 'application/json'
         return response
+
 
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
@@ -290,9 +296,10 @@ def fbconnect():
     output += login_session['picture']
     output += '" style="width: 200px; height: 200px; border-radius: 150px;'
     output += ' -webkit-border-radius: 150px; -moz-border-radius: 150px;">'
-    flash("Logged in as %s" %login_session['username'])
+    flash("Logged in as %s" % login_session['username'])
     print 'done!'
     return output
+
 
 @app.route('/fbdisconnect')
 def fbdisconnect():
@@ -304,6 +311,7 @@ def fbdisconnect():
     h = httplib2.Http()
     result = h.request(url, 'DELETE')[1]
     return 'You have been logged out.'
+
 
 # Disconnect Login
 @app.route('/disconnect')
@@ -342,6 +350,7 @@ def randomcsrf():
     print rstring
     return rstring
 
+
 @app.before_request
 def csrf_protect():
     """Check tokens for Posts to prevent CSRF, ignore login post."""
@@ -350,8 +359,9 @@ def csrf_protect():
             token = login_session.pop('_csrf_token', None)
             if not token or token != request.form.get('_csrf_token'):
                 response = make_response(json.dumps('Invalid token.'), 403)
-                response.headers['Content-Type']='application/json'
+                response.headers['Content-Type'] = 'application/json'
                 return response
+
 
 def gentoken():
     """Create CSRF prevention token per post request."""
@@ -371,6 +381,7 @@ def schoolsJSON():
     schools = session.query(Schools).order_by(Schools.name).all()
     return jsonify(Schools=[i.serialize for i in schools])
 
+
 @app.route('/school/teachers/<int:school_id>/JSON')
 def teachersJSON(school_id):
     """Make JSON API Endpoint for a specific school's teachers (GET)."""
@@ -380,6 +391,7 @@ def teachersJSON(school_id):
                 .order_by(Teachers.name).all())
     return jsonify(Teachers=[i.serialize for i in teachers])
 
+
 @app.route('/school/students/<int:school_id>/JSON')
 def studentsJSON(school_id):
     """Make JSON API Endpoint for a specific school's students (GET)."""
@@ -388,6 +400,7 @@ def studentsJSON(school_id):
                 .order_by(Students.name).all())
     return jsonify(Students=[i.serialize for i in students])
 
+
 @app.route('/student/books/<int:student_id>/JSON')
 def studentlistJSON(student_id):
     """Make JSON API Endpoint for a specific student's book list (GET)."""
@@ -395,6 +408,7 @@ def studentlistJSON(student_id):
              .filter_by(student_id=student_id)
              .order_by(Books.genre, Books.title).all())
     return jsonify(Books=[i.serialize for i in books])
+
 
 @app.route('/school/student/books/<int:school_id>/JSON')
 def schoolbooksJSON(school_id):
@@ -421,6 +435,7 @@ def schoolsXML():
         child.text = school.name
     return app.response_class(tostring(root), mimetype='application/xml')
 
+
 @app.route('/school/<int:school_id>/XML')
 def teachersXML(school_id):
     """Make XML API Endpoint for a specific school's teachers (GET)."""
@@ -436,6 +451,7 @@ def teachersXML(school_id):
         child = SubElement(teach, 'name')
         child.text = teacher.name
     return app.response_class(tostring(root), mimetype='application/xml')
+
 
 @app.route('/school/students/<int:school_id>/XML')
 def studentsXML(school_id):
@@ -465,6 +481,7 @@ def studentsXML(school_id):
         child.text = student.name
     return app.response_class(tostring(root), mimetype='application/xml')
 
+
 @app.route('/student/books/<int:student_id>/XML')
 def studentbooksXML(student_id):
     """Make XML API Endpoint for a specific student's book list (GET)."""
@@ -485,6 +502,7 @@ def studentbooksXML(student_id):
         child = SubElement(each, 'Review')
         child.text = book.review
     return app.response_class(tostring(root), mimetype='application/xml')
+
 
 @app.route('/school/student/books/<int:school_id>/XML')
 def schoolbooksXML(school_id):
@@ -511,6 +529,7 @@ def schoolbooksXML(school_id):
                 child = SubElement(sub, 'Review')
                 child.text = book.review
     return app.response_class(tostring(root), mimetype='application/xml')
+
 
 @app.route('/student/books/XML')
 def recentbooksXML():
@@ -544,6 +563,7 @@ def recentbooksXML():
 '''
 Atom/RSS
 '''
+@app.route('/rssfeed')
 @app.route('/recent.atom')
 def recent_feed():
     """Make Atom/RSS feed for most recent student book lists (GET)."""
@@ -554,14 +574,15 @@ def recent_feed():
         student = session.query(Students).filter_by(id=book.student_id).one()
         feed.add(book.title,
                  book.review,
-                 content_type = 'html',
-                 author = student.name,
-                 url = ('/' +str(student.classes.teacher_id) +
-                        '/student/' + str(student.id)),
-                 id = book.id,
-                 updated = book.date,
-                 published = book.date)
+                 content_type='html',
+                 author=student.name,
+                 url=('/' + str(student.classes.teacher_id) +
+                      '/student/' + str(student.id)),
+                 id=book.id,
+                 updated=book.date,
+                 published=book.date)
     return feed.get_response()
+
 
 def make_external(url):
     return urljoin(request.url_root, url)
@@ -575,17 +596,23 @@ School Block
 def schools():
     """Return all schools in DB."""
     schools = session.query(Schools).order_by(Schools.name).all()
+    books = session.query(Books).count()
     if 'username' not in login_session:
         return render_template('public/schools.html',
                                schools=schools)
     student = session.query(Students).filter_by(email=login_session['email'])
     # Do not show add school function if user is a registered student.
-    if student == []:
+    if student:
             return render_template('public/schools.html',
-                                   schools=schools)
+                                   schools=schools,
+                                   books=books
+                                   )
     else:
         return render_template('schools.html',
-                               schools=schools)
+                               schools=schools,
+                               books=books
+                               )
+
 
 @app.route('/school/<int:school_id>')
 def school(school_id):
@@ -618,6 +645,7 @@ def school(school_id):
                                teachers=teachers,
                                school_id=school_id)
 
+
 @app.route('/school/new', methods=['GET', 'POST'])
 def newschool():
     """Create a new school."""
@@ -629,13 +657,14 @@ def newschool():
                       county=request.form['county'],
                       district=request.form['district'],
                       admin_id=login_session['user_id']
-                     )
+                      )
         session.add(new)
         session.commit()
         flash(new.name + " created!")
         return redirect(url_for('schools'))
     else:
         return render_template('school/new.html')
+
 
 @app.route('/school/<int:school_id>/edit', methods=['GET', 'POST'])
 def editschool(school_id):
@@ -655,13 +684,13 @@ def editschool(school_id):
                 ''')
     if request.method == 'POST':
         if request.form['name']:
-            school.name=request.form['name']
+            school.name = request.form['name']
         if request.form['state']:
-            school.state=request.form['state']
+            school.state = request.form['state']
         if request.form['county']:
-            school.county=request.form['county']
+            school.county = request.form['county']
         if request.form['district']:
-            school.district=request.form['district']
+            school.district = request.form['district']
         session.add(school)
         session.commit()
         flash(school.name + " edited!")
@@ -670,6 +699,7 @@ def editschool(school_id):
         return render_template('school/edit.html',
                                school_id=school_id,
                                school=school)
+
 
 @app.route('/school/<int:school_id>/delete', methods=['GET', 'POST'])
 def deleteschool(school_id):
@@ -697,6 +727,7 @@ def deleteschool(school_id):
                                school=school,
                                school_id=school_id)
 
+
 @app.route('/school/<int:school_id>/teachers')
 def schoolteachers(school_id):
     """Return a specific school's teachers."""
@@ -715,6 +746,7 @@ def schoolteachers(school_id):
                                school=school,
                                teachers=teachers,
                                school_id=school_id)
+
 
 @app.route('/school/<int:school_id>/students')
 def schoolstudents(school_id):
@@ -760,7 +792,7 @@ def newteacher(school_id):
                        email=request.form['email'],
                        picture=request.form['picture'],
                        school_id=school_id
-                      )
+                       )
         session.add(new)
         session.commit()
         flash(new.name + " added!")
@@ -769,6 +801,7 @@ def newteacher(school_id):
         return render_template('teacher/new.html',
                                school_id=school_id,
                                school=school)
+
 
 @app.route('/school/<int:school_id>/teacher/<int:teacher_id>/edit',
            methods=['GET', 'POST'])
@@ -792,11 +825,11 @@ def editteacher(school_id, teacher_id):
                 ''')
     if request.method == 'POST':
         if request.form['name']:
-            teacher.name=request.form['name']
+            teacher.name = request.form['name']
         if request.form['email']:
-            teacher.email=request.form['email']
+            teacher.email = request.form['email']
         if request.form['picture']:
-            teacher.picture=request.form['picture']
+            teacher.picture = request.form['picture']
         session.add(teacher)
         session.commit()
         flash(teacher.name + " edited!")
@@ -807,6 +840,7 @@ def editteacher(school_id, teacher_id):
                                teacher_id=teacher_id,
                                teacher=teacher,
                                school=school)
+
 
 @app.route('/school/<int:school_id>/teacher/<int:teacher_id>/delete',
            methods=['GET', 'POST'])
@@ -881,6 +915,7 @@ def classroom(teacher_id):
                                books=books,
                                teacher_id=teacher_id)
 
+
 @app.route('/teacher/<int:teacher_id>/classroom/<int:room_id>')
 def room(teacher_id, room_id):
     """Return a specific classroom."""
@@ -918,6 +953,7 @@ def room(teacher_id, room_id):
                                teacher_id=teacher_id,
                                room_id=room_id)
 
+
 @app.route('/teacher/<int:teacher_id>/classroom/new', methods=['GET', 'POST'])
 def newclass(teacher_id):
     """Create a classroom (admin and teacher only)."""
@@ -946,7 +982,7 @@ def newclass(teacher_id):
                          set_id=request.form['set'],
                          teacher_id=teacher_id,
                          school_id=teacher.school_id
-                        )
+                         )
         session.add(new)
         session.commit()
         flash(new.name + " added!")
@@ -957,6 +993,7 @@ def newclass(teacher_id):
                                classes=classes,
                                sets=sets,
                                teacher_id=teacher_id)
+
 
 @app.route('/teacher/<int:teacher_id>/classroom/<int:class_id>/edit',
            methods=['GET', 'POST'])
@@ -985,16 +1022,16 @@ def editclass(teacher_id, class_id):
                 ''')
     if request.method == 'POST':
         if request.form['name']:
-            classroom.name=request.form['name']
+            classroom.name = request.form['name']
         if request.form['grade']:
-            classroom.grade=request.form['grade']
+            classroom.grade = request.form['grade']
         if request.form['set']:
             if request.form['set'] == "clear":
-                classroom.set_id=""
+                classroom.set_id = ""
             else:
-                classroom.set_id=request.form['set']
+                classroom.set_id = request.form['set']
         if request.form['teacher']:
-            classroom.teacher_id=request.form['teacher']
+            classroom.teacher_id = request.form['teacher']
         session.add(classroom)
         session.commit()
         flash(classroom.name + " edited!")
@@ -1008,6 +1045,7 @@ def editclass(teacher_id, class_id):
                                allteach=allteach,
                                teacher_id=teacher_id,
                                class_id=class_id)
+
 
 @app.route('/teacher/<int:teacher_id>/classroom/<int:class_id>/delete',
            methods=['GET', 'POST'])
@@ -1069,6 +1107,7 @@ def genre(teacher_id):
                                classes=classes,
                                teacher_id=teacher_id)
 
+
 @app.route('/teacher/<int:teacher_id>/genrelist/new', methods=['GET', 'POST'])
 def newlist(teacher_id):
     """Create a new genre list (admin and teacher only)."""
@@ -1100,7 +1139,7 @@ def newlist(teacher_id):
                      info=request.form['info'],
                      bio=request.form['bio'],
                      pages=request.form['pages']
-                    )
+                     )
         session.add(new)
         session.commit()
         flash(new.name + " added!")
@@ -1111,6 +1150,7 @@ def newlist(teacher_id):
         return render_template('genre/new.html',
                                teacher=teacher,
                                teacher_id=teacher.id)
+
 
 @app.route('/teacher/<int:teacher_id>/genrelist/<int:list_id>/edit',
            methods=['GET', 'POST'])
@@ -1134,27 +1174,27 @@ def editlist(teacher_id, list_id):
                 ''')
     if request.method == 'POST':
         if request.form['name']:
-            alist.name=request.form['name']
+            alist.name = request.form['name']
         if request.form['poetry']:
-            alist.poetry=request.form['poetry']
+            alist.poetry = request.form['poetry']
         if request.form['graphic']:
-            alist.graphic=request.form['graphic']
+            alist.graphic = request.form['graphic']
         if request.form['realistic']:
-            alist.realistic=request.form['realistic']
+            alist.realistic = request.form['realistic']
         if request.form['historical']:
-            alist.historical=request.form['historical']
+            alist.historical = request.form['historical']
         if request.form['fantasy']:
-            alist.fantasy=request.form['fantasy']
+            alist.fantasy = request.form['fantasy']
         if request.form['scifi']:
-            alist.scifi=request.form['scifi']
+            alist.scifi = request.form['scifi']
         if request.form['mystery']:
-            alist.mystery=request.form['mystery']
+            alist.mystery = request.form['mystery']
         if request.form['info']:
-            alist.info=request.form['info']
+            alist.info = request.form['info']
         if request.form['bio']:
-            alist.bio=request.form['bio']
+            alist.bio = request.form['bio']
         if request.form['pages']:
-            alist.pages=request.form['pages']
+            alist.pages = request.form['pages']
         session.add(alist)
         session.commit()
         flash(alist.name + " edited!")
@@ -1165,6 +1205,7 @@ def editlist(teacher_id, list_id):
                                teacher=teacher,
                                teacher_id=teacher.id,
                                list_id=alist.id)
+
 
 @app.route('/teacher/<int:teacher_id>/genrelist/<int:list_id>/delete',
            methods=['GET', 'POST'])
@@ -1224,15 +1265,15 @@ def newstudent(school_id):
                 ''')
     if request.method == 'POST':
         if request.form['classroom'] != "clear":
-            room=request.form['classroom']
+            room = request.form['classroom']
         else:
-            room="0"
+            room = "0"
         new = Students(name=request.form['name'],
                        email=request.form['email'],
                        picture=request.form['picture'],
                        classroom=room,
                        school_id=school_id
-                      )
+                       )
         session.add(new)
         session.commit()
         flash(new.name + " added!")
@@ -1242,6 +1283,7 @@ def newstudent(school_id):
                                school_id=school_id,
                                classes=classes,
                                school=school)
+
 
 # Allow student creation from within a classroom.
 @app.route('/school/<int:school_id>/teacher/<int:teacher_id>/student/new',
@@ -1267,15 +1309,15 @@ def teachernewstudent(school_id, teacher_id):
                 ''')
     if request.method == 'POST':
         if request.form['classroom'] != "clear":
-            room=request.form['classroom']
+            room = request.form['classroom']
         else:
-            room="0"
+            room = "0"
         new = Students(name=request.form['name'],
                        email=request.form['email'],
                        picture=request.form['picture'],
                        classroom=room,
                        school_id=school_id
-                      )
+                       )
         session.add(new)
         session.commit()
         flash(new.name + " added!")
@@ -1285,6 +1327,7 @@ def teachernewstudent(school_id, teacher_id):
                                school_id=school_id,
                                classes=classes,
                                school=school)
+
 
 @app.route('/school/<int:school_id>/student/<int:user_id>/edit',
            methods=['GET', 'POST'])
@@ -1309,16 +1352,16 @@ def editstudent(school_id, user_id):
                 ''')
     if request.method == 'POST':
         if request.form['name']:
-            student.name=request.form['name']
+            student.name = request.form['name']
         if request.form['email']:
-            student.email=request.form['email']
+            student.email = request.form['email']
         if request.form['picture']:
-            student.picture=request.form['picture']
+            student.picture = request.form['picture']
         if request.form['classroom']:
             if request.form['classroom'] == "clear":
-                student.classroom="0"
+                student.classroom = "0"
             else:
-                student.classroom=request.form['classroom']
+                student.classroom = request.form['classroom']
         session.add(student)
         session.commit()
         flash(student.name + " edited!")
@@ -1331,6 +1374,7 @@ def editstudent(school_id, user_id):
                                classes=classes,
                                teachers=teachers,
                                school=school)
+
 
 # Allow student edit from within a classroom.
 @app.route('/<int:school_id>/<int:teacher_id>/student/<int:user_id>/edit',
@@ -1357,16 +1401,16 @@ def teachereditstudent(school_id, user_id, teacher_id):
                 ''')
     if request.method == 'POST':
         if request.form['name']:
-            student.name=request.form['name']
+            student.name = request.form['name']
         if request.form['email']:
-            student.email=request.form['email']
+            student.email = request.form['email']
         if request.form['picture']:
-            student.picture=request.form['picture']
+            student.picture = request.form['picture']
         if request.form['classroom']:
             if request.form['classroom'] == "clear":
-                student.classroom="0"
+                student.classroom = "0"
             else:
-                student.classroom=request.form['classroom']
+                student.classroom = request.form['classroom']
         session.add(student)
         session.commit()
         flash(student.name + " edited!")
@@ -1379,6 +1423,7 @@ def teachereditstudent(school_id, user_id, teacher_id):
                                classes=classes,
                                teachers=teachers,
                                school=school)
+
 
 @app.route('/school/<int:school_id>/student/<int:user_id>/delete',
            methods=['GET', 'POST'])
@@ -1410,6 +1455,7 @@ def deletestudent(school_id, user_id):
                                student=student,
                                user_id=user_id,
                                school_id=school_id)
+
 
 # Allow student deletion from within classroom.
 @app.route('/<int:school_id>/<int:teacher_id>/student/<int:user_id>/delete',
@@ -1509,6 +1555,7 @@ def student(student_id, teacher_id):
                                student_id=student_id,
                                teacher_id=teacher_id)
 
+
 @app.route('/student/<int:student_id>/book/add', methods=['GET', 'POST'])
 def newbook(student_id):
     """Create a book entry (admin, teacher, student)."""
@@ -1548,6 +1595,7 @@ def newbook(student_id):
                                student_id=student_id,
                                student=student)
 
+
 @app.route('/student/<int:student_id>/book/<int:book_id>/edit',
            methods=['GET', 'POST'])
 def editbook(student_id, book_id):
@@ -1572,16 +1620,16 @@ def editbook(student_id, book_id):
                 ''')
     if request.method == 'POST':
         if request.form['title']:
-            book.title=request.form['title']
+            book.title = request.form['title']
         if request.form['author']:
-            book.author=request.form['author']
+            book.author = request.form['author']
         if request.form['image']:
-            book.image=request.form['image']
+            book.image = request.form['image']
         if request.form['review']:
-            book.review=request.form['review']
+            book.review = request.form['review']
         if request.form['genre']:
-            book.genre=request.form['genre']
-        book.user_id=student_id
+            book.genre = request.form['genre']
+        book.user_id = student_id
         session.add(book)
         session.commit()
         flash(book.title + " edited!")
@@ -1594,6 +1642,7 @@ def editbook(student_id, book_id):
                                book_id=book_id,
                                student=student,
                                book=book)
+
 
 @app.route('/student/<int:student_id>/book/<int:book_id>/delete',
            methods=['GET', 'POST'])
