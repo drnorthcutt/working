@@ -209,7 +209,7 @@ A temporary token system is used on all post pages, ignoring the initial login p
 
  Images:
 
-<img src="/img/schools.png" alt="schools" style="width:80%">
+<img src="https://github.com/drnorthcutt/working/blob/catalog/vagrant/catalog/img/schools.png" alt="schools" style="width:80%">
 ####Main Schools View
 
 <img src="/img/school.png" alt="school" style="width:80%">
