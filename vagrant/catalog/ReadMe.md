@@ -1,7 +1,7 @@
 #FSND
 Project 3: Catalog
 ==================
-###40 Books Challenge App
+###40 Book Challenge App
 ###Author: Daniel R. Northcutt
 ###Date: November 2015
 Overview
@@ -199,7 +199,7 @@ Image Fields:
 * Student Avatars (from email login)
 * Book Cover Art
 
-    Initially, the cover art was allowed for as an upload from a client, however after conversations with numerous teachers and librarians, this functionality was removed and cover art is allowed for as a link to an image only.  This reflects the usual lack of availability of storage on school computers for images, the lower availabilty of storage on a school server were it to be installed on such a system, and allows for ease of teacher/admin editing or insertion of images should they be desired.
+    Initially, the cover art was allowed for as an upload from a client, however after conversations with numerous teachers and librarians, this functionality was removed and cover art is allowed for as a link to an image only.  This reflects the usual lack of availability of storage on school computers for images, the lower availabilty of storage on a school server were it to be installed on such a system, and allows for ease of teacher/admin editing or insertion of images should they be desired.  Additionally, it allows for URL filtering by school proxy software to help mitigate images that may contain adult or other inappropriate content.
 
 CSRF Protection:
 
