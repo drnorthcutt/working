@@ -1,3 +1,8 @@
+# Desc:  FSND Project 3: Catalog
+# Name:  40 Book Challenge App DB Schema
+# Author:  Daniel R. Northcutt
+# Date: November 2015
+
 import os
 import sys
 from datetime import datetime
@@ -10,6 +15,7 @@ Base = declarative_base()
 
 
 class Schools(Base):
+    """Create table."""
     __tablename__ = 'schools'
     name = Column(String(80), nullable = False)
     id = Column(Integer, primary_key = True)
@@ -34,6 +40,7 @@ class Schools(Base):
 
 
 class Admins(Base):
+    """Create table."""
     __tablename__ = 'admins'
     name = Column(String(80), nullable = False)
     id = Column(Integer, primary_key =True)
@@ -43,6 +50,7 @@ class Admins(Base):
 
 
 class Teachers(Base):
+    """Create table."""
     __tablename__ = 'teachers'
     name = Column(String(80), nullable = False)
     id = Column(Integer, primary_key = True)
@@ -62,6 +70,7 @@ class Teachers(Base):
 
 
 class Genres(Base):
+    """Create table."""
     __tablename__ = 'genres'
     id = Column(Integer, primary_key = True)
     teacher_id = Column(Integer, ForeignKey('teachers.id'))
@@ -80,6 +89,7 @@ class Genres(Base):
 
 
 class Classrooms(Base):
+    """Create table."""
     __tablename__ = 'classrooms'
     id = Column(Integer, primary_key = True)
     grade = Column(Integer, nullable = False)
@@ -105,6 +115,7 @@ class Classrooms(Base):
 
 
 class Students(Base):
+    """Create table."""
     __tablename__ = 'students'
     name = Column(String(80), nullable = False)
     id = Column(Integer, primary_key = True)
@@ -135,6 +146,7 @@ class Students(Base):
 
 
 class Books(Base):
+    """Create table."""
     __tablename__ = 'books'
     id = Column(Integer, primary_key = True)
     student_id = Column(Integer, ForeignKey('students.id'))
