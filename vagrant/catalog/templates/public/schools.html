@@ -24,6 +24,7 @@
     {% endwith %}
 </div>
 <div class="row padding-top padding-bottom">
+Serving <span class="badge-reverse">{{schools|count}}</span> Schools with <span class="badge">{{books}}</span> books read!
 </div>
 {% for school in schools %}
     <a href="{{url_for('school', school_id = school.id)}}">

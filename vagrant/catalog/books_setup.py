@@ -1,6 +1,12 @@
+# Desc:  FSND Project 3: Catalog
+# Name:  40 Book Challenge App DB Schema
+# Author:  Daniel R. Northcutt
+# Date: November 2015
+
 import os
 import sys
-from sqlalchemy import Column, ForeignKey, Integer, String
+from datetime import datetime
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -9,6 +15,7 @@ Base = declarative_base()
 
 
 class Schools(Base):
+    """Create table."""
     __tablename__ = 'schools'
     name = Column(String(80), nullable = False)
     id = Column(Integer, primary_key = True)
@@ -31,7 +38,9 @@ class Schools(Base):
             'District' : self.district,
         }
 
+
 class Admins(Base):
+    """Create table."""
     __tablename__ = 'admins'
     name = Column(String(80), nullable = False)
     id = Column(Integer, primary_key =True)
@@ -39,7 +48,9 @@ class Admins(Base):
     picture = Column(String(250))
     school = relationship("Schools", backref="admins")
 
+
 class Teachers(Base):
+    """Create table."""
     __tablename__ = 'teachers'
     name = Column(String(80), nullable = False)
     id = Column(Integer, primary_key = True)
@@ -47,6 +58,7 @@ class Teachers(Base):
     picture = Column(String(250))
     school_id = Column(Integer, ForeignKey('schools.id'))
     school = relationship("Schools")
+    classes = relationship("Classrooms")
 
     @property
     def serialize(self):
@@ -56,7 +68,9 @@ class Teachers(Base):
             'name' : self.name,
         }
 
+
 class Genres(Base):
+    """Create table."""
     __tablename__ = 'genres'
     id = Column(Integer, primary_key = True)
     teacher_id = Column(Integer, ForeignKey('teachers.id'))
@@ -75,6 +89,7 @@ class Genres(Base):
 
 
 class Classrooms(Base):
+    """Create table."""
     __tablename__ = 'classrooms'
     id = Column(Integer, primary_key = True)
     grade = Column(Integer, nullable = False)
@@ -87,8 +102,20 @@ class Classrooms(Base):
     genres = relationship("Genres", backref="classrooms")
     studs = relationship("Students")
 
+    @property
+    def serialize(self):
+        # Return data serializeable
+        return {
+            'ID' : self.id,
+            'Grade' : self.grade,
+            'Name' : self.name,
+            'Teacher' : self.teacher.name,
+            'Genre List' : self.genres.name,
+        }
+
 
 class Students(Base):
+    """Create table."""
     __tablename__ = 'students'
     name = Column(String(80), nullable = False)
     id = Column(Integer, primary_key = True)
@@ -100,9 +127,26 @@ class Students(Base):
     classes = relationship("Classrooms", backref="students")
     book = relationship("Books")
 
+    # Except in case a student has not been placed in a class
+    @property
+    def serialize(self):
+        # Return data serializeable
+        try:
+            return {
+                'ID' : self.id,
+                'name' : self.name,
+                'Grade' : self.classes.grade,
+                'Class Name' : self.classes.name,
+            }
+        except:
+            return {
+                'ID' : self.id,
+                'name' : self.name,
+            }
 
 
 class Books(Base):
+    """Create table."""
     __tablename__ = 'books'
     id = Column(Integer, primary_key = True)
     student_id = Column(Integer, ForeignKey('students.id'))
@@ -111,6 +155,7 @@ class Books(Base):
     image = Column(String(250))
     review = Column(String(250), nullable = False)
     genre = Column(String(50), nullable = False)
+    date = Column(DateTime, default=datetime.utcnow)
     students = relationship("Students", backref="books")
 
     @property
@@ -122,6 +167,8 @@ class Books(Base):
             'Title' : self.title,
             'Author' : self.author,
             'Review' : self.review,
+            'Student' : self.students.name,
+            'Student ID' : self.students.id,
         }
 
 
