@@ -1,5 +1,5 @@
 # Desc:  FSND Project 3: Catalog
-# Name:  40 Books Challenge App
+# Name:  40 Book Challenge App
 # Author:  Daniel R. Northcutt
 # Date: November 2015
 
@@ -581,6 +581,21 @@ def make_external(url):
 
 
 '''
+Add, Edit, Delete Universal Block
+'''
+def create_edit(record):
+    """Create or update database with supplied record."""
+    session.add(record)
+    session.commit()
+
+
+def delete(record):
+    """Delete a record from the database."""
+    session.delete(record)
+    session.commit()
+
+
+'''
 School Block
 '''
 @app.route('/')
@@ -591,15 +606,18 @@ def schools():
     books = session.query(Books).count()
     if 'username' not in login_session:
         return render_template('public/schools.html',
-                               schools=schools)
-    student = session.query(Students).filter_by(email=login_session['email'])
+                               schools=schools,
+                               books=books
+                               )
+    try:
+        student = (session.query(Students)
+                   .filter_by(email=login_session['email']).one())
     # Do not show add school function if user is a registered student.
-    if student:
-            return render_template('public/schools.html',
-                                   schools=schools,
-                                   books=books
-                                   )
-    else:
+        return render_template('public/schools.html',
+                               schools=schools,
+                               books=books
+                               )
+    except:
         return render_template('schools.html',
                                schools=schools,
                                books=books
@@ -650,8 +668,7 @@ def newschool():
                       district=request.form['district'],
                       admin_id=login_session['user_id']
                       )
-        session.add(new)
-        session.commit()
+        create_edit(new)
         flash(new.name + " created!")
         return redirect(url_for('schools'))
     else:
@@ -683,8 +700,7 @@ def editschool(school_id):
             school.county = request.form['county']
         if request.form['district']:
             school.district = request.form['district']
-        session.add(school)
-        session.commit()
+        create_edit(school)
         flash(school.name + " edited!")
         return redirect(url_for('schoolstudents', school_id=school_id))
     else:
@@ -710,8 +726,7 @@ def deleteschool(school_id):
                     <body onload='myFunction()''>"
                 ''')
     if request.method == 'POST':
-        session.delete(school)
-        session.commit()
+        delete(school)
         flash(school.name + " deleted!")
         return redirect(url_for('schools'))
     else:
@@ -785,8 +800,7 @@ def newteacher(school_id):
                        picture=request.form['picture'],
                        school_id=school_id
                        )
-        session.add(new)
-        session.commit()
+        create_edit(new)
         flash(new.name + " added!")
         return redirect(url_for('schoolteachers', school_id=school_id))
     else:
@@ -822,8 +836,7 @@ def editteacher(school_id, teacher_id):
             teacher.email = request.form['email']
         if request.form['picture']:
             teacher.picture = request.form['picture']
-        session.add(teacher)
-        session.commit()
+        create_edit(teacher)
         flash(teacher.name + " edited!")
         return redirect(url_for('schoolteachers', school_id=school_id))
     else:
@@ -854,8 +867,7 @@ def deleteteacher(school_id, teacher_id):
                     <body onload='myFunction()''>"
                 ''')
     if request.method == 'POST':
-        session.delete(teacher)
-        session.commit()
+        delete(teacher)
         flash(teacher.name + " deleted!")
         return redirect(url_for('schoolteachers', school_id=school_id))
     else:
@@ -975,8 +987,7 @@ def newclass(teacher_id):
                          teacher_id=teacher_id,
                          school_id=teacher.school_id
                          )
-        session.add(new)
-        session.commit()
+        create_edit(new)
         flash(new.name + " added!")
         return redirect(url_for('classroom', teacher_id=teacher_id))
     else:
@@ -1024,8 +1035,7 @@ def editclass(teacher_id, class_id):
                 classroom.set_id = request.form['set']
         if request.form['teacher']:
             classroom.teacher_id = request.form['teacher']
-        session.add(classroom)
-        session.commit()
+        create_edit(classroom)
         flash(classroom.name + " edited!")
         return redirect(url_for('classroom', teacher_id=teacher_id))
     else:
@@ -1060,8 +1070,7 @@ def deleteclass(teacher_id, class_id):
                     <body onload='myFunction()''>"
                 ''')
     if request.method == 'POST':
-        session.delete(classroom)
-        session.commit()
+        delete(classroom)
         flash(classroom.name + " deleted!")
         return redirect(url_for('classroom', teacher_id=teacher_id))
     else:
@@ -1132,8 +1141,7 @@ def newlist(teacher_id):
                      bio=request.form['bio'],
                      pages=request.form['pages']
                      )
-        session.add(new)
-        session.commit()
+        create_edit(new)
         flash(new.name + " added!")
         return redirect(url_for('classroom',
                                 teacher=teacher,
@@ -1187,8 +1195,7 @@ def editlist(teacher_id, list_id):
             alist.bio = request.form['bio']
         if request.form['pages']:
             alist.pages = request.form['pages']
-        session.add(alist)
-        session.commit()
+        create_edit(alist)
         flash(alist.name + " edited!")
         return redirect(url_for('classroom', teacher_id=teacher.id))
     else:
@@ -1220,8 +1227,7 @@ def deletelist(teacher_id, list_id):
                     <body onload='myFunction()''>"
                 ''')
     if request.method == 'POST':
-        session.delete(alist)
-        session.commit()
+        delete(alist)
         flash(alist.name + " deleted!")
         return redirect(url_for('classroom', teacher_id=teacher.id))
     else:
@@ -1266,8 +1272,7 @@ def newstudent(school_id):
                        classroom=room,
                        school_id=school_id
                        )
-        session.add(new)
-        session.commit()
+        create_edit(new)
         flash(new.name + " added!")
         return redirect(url_for('schoolstudents', school_id=school_id))
     else:
@@ -1310,8 +1315,7 @@ def teachernewstudent(school_id, teacher_id):
                        classroom=room,
                        school_id=school_id
                        )
-        session.add(new)
-        session.commit()
+        create_edit(new)
         flash(new.name + " added!")
         return redirect(url_for('classroom', teacher_id=teacher_id))
     else:
@@ -1354,8 +1358,7 @@ def editstudent(school_id, user_id):
                 student.classroom = "0"
             else:
                 student.classroom = request.form['classroom']
-        session.add(student)
-        session.commit()
+        create_edit(student)
         flash(student.name + " edited!")
         return redirect(url_for('schoolstudents', school_id=school_id))
     else:
@@ -1403,8 +1406,7 @@ def teachereditstudent(school_id, user_id, teacher_id):
                 student.classroom = "0"
             else:
                 student.classroom = request.form['classroom']
-        session.add(student)
-        session.commit()
+        create_edit(student)
         flash(student.name + " edited!")
         return redirect(url_for('classroom', teacher_id=teacher_id))
     else:
@@ -1437,8 +1439,7 @@ def deletestudent(school_id, user_id):
                     <body onload='myFunction()''>"
                 ''')
     if request.method == 'POST':
-        session.delete(student)
-        session.commit()
+        delete(student)
         flash(student.name + " deleted!")
         return redirect(url_for('schoolstudents', school_id=school_id))
     else:
@@ -1471,8 +1472,7 @@ def teacherdeletestudent(school_id, user_id, teacher_id):
                     <body onload='myFunction()''>"
                 ''')
     if request.method == 'POST':
-        session.delete(student)
-        session.commit()
+        delete(student)
         flash(student.name + " deleted!")
         return redirect(url_for('classroom', teacher_id=teacher_id))
     else:
@@ -1576,8 +1576,7 @@ def newbook(student_id):
                     genre=request.form['genre'],
                     student_id=student_id
                     )
-        session.add(new)
-        session.commit()
+        create_edit(new)
         flash(new.title + " added!")
         return redirect(url_for('student',
                                 student_id=student.id,
@@ -1622,8 +1621,7 @@ def editbook(student_id, book_id):
         if request.form['genre']:
             book.genre = request.form['genre']
         book.user_id = student_id
-        session.add(book)
-        session.commit()
+        create_edit(book)
         flash(book.title + " edited!")
         return redirect(url_for('student',
                                 student_id=student.id,
@@ -1659,8 +1657,7 @@ def deletebook(student_id, book_id):
                     <body onload='myFunction()''>"
                 ''')
     if request.method == 'POST':
-        session.delete(book)
-        session.commit()
+        delete(book)
         flash(book.title + " deleted!")
         return redirect(url_for('student',
                                 student_id=student.id,
