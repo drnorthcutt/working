@@ -1,3 +1,8 @@
+# Desc:  FSND Project 3: Catalog
+# Name:  40 Book Challenge App Demo
+# Author:  Daniel R. Northcutt
+# Date: November 2015
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -31,7 +36,7 @@ student edits will be available, then teacher and/or admin.
 #
 # Demo Edit Section
 #
-demo_student_email = "yourEmail_1"
+demo_student_email = "your email_1"
 demo_student_name = "Johnny Q"
 demo_teacher_email = "yourEmail_2"
 demo_teacher_name = "Robo Teacha"
