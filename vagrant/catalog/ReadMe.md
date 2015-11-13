@@ -80,7 +80,9 @@ May also have (for exceeds):
 
 #How to Run this Project
 
-Vagrant files have been provided in the Catalog Directory which should install all the necessary packages required.
+Ensure that you have already installed Vagrant and VirtualBox.  If not, links are provided [above](#required-libraries-and-dependencies).
+
+Vagrant configuration files have been provided in the Catalog Directory, which should install all the necessary packages required.
 
 Clone this repository and ensure the files are all in the same directory.
 (if already cloned from the original repository, only this directory and its subdirectories are required.)
