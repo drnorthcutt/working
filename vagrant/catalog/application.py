@@ -639,7 +639,7 @@ def school(school_id):
              .filter(Students.school_id == school_id)
              .all())
     admin = getadmininfo(school_id)
-    check = credentials(admin, 0, 0)
+    credcheck = credentials(admin, 0, 0)
     if 'username' not in login_session or credcheck != "true":
         return render_template('public/school.html',
                                school=school,
@@ -1244,6 +1244,11 @@ def deletelist(teacher_id, list_id):
                     <body onload='myFunction()''>"
                 ''')
     if request.method == 'POST':
+        rooms = session.query(Classrooms).filter_by(set_id=list_id)
+        if rooms:
+            for room in rooms:
+                room.set_id = ""
+                create_edit(room)
         delete(alist)
         flash(alist.name + " deleted!")
         return redirect(url_for('classroom', teacher_id=teacher.id))
