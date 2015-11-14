@@ -34,10 +34,11 @@
         {% endif %}
     {% endwith %}
 </div>
+
 <div class="row">
     <div class="col-md-1 padding-none">&nbsp;</div>
     <div class="col-md-10 padding-none">
-        <h4>Genre List:<a href="#" data-toggle="tooltip" title="A negative number means you still need to read/ select something from this genre.  A positive number means that you have read more of that genre than required, and it will count towards your 'choice' books. If nothing is shown, your teacher has not yet made a list for you."><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a><br /></h4>
+        <h4>Genre List:<a href="#" data-toggle="tooltip" data-trigger="manual" id="studenttip" title="A negative number means you still need to read/ select something from this genre.  A positive number means that you have read more of that genre than required, and it will count towards your 'choice' books. If nothing is shown, your teacher has not yet made a list for you."><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a><br /></h4>
     </div>
     <div class="col-md-12">
        {% for g in genre %}
