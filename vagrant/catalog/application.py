@@ -1325,16 +1325,16 @@ def teachernewstudent(school_id, teacher_id):
                                school=school)
 
 
-@app.route('/school/<int:school_id>/student/<int:user_id>/edit',
+@app.route('/school/<int:school_id>/student/<int:student_id>/edit',
            methods=['GET', 'POST'])
-def editstudent(school_id, user_id):
+def editstudent(school_id, student_id):
     """Edit an existing student from school list (admin only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id).all()
     classes = session.query(Classrooms).filter_by(school_id=school_id)
-    student = session.query(Students).filter_by(id=user_id).one()
+    student = session.query(Students).filter_by(id=student_id).one()
     creator = getadmininfo(school_id)
     credcheck = credentials(creator.email, 0, 0)
     if 'username' not in login_session or credcheck != "true":
@@ -1364,7 +1364,7 @@ def editstudent(school_id, user_id):
     else:
         return render_template('student/edit.html',
                                school_id=school_id,
-                               user_id=user_id,
+                               student_id=student_id,
                                student=student,
                                classes=classes,
                                teachers=teachers,
@@ -1372,16 +1372,16 @@ def editstudent(school_id, user_id):
 
 
 # Allow student edit from within a classroom.
-@app.route('/<int:school_id>/<int:teacher_id>/student/<int:user_id>/edit',
+@app.route('/<int:school_id>/<int:teacher_id>/student/<int:student_id>/edit',
            methods=['GET', 'POST'])
-def teachereditstudent(school_id, user_id, teacher_id):
+def teachereditstudent(school_id, student_id, teacher_id):
     """Edit an existing student from classroom (admin and teacher only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id).all()
     classes = session.query(Classrooms).filter_by(school_id=school_id)
-    student = session.query(Students).filter_by(id=user_id).one()
+    student = session.query(Students).filter_by(id=student_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     creator = getadmininfo(school_id)
     credcheck = credentials(creator.email, teacher.email, 0)
@@ -1412,21 +1412,21 @@ def teachereditstudent(school_id, user_id, teacher_id):
     else:
         return render_template('student/edit.html',
                                school_id=school_id,
-                               user_id=user_id,
+                               student_id=student_id,
                                student=student,
                                classes=classes,
                                teachers=teachers,
                                school=school)
 
 
-@app.route('/school/<int:school_id>/student/<int:user_id>/delete',
+@app.route('/school/<int:school_id>/student/<int:student_id>/delete',
            methods=['GET', 'POST'])
-def deletestudent(school_id, user_id):
+def deletestudent(school_id, student_id):
     """Delete an existing student from school list (admin only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
-    student = session.query(Students).filter_by(id=user_id).one()
+    student = session.query(Students).filter_by(id=student_id).one()
     creator = getadmininfo(school_id)
     credcheck = credentials(creator.email, 0, 0)
     if 'username' not in login_session or credcheck != "true":
@@ -1446,19 +1446,19 @@ def deletestudent(school_id, user_id):
         return render_template('student/delete.html',
                                school=school,
                                student=student,
-                               user_id=user_id,
+                               student_id=student_id,
                                school_id=school_id)
 
 
 # Allow student deletion from within classroom.
-@app.route('/<int:school_id>/<int:teacher_id>/student/<int:user_id>/delete',
+@app.route('/<int:school_id>/<int:teacher_id>/student/<int:student_id>/delete',
            methods=['GET', 'POST'])
-def teacherdeletestudent(school_id, user_id, teacher_id):
+def teacherdeletestudent(school_id, student_id, teacher_id):
     """Delete an existing student from classroom (admin and teacher only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
-    student = session.query(Students).filter_by(id=user_id).one()
+    student = session.query(Students).filter_by(id=student_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     creator = getadmininfo(school_id)
     credcheck = credentials(creator.email, teacher.email, 0)
@@ -1479,7 +1479,7 @@ def teacherdeletestudent(school_id, user_id, teacher_id):
         return render_template('student/delete.html',
                                school=school,
                                student=student,
-                               user_id=user_id,
+                               student_id=student_id,
                                school_id=school_id)
 
 
