@@ -559,15 +559,17 @@ Atom/RSS
 def recent_feed():
     """Make Atom/RSS feed for most recent student book lists (GET)."""
     feed = AtomFeed('Recent Books',
-                    feed_url=request.url, url=request.url_root)
-    books = session.query(Books).order_by(Books.id.desc()).limit(10).all()
+                    feed_url=request.url,
+                    url=request.url_root
+                    )
+    books = session.query(Books).order_by(Books.date.desc()).limit(10)
     for book in books:
         student = session.query(Students).filter_by(id=book.student_id).one()
         feed.add(book.title,
                  book.review,
                  content_type='html',
                  author=student.name,
-                 url=('/' + str(student.classes.teacher_id) +
+                 url=make_external('/' + str(student.classes.teacher_id) +
                       '/student/' + str(student.id)),
                  id=book.id,
                  updated=book.date,
@@ -575,13 +577,8 @@ def recent_feed():
     return feed.get_response()
 
 
-def make_external(url):
-    """Return external url for proper atom feed subscription."""
-    return urljoin(request.url_root, url)
-
-
 '''
-Add, Edit, Delete Universal Block
+Universal Block
 '''
 def create_edit(record):
     """Create or update database with supplied record."""
@@ -595,6 +592,19 @@ def delete(record):
     session.commit()
 
 
+def make_external(url):
+    """Return external url for proper feed subscriptions."""
+    return urljoin(request.url_root, url)
+
+
+def user():
+    """Return username for Logout name, if exists."""
+    if 'username' in login_session:
+        return login_session['username']
+    else:
+        return ""
+
+
 '''
 School Block
 '''
@@ -604,22 +614,25 @@ def schools():
     """Return all schools in DB."""
     schools = session.query(Schools).order_by(Schools.name).all()
     books = session.query(Books).count()
+    username = user()
     if 'username' not in login_session:
         return render_template('public/schools.html',
                                schools=schools,
                                books=books
                                )
     try:
-        student = (session.query(Students)
-                   .filter_by(email=login_session['email']).one())
-    # Do not show add school function if user is a registered student.
+        admin = (session.query(Admins)
+                 .filter_by(email=login_session['email']).one())
+        if admin:
+            return render_template('schools.html',
+                                   schools=schools,
+                                   username=username,
+                                   books=books
+                                   )
+    except:
         return render_template('public/schools.html',
                                schools=schools,
-                               books=books
-                               )
-    except:
-        return render_template('schools.html',
-                               schools=schools,
+                               username=username,
                                books=books
                                )
 
@@ -640,11 +653,13 @@ def school(school_id):
              .all())
     admin = getadmininfo(school_id)
     credcheck = credentials(admin, 0, 0)
-    if 'username' not in login_session or credcheck != "true":
+    username = user()
+    if credcheck != "true":
         return render_template('public/school.html',
                                school=school,
                                students=students,
                                books=books,
+                               username=username,
                                teachers=teachers,
                                school_id=school_id)
     else:
@@ -652,6 +667,7 @@ def school(school_id):
                                school=school,
                                students=students,
                                books=books,
+                               username=username,
                                teachers=teachers,
                                school_id=school_id)
 
@@ -757,15 +773,18 @@ def schoolteachers(school_id):
     teachers = session.query(Teachers).filter_by(school_id=school_id)
     school = session.query(Schools).filter_by(id=school_id).one()
     admin = getadmininfo(school_id)
-    check = credentials(admin, 0, 0)
+    credcheck = credentials(admin, 0, 0)
+    username = user()
     if 'username' not in login_session or credcheck != "true":
         return render_template('public/teachers.html',
                                school=school,
+                               username=username,
                                teachers=teachers,
                                school_id=school_id)
     else:
         return render_template('school/teachers.html',
                                school=school,
+                               username=username,
                                teachers=teachers,
                                school_id=school_id)
 
@@ -777,14 +796,17 @@ def schoolstudents(school_id):
     students = session.query(Students).filter_by(school_id=school_id).all()
     admin = getadmininfo(school_id)
     credcheck = credentials(admin, 0, 0)
+    username = user()
     if 'username' not in login_session or credcheck != "true":
         return render_template('public/students.html',
                                school=school,
+                               username=username,
                                students=students,
                                school_id=school_id)
     else:
         return render_template('school/students.html',
                                school=school,
+                               username=username,
                                students=students,
                                school_id=school_id)
 
@@ -918,10 +940,12 @@ def classroom(teacher_id):
              .filter_by(teacher_id=teacher_id).all())
     admin = getadmininfo(teacher.school_id)
     credcheck = credentials(admin, teacher.email, 0)
+    username = user()
     if 'username' not in login_session or credcheck != "true":
         return render_template('public/classes.html',
                                teacher=teacher,
                                students=students,
+                               username=username,
                                classroom=classroom,
                                lists=lists,
                                books=books,
@@ -934,6 +958,7 @@ def classroom(teacher_id):
                                noclass=noclass,
                                lists=lists,
                                books=books,
+                               username=username,
                                teacher_id=teacher_id)
 
 
@@ -955,10 +980,12 @@ def room(teacher_id, room_id):
              .filter(Students.classroom == room_id).all())
     admin = getadmininfo(teacher.school_id)
     credcheck = credentials(admin, teacher.email, 0)
+    username = user()
     if 'username' not in login_session or credcheck != "true":
         return render_template('public/classroom.html',
                                teacher=teacher,
                                students=students,
+                               username=username,
                                books=books,
                                classroom=classroom,
                                classother=classother,
@@ -970,6 +997,7 @@ def room(teacher_id, room_id):
                                students=students,
                                books=books,
                                classroom=classroom,
+                               username=username,
                                classother=classother,
                                teacher_id=teacher_id,
                                room_id=room_id)
@@ -1110,9 +1138,11 @@ def genre(teacher_id):
     classes = session.query(Classrooms).filter_by(teacher_id=teacher_id).all()
     admin = getadmininfo(teacher.school_id)
     credcheck = credentials(admin, teacher.email, 0)
+    username = user()
     if 'username' not in login_session or credcheck != "true":
         return render_template('public/lists.html',
                                school=school,
+                               username=username,
                                teacher=teacher,
                                lists=lists,
                                classes=classes,
@@ -1122,6 +1152,7 @@ def genre(teacher_id):
                                school=school,
                                teacher=teacher,
                                lists=lists,
+                               username=username,
                                classes=classes,
                                teacher_id=teacher_id)
 
@@ -1532,9 +1563,11 @@ def student(student_id, teacher_id):
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     admin = getadmininfo(student.school_id)
     credcheck = credentials(admin, teacher.email, student.email)
+    username = user()
     if credcheck != "true":
         return render_template('public/student.html',
                                student=student,
+                               username=username,
                                books=books,
                                percent=percent,
                                genre=genre,
@@ -1553,6 +1586,7 @@ def student(student_id, teacher_id):
     else:
         return render_template('student/student.html',
                                student=student,
+                               username=username,
                                books=books,
                                genre=genre,
                                percent=percent,
