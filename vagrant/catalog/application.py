@@ -562,7 +562,60 @@ def recent_feed():
                     feed_url=request.url,
                     url=request.url_root
                     )
-    books = session.query(Books).order_by(Books.date.desc()).limit(10)
+    books = session.query(Books).order_by(Books.date.desc()).limit(50)
+    for book in books:
+        student = session.query(Students).filter_by(id=book.student_id).one()
+        feed.add(book.title,
+                 book.review,
+                 content_type='html',
+                 author=student.name,
+                 url=make_external('/' + str(student.classes.teacher_id) +
+                      '/student/' + str(student.id)),
+                 id=book.id,
+                 updated=book.date,
+                 published=book.date)
+    return feed.get_response()
+
+
+@app.route('/<int:school_id>/recent.atom')
+def school_feed(school_id):
+    """Make Atom/RSS feed for most recent school book lists (GET)."""
+    school = session.query(Schools).filter_by(id=school_id).one()
+    feed = AtomFeed('Recent ' + school.name + ' Books',
+                    feed_url=request.url,
+                    url=request.url_root
+                    )
+    books = (session.query(Books)
+             .filter(Students.school_id == school_id)
+             .order_by(Books.date.desc()).limit(50))
+    for book in books:
+        student = session.query(Students).filter_by(id=book.student_id).one()
+        feed.add(book.title,
+                 book.review,
+                 content_type='html',
+                 author=student.name,
+                 url=make_external('/' + str(student.classes.teacher_id) +
+                      '/student/' + str(student.id)),
+                 id=book.id,
+                 updated=book.date,
+                 published=book.date)
+    return feed.get_response()
+
+
+@app.route('/<int:school_id>/classroom/<int:class_id>/recent.atom')
+def class_feed(school_id, class_id):
+    """Make Atom/RSS feed for most recent school book lists (GET)."""
+    school = session.query(Schools).filter_by(id=school_id).one()
+    classroom = session.query(Classrooms).filter_by(id=class_id).one()
+    feed = AtomFeed('Recent ' + school.name + ' ' + classroom.name + ' Books',
+                    feed_url=request.url,
+                    url=request.url_root
+                    )
+    students = session.query(Students).filter_by(classroom=class_id).all()
+    books = (session.query(Books)
+             .outerjoin(Students)
+             .filter_by(classroom = class_id)
+             .order_by(Books.date.desc()).limit(30))
     for book in books:
         student = session.query(Students).filter_by(id=book.student_id).one()
         feed.add(book.title,
