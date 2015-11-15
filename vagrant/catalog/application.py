@@ -570,7 +570,7 @@ def recent_feed():
                  content_type='html',
                  author=student.name,
                  url=make_external('/' + str(student.classes.teacher_id) +
-                      '/student/' + str(student.id)),
+                                   '/student/' + str(student.id)),
                  id=book.id,
                  updated=book.date,
                  published=book.date)
@@ -595,7 +595,7 @@ def school_feed(school_id):
                  content_type='html',
                  author=student.name,
                  url=make_external('/' + str(student.classes.teacher_id) +
-                      '/student/' + str(student.id)),
+                                   '/student/' + str(student.id)),
                  id=book.id,
                  updated=book.date,
                  published=book.date)
@@ -614,7 +614,7 @@ def class_feed(school_id, class_id):
     students = session.query(Students).filter_by(classroom=class_id).all()
     books = (session.query(Books)
              .outerjoin(Students)
-             .filter_by(classroom = class_id)
+             .filter_by(classroom=class_id)
              .order_by(Books.date.desc()).limit(30))
     for book in books:
         student = session.query(Students).filter_by(id=book.student_id).one()
