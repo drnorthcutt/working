@@ -64,12 +64,12 @@
                 <span class="badge">
                     {{student.books|count}} read
                  </span><br />
-                <a href="{{url_for('editstudent', school_id=school.id, user_id=student.id)}}">
+                <a href="{{url_for('editstudent', school_id=school.id, student_id=student.id)}}">
                     <button class="btn-xs btn-warning" id="edit">
                         <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                             edit
                     </button></a>
-                <a href="{{url_for('deletestudent', school_id = school.id, user_id = student.id)}}">
+                <a href="{{url_for('deletestudent', school_id = school.id, student_id = student.id)}}">
                     <button class="btn-xs btn-danger" id="delete">
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                             delete

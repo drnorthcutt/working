@@ -66,11 +66,11 @@ def newadmin(login_session):
     return user.id
 
 
-def getadmininfo(user_id):
+def getadmininfo(school_id):
     """Return school admin."""
-    school = session.query(Schools).filter_by(id=user_id).one()
-    user = session.query(Admins).filter_by(id=school.admin_id).one()
-    return user
+    school = session.query(Schools).filter_by(id=school_id).one()
+    admin = session.query(Admins).filter_by(id=school.admin_id).one()
+    return admin.email
 
 
 def credentials(admin, teacher, student):
@@ -559,15 +559,17 @@ Atom/RSS
 def recent_feed():
     """Make Atom/RSS feed for most recent student book lists (GET)."""
     feed = AtomFeed('Recent Books',
-                    feed_url=request.url, url=request.url_root)
-    books = session.query(Books).order_by(Books.id.desc()).limit(10).all()
+                    feed_url=request.url,
+                    url=request.url_root
+                    )
+    books = session.query(Books).order_by(Books.date.desc()).limit(50)
     for book in books:
         student = session.query(Students).filter_by(id=book.student_id).one()
         feed.add(book.title,
                  book.review,
                  content_type='html',
                  author=student.name,
-                 url=('/' + str(student.classes.teacher_id) +
+                 url=make_external('/' + str(student.classes.teacher_id) +
                       '/student/' + str(student.id)),
                  id=book.id,
                  updated=book.date,
@@ -575,13 +577,61 @@ def recent_feed():
     return feed.get_response()
 
 
-def make_external(url):
-    """Return external url for proper atom feed subscription."""
-    return urljoin(request.url_root, url)
+@app.route('/<int:school_id>/recent.atom')
+def school_feed(school_id):
+    """Make Atom/RSS feed for most recent school book lists (GET)."""
+    school = session.query(Schools).filter_by(id=school_id).one()
+    feed = AtomFeed('Recent ' + school.name + ' Books',
+                    feed_url=request.url,
+                    url=request.url_root
+                    )
+    books = (session.query(Books)
+             .filter(Students.school_id == school_id)
+             .order_by(Books.date.desc()).limit(50))
+    for book in books:
+        student = session.query(Students).filter_by(id=book.student_id).one()
+        feed.add(book.title,
+                 book.review,
+                 content_type='html',
+                 author=student.name,
+                 url=make_external('/' + str(student.classes.teacher_id) +
+                      '/student/' + str(student.id)),
+                 id=book.id,
+                 updated=book.date,
+                 published=book.date)
+    return feed.get_response()
+
+
+@app.route('/<int:school_id>/classroom/<int:class_id>/recent.atom')
+def class_feed(school_id, class_id):
+    """Make Atom/RSS feed for most recent school book lists (GET)."""
+    school = session.query(Schools).filter_by(id=school_id).one()
+    classroom = session.query(Classrooms).filter_by(id=class_id).one()
+    feed = AtomFeed('Recent ' + school.name + ' ' + classroom.name + ' Books',
+                    feed_url=request.url,
+                    url=request.url_root
+                    )
+    students = session.query(Students).filter_by(classroom=class_id).all()
+    books = (session.query(Books)
+             .outerjoin(Students)
+             .filter_by(classroom = class_id)
+             .order_by(Books.date.desc()).limit(30))
+    for book in books:
+        student = session.query(Students).filter_by(id=book.student_id).one()
+        feed.add(book.title,
+                 book.review,
+                 content_type='html',
+                 author=student.name,
+                 url=make_external('/' + str(student.classes.teacher_id) +
+                      '/student/' + str(student.id)),
+                 id=book.id,
+                 updated=book.date,
+                 published=book.date)
+    return feed.get_response()
 
 
 '''
-Add, Edit, Delete Universal Block
+Universal Block
 '''
 def create_edit(record):
     """Create or update database with supplied record."""
@@ -595,6 +645,19 @@ def delete(record):
     session.commit()
 
 
+def make_external(url):
+    """Return external url for proper feed subscriptions."""
+    return urljoin(request.url_root, url)
+
+
+def user():
+    """Return username for Logout name, if exists."""
+    if 'username' in login_session:
+        return login_session['username']
+    else:
+        return ""
+
+
 '''
 School Block
 '''
@@ -604,22 +667,25 @@ def schools():
     """Return all schools in DB."""
     schools = session.query(Schools).order_by(Schools.name).all()
     books = session.query(Books).count()
+    username = user()
     if 'username' not in login_session:
         return render_template('public/schools.html',
                                schools=schools,
                                books=books
                                )
     try:
-        student = (session.query(Students)
-                   .filter_by(email=login_session['email']).one())
-    # Do not show add school function if user is a registered student.
+        admin = (session.query(Admins)
+                 .filter_by(email=login_session['email']).one())
+        if admin:
+            return render_template('schools.html',
+                                   schools=schools,
+                                   username=username,
+                                   books=books
+                                   )
+    except:
         return render_template('public/schools.html',
                                schools=schools,
-                               books=books
-                               )
-    except:
-        return render_template('schools.html',
-                               schools=schools,
+                               username=username,
                                books=books
                                )
 
@@ -638,13 +704,15 @@ def school(school_id):
              .join(Students)
              .filter(Students.school_id == school_id)
              .all())
-    creator = getadmininfo(school_id)
-    if ('username' not in login_session or
-            creator.email != login_session['email']):
+    admin = getadmininfo(school_id)
+    credcheck = credentials(admin, 0, 0)
+    username = user()
+    if credcheck != "true":
         return render_template('public/school.html',
                                school=school,
                                students=students,
                                books=books,
+                               username=username,
                                teachers=teachers,
                                school_id=school_id)
     else:
@@ -652,6 +720,7 @@ def school(school_id):
                                school=school,
                                students=students,
                                books=books,
+                               username=username,
                                teachers=teachers,
                                school_id=school_id)
 
@@ -661,18 +730,31 @@ def newschool():
     """Create a new school."""
     if 'username' not in login_session:
         return redirect('/login')
-    if request.method == 'POST':
-        new = Schools(name=request.form['name'],
-                      state=request.form['state'],
-                      county=request.form['county'],
-                      district=request.form['district'],
-                      admin_id=login_session['user_id']
-                      )
-        create_edit(new)
-        flash(new.name + " created!")
-        return redirect(url_for('schools'))
-    else:
-        return render_template('school/new.html')
+    try:
+        student = (session.query(Students)
+                   .filter_by(email=login_session['email']).one())
+    # Do not show add school function if user is a registered student.
+        return ('''
+                    "<script>
+                    function myFunction() {
+                    alert('You are not authorized to add a new school.');
+                    }
+                    </script>
+                    <body onload='myFunction()''>"
+                ''')
+    except:
+        if request.method == 'POST':
+            new = Schools(name=request.form['name'],
+                          state=request.form['state'],
+                          county=request.form['county'],
+                          district=request.form['district'],
+                          admin_id=login_session['user_id']
+                          )
+            create_edit(new)
+            flash(new.name + " created!")
+            return redirect(url_for('schools'))
+        else:
+            return render_template('school/new.html')
 
 
 @app.route('/school/<int:school_id>/edit', methods=['GET', 'POST'])
@@ -681,8 +763,9 @@ def editschool(school_id):
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
-    creator = getadmininfo(school_id)
-    if creator.email != login_session['email']:
+    admin = getadmininfo(school_id)
+    check = credentials(admin, 0, 0)
+    if check != "true":
         return ('''
                     "<script>
                     function myFunction() {
@@ -715,8 +798,9 @@ def deleteschool(school_id):
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
-    creator = getadmininfo(school_id)
-    if creator.email != login_session['email']:
+    admin = getadmininfo(school_id)
+    check = credentials(admin, 0, 0)
+    if check != "true":
         return ('''
                     "<script>
                     function myFunction() {
@@ -741,16 +825,19 @@ def schoolteachers(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id)
     school = session.query(Schools).filter_by(id=school_id).one()
-    creator = getadmininfo(school_id)
-    if ('username' not in login_session or
-            creator.email != login_session['email']):
+    admin = getadmininfo(school_id)
+    credcheck = credentials(admin, 0, 0)
+    username = user()
+    if 'username' not in login_session or credcheck != "true":
         return render_template('public/teachers.html',
                                school=school,
+                               username=username,
                                teachers=teachers,
                                school_id=school_id)
     else:
         return render_template('school/teachers.html',
                                school=school,
+                               username=username,
                                teachers=teachers,
                                school_id=school_id)
 
@@ -760,16 +847,19 @@ def schoolstudents(school_id):
     """Return a specific school's students."""
     school = session.query(Schools).filter_by(id=school_id).one()
     students = session.query(Students).filter_by(school_id=school_id).all()
-    creator = getadmininfo(school_id)
-    credcheck = credentials(creator.email, 0, 0)
+    admin = getadmininfo(school_id)
+    credcheck = credentials(admin, 0, 0)
+    username = user()
     if 'username' not in login_session or credcheck != "true":
         return render_template('public/students.html',
                                school=school,
+                               username=username,
                                students=students,
                                school_id=school_id)
     else:
         return render_template('school/students.html',
                                school=school,
+                               username=username,
                                students=students,
                                school_id=school_id)
 
@@ -783,8 +873,9 @@ def newteacher(school_id):
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
-    creator = getadmininfo(school_id)
-    if creator.email != login_session['email']:
+    admin = getadmininfo(school_id)
+    check = credentials(admin, 0, 0)
+    if check != "true":
         return ('''
                     "<script>
                     function myFunction() {
@@ -817,8 +908,8 @@ def editteacher(school_id, teacher_id):
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
-    creator = getadmininfo(school_id)
-    check = credentials(creator.email, teacher.email, 0)
+    admin = getadmininfo(school_id)
+    check = credentials(admin, teacher.email, 0)
     if check != "true":
         return ('''
                     "<script>
@@ -855,8 +946,9 @@ def deleteteacher(school_id, teacher_id):
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
-    creator = getadmininfo(school_id)
-    if creator.email != login_session['email']:
+    admin = getadmininfo(school_id)
+    check = credentials(admin, 0, 0)
+    if check != "true":
         return ('''
                     "<script>
                     function myFunction() {
@@ -899,12 +991,14 @@ def classroom(teacher_id):
              .join(Students)
              .join(Classrooms)
              .filter_by(teacher_id=teacher_id).all())
-    creator = getadmininfo(teacher.school_id)
-    credcheck = credentials(creator.email, teacher.email, 0)
-    if credcheck != "true":
+    admin = getadmininfo(teacher.school_id)
+    credcheck = credentials(admin, teacher.email, 0)
+    username = user()
+    if 'username' not in login_session or credcheck != "true":
         return render_template('public/classes.html',
                                teacher=teacher,
                                students=students,
+                               username=username,
                                classroom=classroom,
                                lists=lists,
                                books=books,
@@ -917,6 +1011,7 @@ def classroom(teacher_id):
                                noclass=noclass,
                                lists=lists,
                                books=books,
+                               username=username,
                                teacher_id=teacher_id)
 
 
@@ -936,12 +1031,14 @@ def room(teacher_id, room_id):
     books = (session.query(Books)
              .join(Students)
              .filter(Students.classroom == room_id).all())
-    creator = getadmininfo(teacher.school_id)
-    credcheck = credentials(creator.email, teacher.email, 0)
+    admin = getadmininfo(teacher.school_id)
+    credcheck = credentials(admin, teacher.email, 0)
+    username = user()
     if 'username' not in login_session or credcheck != "true":
         return render_template('public/classroom.html',
                                teacher=teacher,
                                students=students,
+                               username=username,
                                books=books,
                                classroom=classroom,
                                classother=classother,
@@ -953,6 +1050,7 @@ def room(teacher_id, room_id):
                                students=students,
                                books=books,
                                classroom=classroom,
+                               username=username,
                                classother=classother,
                                teacher_id=teacher_id,
                                room_id=room_id)
@@ -968,9 +1066,9 @@ def newclass(teacher_id):
                .filter_by(teacher_id=teacher_id)
                .order_by(Classrooms.grade, Classrooms.name))
     sets = session.query(Genres).filter_by(teacher_id=teacher_id).all()
-    creator = getadmininfo(teacher.school_id)
-    credcheck = credentials(creator.email, teacher.email, 0)
-    if 'username' not in login_session or credcheck != "true":
+    admin = getadmininfo(teacher.school_id)
+    credcheck = credentials(admin, teacher.email, 0)
+    if credcheck != "true":
         return ('''
                     "<script>
                     function myFunction() {
@@ -1011,9 +1109,9 @@ def editclass(teacher_id, class_id):
     allteach = session.query(Teachers).filter_by(school_id=teacher.school_id)
     classroom = session.query(Classrooms).filter_by(id=class_id).one()
     sets = session.query(Genres).filter_by(teacher_id=teacher_id).all()
-    creator = getadmininfo(teacher.school_id)
-    credcheck = credentials(creator.email, teacher.email, 0)
-    if 'username' not in login_session or credcheck != "true":
+    admin = getadmininfo(teacher.school_id)
+    credcheck = credentials(admin, teacher.email, 0)
+    if credcheck != "true":
         return ('''
                     "<script>
                     function myFunction() {
@@ -1057,9 +1155,9 @@ def deleteclass(teacher_id, class_id):
         return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     classroom = session.query(Classrooms).filter_by(id=class_id).one()
-    creator = getadmininfo(teacher.school_id)
-    credcheck = credentials(creator.email, teacher.email, 0)
-    if 'username' not in login_session or credcheck != "true":
+    admin = getadmininfo(teacher.school_id)
+    credcheck = credentials(admin, teacher.email, 0)
+    if credcheck != "true":
         return ('''
                     "<script>
                     function myFunction() {
@@ -1091,11 +1189,13 @@ def genre(teacher_id):
     school = session.query(Schools).filter_by(id=teacher.school_id).one()
     lists = session.query(Genres).filter_by(teacher_id=teacher_id).all()
     classes = session.query(Classrooms).filter_by(teacher_id=teacher_id).all()
-    creator = getadmininfo(teacher.school_id)
-    credcheck = credentials(creator.email, teacher.email, 0)
+    admin = getadmininfo(teacher.school_id)
+    credcheck = credentials(admin, teacher.email, 0)
+    username = user()
     if 'username' not in login_session or credcheck != "true":
         return render_template('public/lists.html',
                                school=school,
+                               username=username,
                                teacher=teacher,
                                lists=lists,
                                classes=classes,
@@ -1105,6 +1205,7 @@ def genre(teacher_id):
                                school=school,
                                teacher=teacher,
                                lists=lists,
+                               username=username,
                                classes=classes,
                                teacher_id=teacher_id)
 
@@ -1115,9 +1216,9 @@ def newlist(teacher_id):
     if 'username' not in login_session:
         return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
-    creator = getadmininfo(teacher.school_id)
-    credcheck = credentials(creator.email, teacher.email, 0)
-    if 'username' not in login_session or credcheck != "true":
+    admin = getadmininfo(teacher.school_id)
+    credcheck = credentials(admin, teacher.email, 0)
+    if credcheck != "true":
         return ('''
                    <script>
                     function myFunction() {
@@ -1160,8 +1261,8 @@ def editlist(teacher_id, list_id):
         return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     alist = session.query(Genres).filter_by(id=list_id).one()
-    creator = getadmininfo(teacher.school_id)
-    credcheck = credentials(creator.email, teacher.email, 0)
+    admin = getadmininfo(teacher.school_id)
+    credcheck = credentials(admin, teacher.email, 0)
     if credcheck != "true":
         return ('''
                     "<script>
@@ -1214,9 +1315,9 @@ def deletelist(teacher_id, list_id):
         return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     alist = session.query(Genres).filter_by(id=list_id).one()
-    creator = getadmininfo(teacher.school_id)
-    credcheck = credentials(creator.email, teacher.email, 0)
-    if 'username' not in login_session or credcheck != "true":
+    admin = getadmininfo(teacher.school_id)
+    credcheck = credentials(admin, teacher.email, 0)
+    if credcheck != "true":
         return ('''
                     "<script>
                     function myFunction() {
@@ -1227,6 +1328,11 @@ def deletelist(teacher_id, list_id):
                     <body onload='myFunction()''>"
                 ''')
     if request.method == 'POST':
+        rooms = session.query(Classrooms).filter_by(set_id=list_id)
+        if rooms:
+            for room in rooms:
+                room.set_id = ""
+                create_edit(room)
         delete(alist)
         flash(alist.name + " deleted!")
         return redirect(url_for('classroom', teacher_id=teacher.id))
@@ -1249,9 +1355,9 @@ def newstudent(school_id):
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id).all()
     classes = session.query(Classrooms).filter_by(school_id=school_id)
-    creator = getadmininfo(school_id)
-    credcheck = credentials(creator.email, 0, 0)
-    if 'username' not in login_session or credcheck != "true":
+    admin = getadmininfo(school_id)
+    credcheck = credentials(admin, 0, 0)
+    if credcheck != "true":
         return ('''
                     "<script>
                     function myFunction() {
@@ -1292,9 +1398,9 @@ def teachernewstudent(school_id, teacher_id):
     school = session.query(Schools).filter_by(id=school_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     classes = session.query(Classrooms).filter_by(school_id=school_id)
-    creator = getadmininfo(school_id)
-    credcheck = credentials(creator.email, teacher.email, 0)
-    if 'username' not in login_session or credcheck != "true":
+    admin = getadmininfo(school_id)
+    credcheck = credentials(admin, teacher.email, 0)
+    if credcheck != "true":
         return ('''
                     "<script>
                     function myFunction() {
@@ -1325,19 +1431,19 @@ def teachernewstudent(school_id, teacher_id):
                                school=school)
 
 
-@app.route('/school/<int:school_id>/student/<int:user_id>/edit',
+@app.route('/school/<int:school_id>/student/<int:student_id>/edit',
            methods=['GET', 'POST'])
-def editstudent(school_id, user_id):
+def editstudent(school_id, student_id):
     """Edit an existing student from school list (admin only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id).all()
     classes = session.query(Classrooms).filter_by(school_id=school_id)
-    student = session.query(Students).filter_by(id=user_id).one()
-    creator = getadmininfo(school_id)
-    credcheck = credentials(creator.email, 0, 0)
-    if 'username' not in login_session or credcheck != "true":
+    student = session.query(Students).filter_by(id=student_id).one()
+    admin = getadmininfo(school_id)
+    credcheck = credentials(admin, 0, 0)
+    if credcheck != "true":
         return ('''
                     "<script>
                     function myFunction() {
@@ -1364,7 +1470,7 @@ def editstudent(school_id, user_id):
     else:
         return render_template('student/edit.html',
                                school_id=school_id,
-                               user_id=user_id,
+                               student_id=student_id,
                                student=student,
                                classes=classes,
                                teachers=teachers,
@@ -1372,20 +1478,20 @@ def editstudent(school_id, user_id):
 
 
 # Allow student edit from within a classroom.
-@app.route('/<int:school_id>/<int:teacher_id>/student/<int:user_id>/edit',
+@app.route('/<int:school_id>/<int:teacher_id>/student/<int:student_id>/edit',
            methods=['GET', 'POST'])
-def teachereditstudent(school_id, user_id, teacher_id):
+def teachereditstudent(school_id, student_id, teacher_id):
     """Edit an existing student from classroom (admin and teacher only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id).all()
     classes = session.query(Classrooms).filter_by(school_id=school_id)
-    student = session.query(Students).filter_by(id=user_id).one()
+    student = session.query(Students).filter_by(id=student_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
-    creator = getadmininfo(school_id)
-    credcheck = credentials(creator.email, teacher.email, 0)
-    if 'username' not in login_session or credcheck != "true":
+    admin = getadmininfo(school_id)
+    credcheck = credentials(admin, teacher.email, 0)
+    if credcheck != "true":
         return ('''
                     "<script>
                     function myFunction() {
@@ -1412,24 +1518,24 @@ def teachereditstudent(school_id, user_id, teacher_id):
     else:
         return render_template('student/edit.html',
                                school_id=school_id,
-                               user_id=user_id,
+                               student_id=student_id,
                                student=student,
                                classes=classes,
                                teachers=teachers,
                                school=school)
 
 
-@app.route('/school/<int:school_id>/student/<int:user_id>/delete',
+@app.route('/school/<int:school_id>/student/<int:student_id>/delete',
            methods=['GET', 'POST'])
-def deletestudent(school_id, user_id):
+def deletestudent(school_id, student_id):
     """Delete an existing student from school list (admin only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
-    student = session.query(Students).filter_by(id=user_id).one()
-    creator = getadmininfo(school_id)
-    credcheck = credentials(creator.email, 0, 0)
-    if 'username' not in login_session or credcheck != "true":
+    student = session.query(Students).filter_by(id=student_id).one()
+    admin = getadmininfo(school_id)
+    credcheck = credentials(admin, 0, 0)
+    if credcheck != "true":
         return ('''
                     "<script>
                     function myFunction() {
@@ -1446,23 +1552,23 @@ def deletestudent(school_id, user_id):
         return render_template('student/delete.html',
                                school=school,
                                student=student,
-                               user_id=user_id,
+                               student_id=student_id,
                                school_id=school_id)
 
 
 # Allow student deletion from within classroom.
-@app.route('/<int:school_id>/<int:teacher_id>/student/<int:user_id>/delete',
+@app.route('/<int:school_id>/<int:teacher_id>/student/<int:student_id>/delete',
            methods=['GET', 'POST'])
-def teacherdeletestudent(school_id, user_id, teacher_id):
+def teacherdeletestudent(school_id, student_id, teacher_id):
     """Delete an existing student from classroom (admin and teacher only)."""
     if 'username' not in login_session:
         return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
-    student = session.query(Students).filter_by(id=user_id).one()
+    student = session.query(Students).filter_by(id=student_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
-    creator = getadmininfo(school_id)
-    credcheck = credentials(creator.email, teacher.email, 0)
-    if 'username' not in login_session or credcheck != "true":
+    admin = getadmininfo(school_id)
+    credcheck = credentials(admin, teacher.email, 0)
+    if credcheck != "true":
         return ('''
                     "<script>
                     function myFunction() {
@@ -1479,7 +1585,7 @@ def teacherdeletestudent(school_id, user_id, teacher_id):
         return render_template('student/delete.html',
                                school=school,
                                student=student,
-                               user_id=user_id,
+                               student_id=student_id,
                                school_id=school_id)
 
 
@@ -1508,11 +1614,13 @@ def student(student_id, teacher_id):
     bio = books.filter_by(genre='bio').count()
     school = session.query(Schools).filter_by(id=student.school_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
-    creator = getadmininfo(student.school_id)
-    credcheck = credentials(creator.email, teacher.email, student.email)
+    admin = getadmininfo(student.school_id)
+    credcheck = credentials(admin, teacher.email, student.email)
+    username = user()
     if credcheck != "true":
         return render_template('public/student.html',
                                student=student,
+                               username=username,
                                books=books,
                                percent=percent,
                                genre=genre,
@@ -1531,6 +1639,7 @@ def student(student_id, teacher_id):
     else:
         return render_template('student/student.html',
                                student=student,
+                               username=username,
                                books=books,
                                genre=genre,
                                percent=percent,
@@ -1556,8 +1665,8 @@ def newbook(student_id):
     student = session.query(Students).filter_by(id=student_id).one()
     teacher = (session.query(Teachers)
                .filter_by(id=student.classes.teacher_id).one())
-    creator = getadmininfo(student.school_id)
-    credcheck = credentials(creator.email, teacher.email, student.email)
+    admin = getadmininfo(student.school_id)
+    credcheck = credentials(admin, teacher.email, student.email)
     if credcheck != "true":
         return ('''
                     "<script>
@@ -1597,8 +1706,8 @@ def editbook(student_id, book_id):
     book = session.query(Books).filter_by(id=book_id).one()
     teacher = (session.query(Teachers)
                .filter_by(id=student.classes.teacher_id).one())
-    creator = getadmininfo(student.school_id)
-    credcheck = credentials(creator.email, teacher.email, student.email)
+    admin = getadmininfo(student.school_id)
+    credcheck = credentials(admin, teacher.email, student.email)
     if credcheck != "true":
         return ('''
                     "<script>
@@ -1644,8 +1753,8 @@ def deletebook(student_id, book_id):
     student = session.query(Students).filter_by(id=student_id).one()
     teacher = (session.query(Teachers)
                .filter_by(id=student.classes.teacher_id).one())
-    creator = getadmininfo(student.school_id)
-    credcheck = credentials(creator.email, teacher.email, student.email)
+    admin = getadmininfo(student.school_id)
+    credcheck = credentials(admin, teacher.email, student.email)
     if credcheck != "true":
         return ('''
                     "<script>

@@ -119,12 +119,12 @@
                                     {{each.books|count}} read
                                 </span>
                                 <br/>
-                                <a href="{{url_for('editstudent', school_id=each.school_id, user_id=each.id)}}">
+                                <a href="{{url_for('teachereditstudent', school_id=each.school_id, student_id=each.id, teacher_id=teacher.id)}}">
                                     <button class="btn-xs btn-warning" id="edit">
                                         <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                                             edit
                                     </button></a>
-                                <a href="{{url_for('deletestudent', school_id = each.school_id, user_id = each.id)}}">
+                                <a href="{{url_for('deletestudent', school_id = each.school_id, student_id = each.id)}}">
                                     <button class="btn-xs btn-danger" id="delete">
                                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                             delete
@@ -159,12 +159,12 @@
                                             </span>
                                             <br />
                                             <p>
-                                            <a href="{{url_for('editstudent', school_id=student.school_id, user_id=student.id)}}">
+                                            <a href="{{url_for('teachereditstudent', school_id=student.school_id, student_id=student.id, teacher_id=teacher.id)}}">
                                                 <button class="btn-xs btn-warning" id="edit">
                                                     <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                                                         edit
                                                 </button></a>
-                                            <a href="{{url_for('deletestudent', school_id = student.school_id, user_id = student.id)}}">
+                                            <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, student_id = student.id, teacher_id=teacher.id)}}">
                                                 <button class="btn-xs btn-danger" id="delete">
                                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                                         delete

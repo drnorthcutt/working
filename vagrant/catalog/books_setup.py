@@ -23,8 +23,8 @@ class Schools(Base):
     state = Column(String(2), nullable = False)
     county = Column(String(80))
     district = Column(String(80))
-    students = relationship("Students")
-    teachers = relationship("Teachers")
+    students = relationship("Students", cascade="all, delete-orphan")
+    teachers = relationship("Teachers", cascade="all, delete-orphan")
     admin = relationship("Admins")
 
     @property
@@ -58,7 +58,8 @@ class Teachers(Base):
     picture = Column(String(250))
     school_id = Column(Integer, ForeignKey('schools.id'))
     school = relationship("Schools")
-    classes = relationship("Classrooms")
+    classes = relationship("Classrooms", cascade="all, delete-orphan")
+    lists = relationship("Genres", cascade="all, delete-orphan")
 
     @property
     def serialize(self):
@@ -125,7 +126,7 @@ class Students(Base):
     school_id = Column(Integer, ForeignKey('schools.id'))
     school = relationship("Schools", backref="student")
     classes = relationship("Classrooms", backref="students")
-    book = relationship("Books")
+    book = relationship("Books", cascade="all, delete-orphan")
 
     # Except in case a student has not been placed in a class
     @property

@@ -15,9 +15,9 @@
 			    <input name=_csrf_token type=hidden value="{{ gentoken() }}">
 				<div class="form-group">
 					<label for="title">Title:<a href="#" data-toggle="tooltip" title="The full name of your book goes here.  If you are unsure what to type, ask your teacher or librarian for help."><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a></label>
-					<input type ="text" class="form-control" maxlength="250" name="title" placeholder="{{book.title}}" autofocus>
+					<input type ="text" class="form-control" maxlength="250" name="title" value="{{book.title}}" autofocus>
                 <br/><label for="author">Author:<a href="#" data-toggle="tooltip" title="The Author of your book goes here.  If there is more than one author, type them all, or ask your teacher or librarian for help."><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a></label>
-				<input type ="text" class="form-control" maxlength="80" name="author" placeholder="{{book.author}}">
+				<input type ="text" class="form-control" maxlength="80" name="author" value="{{book.author}}">
 				<br/><label for="genre">Genre:<a href="#" data-toggle="tooltip" title="The category your book falls into goes here. Some books can fit into more than one category, so choose the best one for this particular book.  If you are unsure, ask your teacher or librarian for help."><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a></label>
 				<select name='genre'>
                    <option value="{{book.genre}}">{{book.genre}}</option>

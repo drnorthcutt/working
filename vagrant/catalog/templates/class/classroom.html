@@ -1,4 +1,4 @@
-{% extends "main.html" %} {% block content %} {% include "class/header.html" %}
+{% extends "main.html" %} {% block content %} {% include "class/roomheader.html" %}
 <div class="row divider green">
     <div class="col-md-12"></div>
 </div>
@@ -86,11 +86,11 @@
                             {{student.books|count}} read
                         </span>
                         <br/>
-                        <a href="{{url_for('teachereditstudent', school_id=student.school_id, user_id=student.id, teacher_id=teacher.id)}}">
+                        <a href="{{url_for('teachereditstudent', school_id=student.school_id, student_id=student.id, teacher_id=teacher.id)}}">
                             <button class="btn-xs btn-warning" id="edit">
                                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                                 edit</button></a>
-                        <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, user_id = student.id, teacher_id=teacher.id)}}">
+                        <a href="{{url_for('teacherdeletestudent', school_id = student.school_id, student_id = student.id, teacher_id=teacher.id)}}">
                             <button class="btn-xs btn-danger" id="delete">
                                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                 delete</button></a>
