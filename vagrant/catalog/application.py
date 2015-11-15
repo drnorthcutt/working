@@ -19,6 +19,7 @@ from oauth2client.client import FlowExchangeError
 import httplib2
 from flask import make_response
 import requests
+from functools import wraps
 
 # For API endpoints
 import json
@@ -633,6 +634,16 @@ def class_feed(school_id, class_id):
 '''
 Universal Block
 '''
+def requires_login(f):
+    """Check for login and return to function or login screen."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in login_session:
+            return redirect('/login')
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 def create_edit(record):
     """Create or update database with supplied record."""
     session.add(record)
@@ -725,11 +736,10 @@ def school(school_id):
                                school_id=school_id)
 
 
+@requires_login
 @app.route('/school/new', methods=['GET', 'POST'])
 def newschool():
     """Create a new school."""
-    if 'username' not in login_session:
-        return redirect('/login')
     try:
         student = (session.query(Students)
                    .filter_by(email=login_session['email']).one())
@@ -757,11 +767,10 @@ def newschool():
             return render_template('school/new.html')
 
 
+@requires_login
 @app.route('/school/<int:school_id>/edit', methods=['GET', 'POST'])
 def editschool(school_id):
     """Edit an existing school (admin only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     admin = getadmininfo(school_id)
     check = credentials(admin, 0, 0)
@@ -792,11 +801,10 @@ def editschool(school_id):
                                school=school)
 
 
+@requires_login
 @app.route('/school/<int:school_id>/delete', methods=['GET', 'POST'])
 def deleteschool(school_id):
     """Delete an existing school (admin only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     admin = getadmininfo(school_id)
     check = credentials(admin, 0, 0)
@@ -867,11 +875,10 @@ def schoolstudents(school_id):
 '''
 Teacher Block
 '''
+@requires_login
 @app.route('/school/<int:school_id>/teacher/new', methods=['GET', 'POST'])
 def newteacher(school_id):
     """Create a new teacher (admin only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     admin = getadmininfo(school_id)
     check = credentials(admin, 0, 0)
@@ -900,12 +907,11 @@ def newteacher(school_id):
                                school=school)
 
 
+@requires_login
 @app.route('/school/<int:school_id>/teacher/<int:teacher_id>/edit',
            methods=['GET', 'POST'])
 def editteacher(school_id, teacher_id):
     """Edit an existing teacher (admin and edited teacher only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     admin = getadmininfo(school_id)
@@ -938,12 +944,11 @@ def editteacher(school_id, teacher_id):
                                school=school)
 
 
+@requires_login
 @app.route('/school/<int:school_id>/teacher/<int:teacher_id>/delete',
            methods=['GET', 'POST'])
 def deleteteacher(school_id, teacher_id):
     """Delete an existing teacher (admin only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     admin = getadmininfo(school_id)
@@ -1056,11 +1061,10 @@ def room(teacher_id, room_id):
                                room_id=room_id)
 
 
+@requires_login
 @app.route('/teacher/<int:teacher_id>/classroom/new', methods=['GET', 'POST'])
 def newclass(teacher_id):
     """Create a classroom (admin and teacher only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     classes = (session.query(Classrooms)
                .filter_by(teacher_id=teacher_id)
@@ -1096,12 +1100,11 @@ def newclass(teacher_id):
                                teacher_id=teacher_id)
 
 
+@requires_login
 @app.route('/teacher/<int:teacher_id>/classroom/<int:class_id>/edit',
            methods=['GET', 'POST'])
 def editclass(teacher_id, class_id):
     """Edit an existing classroom (admin and teacher only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     grades = (session.query(Classrooms)
               .filter_by(teacher_id=teacher_id)
@@ -1147,12 +1150,11 @@ def editclass(teacher_id, class_id):
                                class_id=class_id)
 
 
+@requires_login
 @app.route('/teacher/<int:teacher_id>/classroom/<int:class_id>/delete',
            methods=['GET', 'POST'])
 def deleteclass(teacher_id, class_id):
     """Delete an existing classroom (admin and teacher only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     classroom = session.query(Classrooms).filter_by(id=class_id).one()
     admin = getadmininfo(teacher.school_id)
@@ -1210,11 +1212,10 @@ def genre(teacher_id):
                                teacher_id=teacher_id)
 
 
+@requires_login
 @app.route('/teacher/<int:teacher_id>/genrelist/new', methods=['GET', 'POST'])
 def newlist(teacher_id):
     """Create a new genre list (admin and teacher only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     admin = getadmininfo(teacher.school_id)
     credcheck = credentials(admin, teacher.email, 0)
@@ -1253,12 +1254,11 @@ def newlist(teacher_id):
                                teacher_id=teacher.id)
 
 
+@requires_login
 @app.route('/teacher/<int:teacher_id>/genrelist/<int:list_id>/edit',
            methods=['GET', 'POST'])
 def editlist(teacher_id, list_id):
     """Edit an existing genre list (admin and teacher only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     alist = session.query(Genres).filter_by(id=list_id).one()
     admin = getadmininfo(teacher.school_id)
@@ -1307,12 +1307,11 @@ def editlist(teacher_id, list_id):
                                list_id=alist.id)
 
 
+@requires_login
 @app.route('/teacher/<int:teacher_id>/genrelist/<int:list_id>/delete',
            methods=['GET', 'POST'])
 def deletelist(teacher_id, list_id):
     """Delete an existing genre list (admin and teacher only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     alist = session.query(Genres).filter_by(id=list_id).one()
     admin = getadmininfo(teacher.school_id)
@@ -1347,11 +1346,10 @@ def deletelist(teacher_id, list_id):
 '''
 Student Block
 '''
+@requires_login
 @app.route('/school/<int:school_id>/student/new', methods=['GET', 'POST'])
 def newstudent(school_id):
     """Create a new student from school list (admin only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id).all()
     classes = session.query(Classrooms).filter_by(school_id=school_id)
@@ -1389,12 +1387,11 @@ def newstudent(school_id):
 
 
 # Allow student creation from within a classroom.
+@requires_login
 @app.route('/school/<int:school_id>/teacher/<int:teacher_id>/student/new',
            methods=['GET', 'POST'])
 def teachernewstudent(school_id, teacher_id):
     """Create a new student (admin and teacher only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
     classes = session.query(Classrooms).filter_by(school_id=school_id)
@@ -1431,12 +1428,11 @@ def teachernewstudent(school_id, teacher_id):
                                school=school)
 
 
+@requires_login
 @app.route('/school/<int:school_id>/student/<int:student_id>/edit',
            methods=['GET', 'POST'])
 def editstudent(school_id, student_id):
     """Edit an existing student from school list (admin only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id).all()
     classes = session.query(Classrooms).filter_by(school_id=school_id)
@@ -1478,12 +1474,11 @@ def editstudent(school_id, student_id):
 
 
 # Allow student edit from within a classroom.
+@requires_login
 @app.route('/<int:school_id>/<int:teacher_id>/student/<int:student_id>/edit',
            methods=['GET', 'POST'])
 def teachereditstudent(school_id, student_id, teacher_id):
     """Edit an existing student from classroom (admin and teacher only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     teachers = session.query(Teachers).filter_by(school_id=school_id).all()
     classes = session.query(Classrooms).filter_by(school_id=school_id)
@@ -1525,12 +1520,11 @@ def teachereditstudent(school_id, student_id, teacher_id):
                                school=school)
 
 
+@requires_login
 @app.route('/school/<int:school_id>/student/<int:student_id>/delete',
            methods=['GET', 'POST'])
 def deletestudent(school_id, student_id):
     """Delete an existing student from school list (admin only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     student = session.query(Students).filter_by(id=student_id).one()
     admin = getadmininfo(school_id)
@@ -1557,12 +1551,11 @@ def deletestudent(school_id, student_id):
 
 
 # Allow student deletion from within classroom.
+@requires_login
 @app.route('/<int:school_id>/<int:teacher_id>/student/<int:student_id>/delete',
            methods=['GET', 'POST'])
 def teacherdeletestudent(school_id, student_id, teacher_id):
     """Delete an existing student from classroom (admin and teacher only)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     school = session.query(Schools).filter_by(id=school_id).one()
     student = session.query(Students).filter_by(id=student_id).one()
     teacher = session.query(Teachers).filter_by(id=teacher_id).one()
@@ -1657,11 +1650,10 @@ def student(student_id, teacher_id):
                                teacher_id=teacher_id)
 
 
+@requires_login
 @app.route('/student/<int:student_id>/book/add', methods=['GET', 'POST'])
 def newbook(student_id):
     """Create a book entry (admin, teacher, student)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     student = session.query(Students).filter_by(id=student_id).one()
     teacher = (session.query(Teachers)
                .filter_by(id=student.classes.teacher_id).one())
@@ -1696,12 +1688,11 @@ def newbook(student_id):
                                student=student)
 
 
+@requires_login
 @app.route('/student/<int:student_id>/book/<int:book_id>/edit',
            methods=['GET', 'POST'])
 def editbook(student_id, book_id):
     """Edit an existing book entry (admin, teacher, student)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     student = session.query(Students).filter_by(id=student_id).one()
     book = session.query(Books).filter_by(id=book_id).one()
     teacher = (session.query(Teachers)
@@ -1743,12 +1734,11 @@ def editbook(student_id, book_id):
                                book=book)
 
 
+@requires_login
 @app.route('/student/<int:student_id>/book/<int:book_id>/delete',
            methods=['GET', 'POST'])
 def deletebook(student_id, book_id):
     """Delete an existing book entry (admin, teacher, student)."""
-    if 'username' not in login_session:
-        return redirect('/login')
     book = session.query(Books).filter_by(id=book_id).one()
     student = session.query(Students).filter_by(id=student_id).one()
     teacher = (session.query(Teachers)
