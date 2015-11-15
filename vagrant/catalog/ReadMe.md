@@ -191,10 +191,14 @@ Auth/OAuth (login):
 
 API Implementation:
 * JSON
+
+    Available via hand typed URL Endpoints.
 * XML
+
+    Available via hand typed URL Endpoints
 * RSS/Atom feeds
 
-    For the most part, these are available via hand typed URL Endpoints.  In the future, these will be incorporated into a Reporting System after initial testing and requests from beta participants.
+    Used for All Schools feed, Single School Feed, and Individual Classroom Feeds.  For Schools, the feed allows an administrator or librarian to know when new books have been added, or edited.  Classroom feeds allow a teacher to keep track of new books added or edited for his/ her classroom.
 
 Image Fields:
 * Teacher Avatars (from email login)
