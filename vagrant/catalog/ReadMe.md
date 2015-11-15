@@ -211,8 +211,10 @@ CSRF Protection:
 
 A temporary token system is used on all post pages, ignoring the initial login post which uses state and a permanent session token.
 
- #Miscellaneous
 
+#Miscellaneous
+ 
+ 
  Images:
 
 ####Main Schools View
