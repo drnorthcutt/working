@@ -170,6 +170,7 @@ class Books(Base):
             'Review' : self.review,
             'Student' : self.students.name,
             'Student ID' : self.students.id,
+            'Date' : str(self.date)
         }
 
 
