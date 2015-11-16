@@ -69,7 +69,7 @@ def newadmin(login_session):
 
 def getadmininfo(school_id):
     """Return school admin."""
-    school = session.query(Schools).filter_by(id=school_id).one()
+    school = get_school(school_id)
     admin = session.query(Admins).filter_by(id=school.admin_id).one()
     return admin.email
 
@@ -434,7 +434,7 @@ def teachersXML(school_id):
     teachers = (session.query(Teachers)
                 .filter_by(school_id=school_id)
                 .order_by(Teachers.name).all())
-    school = session.query(Schools).filter_by(id=school_id).one()
+    school = get_school(school_id)
     root = Element('School')
     for teacher in teachers:
         teach = SubElement(root, 'teacher')
@@ -451,7 +451,7 @@ def studentsXML(school_id):
     students = (session.query(Students)
                 .filter_by(school_id=school_id)
                 .order_by(Students.classroom, Students.name).all())
-    school = session.query(Schools).filter_by(id=school_id).one()
+    school = get_school(school_id)
     root = Element('School')
     root.text = school.name
     for student in students:
@@ -480,7 +480,7 @@ def studentbooksXML(student_id):
     books = (session.query(Books)
              .filter_by(student_id=student_id)
              .order_by(Books.genre, Books.title).all())
-    student = session.query(Students).filter_by(id=student_id).one()
+    student = get_student(student_id)
     root = Element('Student')
     root.text = student.name
     for book in books:
@@ -503,7 +503,7 @@ def schoolbooksXML(school_id):
              .filter_by(school_id=school_id)
              .order_by(Students.name, Books.genre, Books.title))
     students = session.query(Students).filter_by(school_id=school_id).all()
-    school = session.query(Schools).filter_by(id=school_id).one()
+    school = get_school(school_id)
     root = Element('School')
     root.text = school.name
     for student in students:
@@ -581,7 +581,7 @@ def recent_feed():
 @app.route('/<int:school_id>/recent.atom')
 def school_feed(school_id):
     """Make Atom/RSS feed for most recent school book lists (GET)."""
-    school = session.query(Schools).filter_by(id=school_id).one()
+    school = get_school(school_id)
     feed = AtomFeed('Recent ' + school.name + ' Books',
                     feed_url=request.url,
                     url=request.url_root
@@ -606,7 +606,7 @@ def school_feed(school_id):
 @app.route('/<int:school_id>/classroom/<int:class_id>/recent.atom')
 def class_feed(school_id, class_id):
     """Make Atom/RSS feed for most recent school book lists (GET)."""
-    school = session.query(Schools).filter_by(id=school_id).one()
+    school = get_school(school_id)
     classroom = session.query(Classrooms).filter_by(id=class_id).one()
     feed = AtomFeed('Recent ' + school.name + ' ' + classroom.name + ' Books',
                     feed_url=request.url,
@@ -669,6 +669,35 @@ def user():
         return ""
 
 
+def get_school(school_id):
+    """Return school information by school_id."""
+    s = session.query(Schools).filter_by(id=school_id).one()
+    return s
+
+
+def get_teachers(school_id):
+    """Return teachers by school_id."""
+    t = session.query(Teachers).filter_by(school_id=school_id)
+    return t
+
+def get_teacher(teacher_id):
+    """Return teacher by teacher_id."""
+    t = session.query(Teachers).filter_by(id=teacher_id).one()
+    return t
+
+
+def get_classes(school_id):
+    """Return classes by school_id."""
+    c = session.query(Classrooms).filter_by(school_id=school_id)
+    return c
+
+
+def get_student(student_id):
+    """Return student by id"""
+    s = session.query(Students).filter_by(id=student_id).one()
+    return s
+
+
 '''
 School Block
 '''
@@ -704,7 +733,7 @@ def schools():
 @app.route('/school/<int:school_id>')
 def school(school_id):
     """Return a specific school with students and teachers."""
-    school = session.query(Schools).filter_by(id=school_id).one()
+    school = get_school(school_id)
     students = (session.query(Students)
                 .filter_by(school_id=school_id)
                 .order_by(Students.name))
@@ -771,7 +800,7 @@ def newschool():
 @app.route('/school/<int:school_id>/edit', methods=['GET', 'POST'])
 def editschool(school_id):
     """Edit an existing school (admin only)."""
-    school = session.query(Schools).filter_by(id=school_id).one()
+    school = get_school(school_id)
     admin = getadmininfo(school_id)
     check = credentials(admin, 0, 0)
     if check != "true":
@@ -805,7 +834,7 @@ def editschool(school_id):
 @app.route('/school/<int:school_id>/delete', methods=['GET', 'POST'])
 def deleteschool(school_id):
     """Delete an existing school (admin only)."""
-    school = session.query(Schools).filter_by(id=school_id).one()
+    school = get_school(school_id)
     admin = getadmininfo(school_id)
     check = credentials(admin, 0, 0)
     if check != "true":
@@ -830,9 +859,8 @@ def deleteschool(school_id):
 @app.route('/school/<int:school_id>/teachers')
 def schoolteachers(school_id):
     """Return a specific school's teachers."""
-    school = session.query(Schools).filter_by(id=school_id).one()
-    teachers = session.query(Teachers).filter_by(school_id=school_id)
-    school = session.query(Schools).filter_by(id=school_id).one()
+    school = get_school(school_id)
+    teachers = get_teachers(school_id)
     admin = getadmininfo(school_id)
     credcheck = credentials(admin, 0, 0)
     username = user()
@@ -853,7 +881,7 @@ def schoolteachers(school_id):
 @app.route('/school/<int:school_id>/students')
 def schoolstudents(school_id):
     """Return a specific school's students."""
-    school = session.query(Schools).filter_by(id=school_id).one()
+    school = get_school(school_id)
     students = session.query(Students).filter_by(school_id=school_id).all()
     admin = getadmininfo(school_id)
     credcheck = credentials(admin, 0, 0)
@@ -879,7 +907,7 @@ Teacher Block
 @app.route('/school/<int:school_id>/teacher/new', methods=['GET', 'POST'])
 def newteacher(school_id):
     """Create a new teacher (admin only)."""
-    school = session.query(Schools).filter_by(id=school_id).one()
+    school = get_school(school_id)
     admin = getadmininfo(school_id)
     check = credentials(admin, 0, 0)
     if check != "true":
@@ -912,8 +940,8 @@ def newteacher(school_id):
            methods=['GET', 'POST'])
 def editteacher(school_id, teacher_id):
     """Edit an existing teacher (admin and edited teacher only)."""
-    school = session.query(Schools).filter_by(id=school_id).one()
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    school = get_school(school_id)
+    teacher = get_teacher(teacher_id)
     admin = getadmininfo(school_id)
     check = credentials(admin, teacher.email, 0)
     if check != "true":
@@ -949,8 +977,8 @@ def editteacher(school_id, teacher_id):
            methods=['GET', 'POST'])
 def deleteteacher(school_id, teacher_id):
     """Delete an existing teacher (admin only)."""
-    school = session.query(Schools).filter_by(id=school_id).one()
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    school = get_school(school_id)
+    teacher = get_teacher(teacher_id)
     admin = getadmininfo(school_id)
     check = credentials(admin, 0, 0)
     if check != "true":
@@ -981,7 +1009,7 @@ Class(es) Block
 @app.route('/teacher/<int:teacher_id>/classroom')
 def classroom(teacher_id):
     """Return a teacher's classrooms."""
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    teacher = get_teacher(teacher_id)
     classroom = session.query(Classrooms).filter_by(teacher_id=teacher_id)
     students = (session.query(Students)
                 .filter(Students.classroom == Classrooms.id)
@@ -1023,13 +1051,13 @@ def classroom(teacher_id):
 @app.route('/teacher/<int:teacher_id>/classroom/<int:room_id>')
 def room(teacher_id, room_id):
     """Return a specific classroom."""
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    teacher = get_teacher(teacher_id)
     classroom = session.query(Classrooms).filter_by(id=room_id).one()
     classother = session.query(Classrooms).filter_by(teacher_id=teacher_id)
-    students = (session.query(Students)
-                .filter(Students.classroom == Classrooms.id)
-                .filter(Classrooms.teacher_id == teacher_id)
-                .order_by(Students.name))
+#    students = (session.query(Students)
+#                .filter(Students.classroom == Classrooms.id)
+#                .filter(Classrooms.teacher_id == teacher_id)
+#                .order_by(Students.name))
     students = (session.query(Students)
                 .filter(Students.classroom == room_id)
                 .order_by(Students.name))
@@ -1065,7 +1093,7 @@ def room(teacher_id, room_id):
 @app.route('/teacher/<int:teacher_id>/classroom/new', methods=['GET', 'POST'])
 def newclass(teacher_id):
     """Create a classroom (admin and teacher only)."""
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    teacher = get_teacher(teacher_id)
     classes = (session.query(Classrooms)
                .filter_by(teacher_id=teacher_id)
                .order_by(Classrooms.grade, Classrooms.name))
@@ -1105,7 +1133,7 @@ def newclass(teacher_id):
            methods=['GET', 'POST'])
 def editclass(teacher_id, class_id):
     """Edit an existing classroom (admin and teacher only)."""
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    teacher = get_teacher(teacher_id)
     grades = (session.query(Classrooms)
               .filter_by(teacher_id=teacher_id)
               .order_by(Classrooms.grade, Classrooms.name))
@@ -1155,7 +1183,7 @@ def editclass(teacher_id, class_id):
            methods=['GET', 'POST'])
 def deleteclass(teacher_id, class_id):
     """Delete an existing classroom (admin and teacher only)."""
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    teacher = get_teacher(teacher_id)
     classroom = session.query(Classrooms).filter_by(id=class_id).one()
     admin = getadmininfo(teacher.school_id)
     credcheck = credentials(admin, teacher.email, 0)
@@ -1187,7 +1215,7 @@ Genre Lists Block
 @app.route('/teacher/<int:teacher_id>/genrelists')
 def genre(teacher_id):
     """Return a teacher's genre lists."""
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    teacher = get_teacher(teacher_id)
     school = session.query(Schools).filter_by(id=teacher.school_id).one()
     lists = session.query(Genres).filter_by(teacher_id=teacher_id).all()
     classes = session.query(Classrooms).filter_by(teacher_id=teacher_id).all()
@@ -1216,7 +1244,7 @@ def genre(teacher_id):
 @app.route('/teacher/<int:teacher_id>/genrelist/new', methods=['GET', 'POST'])
 def newlist(teacher_id):
     """Create a new genre list (admin and teacher only)."""
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    teacher = get_teacher(teacher_id)
     admin = getadmininfo(teacher.school_id)
     credcheck = credentials(admin, teacher.email, 0)
     if credcheck != "true":
@@ -1259,7 +1287,7 @@ def newlist(teacher_id):
            methods=['GET', 'POST'])
 def editlist(teacher_id, list_id):
     """Edit an existing genre list (admin and teacher only)."""
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    teacher = get_teacher(teacher_id)
     alist = session.query(Genres).filter_by(id=list_id).one()
     admin = getadmininfo(teacher.school_id)
     credcheck = credentials(admin, teacher.email, 0)
@@ -1312,7 +1340,7 @@ def editlist(teacher_id, list_id):
            methods=['GET', 'POST'])
 def deletelist(teacher_id, list_id):
     """Delete an existing genre list (admin and teacher only)."""
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    teacher = get_teacher(teacher_id)
     alist = session.query(Genres).filter_by(id=list_id).one()
     admin = getadmininfo(teacher.school_id)
     credcheck = credentials(admin, teacher.email, 0)
@@ -1350,9 +1378,9 @@ Student Block
 @app.route('/school/<int:school_id>/student/new', methods=['GET', 'POST'])
 def newstudent(school_id):
     """Create a new student from school list (admin only)."""
-    school = session.query(Schools).filter_by(id=school_id).one()
-    teachers = session.query(Teachers).filter_by(school_id=school_id).all()
-    classes = session.query(Classrooms).filter_by(school_id=school_id)
+    school = get_school(school_id)
+    teachers = get_teachers(school_id)
+    classes = get_classes(school_id)
     admin = getadmininfo(school_id)
     credcheck = credentials(admin, 0, 0)
     if credcheck != "true":
@@ -1392,9 +1420,9 @@ def newstudent(school_id):
            methods=['GET', 'POST'])
 def teachernewstudent(school_id, teacher_id):
     """Create a new student (admin and teacher only)."""
-    school = session.query(Schools).filter_by(id=school_id).one()
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
-    classes = session.query(Classrooms).filter_by(school_id=school_id)
+    school = get_school(school_id)
+    teacher = get_teacher(teacher_id)
+    classes = get_classes(school_id)
     admin = getadmininfo(school_id)
     credcheck = credentials(admin, teacher.email, 0)
     if credcheck != "true":
@@ -1433,10 +1461,10 @@ def teachernewstudent(school_id, teacher_id):
            methods=['GET', 'POST'])
 def editstudent(school_id, student_id):
     """Edit an existing student from school list (admin only)."""
-    school = session.query(Schools).filter_by(id=school_id).one()
-    teachers = session.query(Teachers).filter_by(school_id=school_id).all()
-    classes = session.query(Classrooms).filter_by(school_id=school_id)
-    student = session.query(Students).filter_by(id=student_id).one()
+    school = get_school(school_id)
+    teachers = get_teachers(school_id)
+    classes = get_classes(school_id)
+    student = get_student(student_id)
     admin = getadmininfo(school_id)
     credcheck = credentials(admin, 0, 0)
     if credcheck != "true":
@@ -1479,11 +1507,11 @@ def editstudent(school_id, student_id):
            methods=['GET', 'POST'])
 def teachereditstudent(school_id, student_id, teacher_id):
     """Edit an existing student from classroom (admin and teacher only)."""
-    school = session.query(Schools).filter_by(id=school_id).one()
-    teachers = session.query(Teachers).filter_by(school_id=school_id).all()
-    classes = session.query(Classrooms).filter_by(school_id=school_id)
-    student = session.query(Students).filter_by(id=student_id).one()
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    school = get_school(school_id)
+    teachers = get_teachers(school_id)
+    classes = get_classes(school_id)
+    student = get_student(student_id)
+    teacher = get_teacher(teacher_id)
     admin = getadmininfo(school_id)
     credcheck = credentials(admin, teacher.email, 0)
     if credcheck != "true":
@@ -1525,8 +1553,8 @@ def teachereditstudent(school_id, student_id, teacher_id):
            methods=['GET', 'POST'])
 def deletestudent(school_id, student_id):
     """Delete an existing student from school list (admin only)."""
-    school = session.query(Schools).filter_by(id=school_id).one()
-    student = session.query(Students).filter_by(id=student_id).one()
+    school = get_school(school_id)
+    student = get_student(student_id)
     admin = getadmininfo(school_id)
     credcheck = credentials(admin, 0, 0)
     if credcheck != "true":
@@ -1556,9 +1584,9 @@ def deletestudent(school_id, student_id):
            methods=['GET', 'POST'])
 def teacherdeletestudent(school_id, student_id, teacher_id):
     """Delete an existing student from classroom (admin and teacher only)."""
-    school = session.query(Schools).filter_by(id=school_id).one()
-    student = session.query(Students).filter_by(id=student_id).one()
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    school = get_school(school_id)
+    student = get_student(student_id)
+    teacher = get_teacher(teacher_id)
     admin = getadmininfo(school_id)
     credcheck = credentials(admin, teacher.email, 0)
     if credcheck != "true":
@@ -1588,7 +1616,7 @@ Books Block
 @app.route('/<int:teacher_id>/student/<int:student_id>')
 def student(student_id, teacher_id):
     """Return a student's books"""
-    student = session.query(Students).filter_by(id=student_id).one()
+    student = get_student(student_id)
     genre = (session.query(Genres)
              .join(Classrooms)
              .filter(Classrooms.id == student.classroom))
@@ -1606,7 +1634,7 @@ def student(student_id, teacher_id):
     info = books.filter_by(genre='info').count()
     bio = books.filter_by(genre='bio').count()
     school = session.query(Schools).filter_by(id=student.school_id).one()
-    teacher = session.query(Teachers).filter_by(id=teacher_id).one()
+    teacher = get_teacher(teacher_id)
     admin = getadmininfo(student.school_id)
     credcheck = credentials(admin, teacher.email, student.email)
     username = user()
@@ -1654,7 +1682,7 @@ def student(student_id, teacher_id):
 @app.route('/student/<int:student_id>/book/add', methods=['GET', 'POST'])
 def newbook(student_id):
     """Create a book entry (admin, teacher, student)."""
-    student = session.query(Students).filter_by(id=student_id).one()
+    student = get_student(student_id)
     teacher = (session.query(Teachers)
                .filter_by(id=student.classes.teacher_id).one())
     admin = getadmininfo(student.school_id)
@@ -1693,7 +1721,7 @@ def newbook(student_id):
            methods=['GET', 'POST'])
 def editbook(student_id, book_id):
     """Edit an existing book entry (admin, teacher, student)."""
-    student = session.query(Students).filter_by(id=student_id).one()
+    student = get_student(student_id)
     book = session.query(Books).filter_by(id=book_id).one()
     teacher = (session.query(Teachers)
                .filter_by(id=student.classes.teacher_id).one())
@@ -1740,7 +1768,7 @@ def editbook(student_id, book_id):
 def deletebook(student_id, book_id):
     """Delete an existing book entry (admin, teacher, student)."""
     book = session.query(Books).filter_by(id=book_id).one()
-    student = session.query(Students).filter_by(id=student_id).one()
+    student = get_student(student_id)
     teacher = (session.query(Teachers)
                .filter_by(id=student.classes.teacher_id).one())
     admin = getadmininfo(student.school_id)
